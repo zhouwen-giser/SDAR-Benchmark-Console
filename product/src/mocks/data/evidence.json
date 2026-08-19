@@ -1,0 +1,117 @@
+{
+  "bundleId": "bundle-cand-mcp17",
+  "episodeId": "episode-mcp17",
+  "manifestRevision": 4,
+  "status": "complete",
+  "recordCount": 12,
+  "sequenceRange": [
+    101,
+    112
+  ],
+  "bundleHash": "sha256:example-candidate",
+  "requiredFamilies": [
+    "runtime",
+    "skill",
+    "mcp_task",
+    "evidence"
+  ],
+  "missingFamilies": [],
+  "timeline": [
+    {
+      "id": "req1",
+      "type": "runtime.request",
+      "label": "Request",
+      "time": "20:00:00",
+      "status": "normal"
+    },
+    {
+      "id": "goal1",
+      "type": "runtime.goal",
+      "label": "Goal",
+      "time": "20:00:01",
+      "status": "normal"
+    },
+    {
+      "id": "skill1",
+      "type": "skill.selection",
+      "label": "Skill Selection",
+      "time": "20:00:02",
+      "status": "normal"
+    },
+    {
+      "id": "plan1",
+      "type": "runtime.plan",
+      "label": "Plan",
+      "time": "20:00:03",
+      "status": "normal"
+    },
+    {
+      "id": "action-A123",
+      "type": "runtime.action",
+      "label": "Action",
+      "time": "20:00:04",
+      "status": "normal"
+    },
+    {
+      "id": "binding-B2",
+      "type": "mcp_task.remote_binding",
+      "label": "Remote Task Binding",
+      "time": "20:00:05",
+      "status": "normal"
+    },
+    {
+      "id": "control-E4",
+      "type": "mcp_task.control_event",
+      "label": "Control Event",
+      "time": "20:00:12",
+      "status": "normal"
+    },
+    {
+      "id": "continuation-C55",
+      "type": "mcp_task.continuation_attempt",
+      "label": "Continuation",
+      "time": "20:00:13",
+      "status": "warning"
+    },
+    {
+      "id": "verify-V9",
+      "type": "runtime.verification",
+      "label": "Verification",
+      "time": "20:00:15",
+      "status": "warning"
+    },
+    {
+      "id": "outcome-O1",
+      "type": "runtime.outcome",
+      "label": "Outcome",
+      "time": "20:00:16",
+      "status": "warning"
+    }
+  ],
+  "diff": {
+    "baselineBundleId": "bundle-base-mcp17",
+    "added": [],
+    "removed": [
+      {
+        "type": "runtime.receipt",
+        "id": "receipt-R1",
+        "label": "Receipt"
+      }
+    ],
+    "changed": [
+      {
+        "id": "verify-V9",
+        "field": "payload.result",
+        "baseline": "pass",
+        "candidate": "insufficient"
+      }
+    ],
+    "relationChanges": [
+      {
+        "from": "action-A123",
+        "to": "verify-V9",
+        "issue": "missing receipt between action and verification"
+      }
+    ]
+  }
+}

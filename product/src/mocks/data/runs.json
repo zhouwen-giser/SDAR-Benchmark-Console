@@ -1,0 +1,54 @@
+{
+  "data": [
+    {
+      "runId": "R-20260815-004",
+      "candidate": "SDAR 1.4.2 def456",
+      "dataset": "release-v0.1",
+      "profile": "sdar-v2-review-2.1",
+      "cases": 80,
+      "completed": 80,
+      "passRate": 91.2,
+      "qualityScore": 86.4,
+      "fatal": 0,
+      "hg": 2,
+      "nr": 4,
+      "releaseGate": "blocked",
+      "status": "completed",
+      "completedAt": "2026-08-15T20:26:00Z"
+    },
+    {
+      "runId": "R-20260815-003",
+      "candidate": "SDAR 1.4.2 ccc891",
+      "dataset": "release-v0.1",
+      "profile": "sdar-v2-review-2.1",
+      "cases": 80,
+      "completed": 80,
+      "passRate": 93.8,
+      "qualityScore": 88.2,
+      "fatal": 0,
+      "hg": 1,
+      "nr": 2,
+      "releaseGate": "blocked",
+      "status": "completed",
+      "completedAt": "2026-08-15T18:12:00Z"
+    },
+    {
+      "runId": "R-20260814-010",
+      "candidate": "SDAR 1.4.1 abc123",
+      "dataset": "release-v0.1",
+      "profile": "sdar-v2-review-2.1",
+      "cases": 80,
+      "completed": 80,
+      "passRate": 87.1,
+      "qualityScore": 83.2,
+      "fatal": 0,
+      "hg": 0,
+      "nr": 1,
+      "releaseGate": "warning",
+      "status": "completed",
+      "completedAt": "2026-08-14T16:05:00Z"
+    }
+  ],
+  "watermark": "2026-08-15T20:31:42Z",
+  "projectionLagMs": 3200
+}

@@ -1,0 +1,100 @@
+﻿group,method,path,console_page_or_component,purpose,source_of_truth,consistency,current_status,priority,current_endpoint_or_basis,gap_or_required_change
+foundation,GET,/health,All,Process liveness,Process,live,EXISTING,P0,GET /health,
+foundation,GET,/ready,All,Dependency and frozen-contract readiness,PG+CH+Contract Registry,probe-time,EXISTING,P0,GET /ready,
+context,GET,/v1/context/options,Overview Context Bar,"Return compatible Candidate, Baseline, Dataset, Profile, Run and filter options in one cached response",PG registry + CH summaries,current registry + projected labels,NEW,P0,,Required to populate selectors without client-side discovery.
+context,GET,/v1/catalogs/evaluation,Metrics/Drawers,"Return M1-M15, five dimensions, HG1-HG7, F1-F7, levels, readiness and score-status definitions",Frozen Contract Registry/PG registry,versioned immutable,NEW,P0,,"Frontend must not hard-code weights, labels and rule versions."
+context,GET,/v1/candidates,Candidate selector / Analytics,List registered CandidateSnapshot identities and latest run summary,PG registry + CH candidate summary,PG identity + projected analytics,NEW,P1,,Current analytics-candidates only returns rows that already have projected summaries.
+context,GET,/v1/candidates/{candidateSnapshotId},Candidate detail,Get exact immutable CandidateSnapshot and provenance,PG registry,transactional/current,NEW,P1,,
+context,GET,/v1/datasets,Dataset selector / Cases,"List Dataset versions, splits, case counts and lifecycle status",PG registry,transactional/current,NEW,P1,,
+context,GET,/v1/datasets/{datasetVersionRef},Dataset detail,Get exact DatasetVersion metadata and coverage summary,PG registry,transactional/current,NEW,P1,,
+context,GET,/v1/evaluation-profiles,Profile selector / Metrics,List exact profile versions and formalization status,PG registry + frozen contracts,transactional/current,NEW,P1,,
+context,GET,/v1/evaluation-profiles/{profileVersionId},Profile detail,"Get profile weights, required evaluator types and rule-set refs",PG registry + frozen contracts,versioned immutable,NEW,P1,,
+system,GET,/v1/system/status,Overview System Status / Settings,"Unified evaluation-trust status: Evidence ingestion freshness, domain projection, evaluation workers, mart projection, schema/contracts/profile/dataset",PG+CH+derived freshness,single probe snapshot,NEW,P0,,/ready is dependency-oriented and not shaped for the dashboard status panel.
+system,GET,/v1/system/contracts,Settings,List active contract releases and drift/preflight state,Contract Registry + PG + CH meta,versioned/current,NEW,P1,,
+system,GET,/v1/system/projections,Settings / Anomalies,"Projection checkpoint, lag, DLQ and conflict status",PG ops + CH projection metadata,current/near-real-time,NEW,P1,,
+overview,GET,/v1/dashboard/overview,Overview,Return one consistent full-page Quality Command Center snapshot,CH analytics + PG context + deterministic analysis,single pinned watermark snapshot,NEW,P0,,Core missing endpoint. Must include all sections in the high-fidelity Overview contract.
+overview,GET,/v1/analysis-conclusions,Overview / Reports,List deterministic/statistical conclusions with verifiable case/evaluation/evidence refs,Derived from CH comparison/evaluation facts,pinned watermark,NEW,P0,,Initial nine conclusion rules must be implemented; no free-form ungrounded AI result.
+overview,GET,/v1/analysis-conclusions/{conclusionId},Conclusion drawer,"Return conclusion impact, derivation, supporting metrics and drill-down refs",Derived snapshot or persisted analysis record,snapshot-consistent,NEW,P1,,
+overview,GET,/v1/attention-items,Overview / Alerts,List ordered Fatal/HG/Critical/NR/Regression/Stability/Projection attention items,Derived CH facts + optional PG workflow,snapshot-consistent,NEW,P0,,Read-only derivation is enough for P0; lifecycle status needs PG persistence.
+overview,GET,/v1/attention-items/{attentionId},Attention drawer,Get full attention item and linked objects,Derived/PG,current,NEW,P1,,
+overview,PATCH,/v1/attention-items/{attentionId},Alerts,Update open/investigating/resolved/ignored workflow state,PG authority,transactional/current,NEW,P2,,Requires new PG attention-item lifecycle tables; not required for read-only prototype.
+overview,GET,/v1/anomalies,Overview / Alerts,"List New Fatal, New HG, NR, projection lag, run completion and positive change events",Derived CH+PG events,watermarked,NEW,P0,,
+explorer,GET,/v1/case-results,Case drawer / Regression Explorer,Unified paged case-result explorer with cross filters and baseline/candidate deltas,CH case/comparison/evaluation views,watermarked,NEW,P0,,"Supports track,risk,scenario,metric,gate,fatal,readiness,changeType,funnelStage,contributor,search,sort."
+commands,POST,/v1/operational-evaluations,Evaluation command,Queue exact sealed-manifest operational evaluation,PG authority,transactional/current,EXISTING,P0,POST /v1/operational-evaluations,
+runs,POST,/v1/benchmark-runs,Run create,Create benchmark run from exact immutable refs,PG authority,transactional/current,EXISTING,P0,POST /v1/benchmark-runs,
+runs,GET,/v1/benchmark-runs,Runs / Context Bar,"List runs with Candidate, Dataset, Profile, counts, status and timestamps",PG authority for active + CH projection for completed metrics,mixed explicit,NEW,P0,,Current API only supports POST collection and GET by exact runId.
+runs,GET,/v1/benchmark-runs/{runId},Run status,Get authoritative run state,PG authority,transactional/current,EXISTING,P0,GET /v1/benchmark-runs/{runId},
+runs,POST,/v1/benchmark-runs/{runId}/cancel,Run command,Request cancellation,PG authority,transactional/current,EXISTING,P0,POST /v1/benchmark-runs/{runId}/cancel,
+runs,GET,/v1/benchmark-runs/{runId}/dashboard,Run Detail,"Consistent Run Detail snapshot: quality, verdict, tracks, dimensions, metrics, funnel, stability and recent events",CH analytics + PG authority metadata,single pinned watermark,NEW,P1,,
+runs,GET,/v1/benchmark-runs/{runId}/results,Run Detail,Paged case aggregates,CH projection,watermarked,EXTEND,P1,GET /v1/benchmark-runs/{runId}/results,"Add filters, sorting, evaluation/bundle refs and typed response schema."
+runs,GET,/v1/benchmark-runs/{runId}/cases,Run Detail / Case Matrix,Paged case executions,CH projection,watermarked,EXTEND,P0,GET /v1/benchmark-runs/{runId}/cases,Add track/risk/scenario/change/readiness filters and baseline/candidate columns.
+runs,GET,/v1/benchmark-runs/{runId}/failures,Run Detail / Attention,Paged failed/invalid/NR cases,CH projection,watermarked,EXTEND,P0,GET /v1/benchmark-runs/{runId}/failures,Add gate/fatal/missing-evidence/reason filters and evaluation refs.
+runs,GET,/v1/benchmark-runs/{runId}/release-gate,Overview / Run Detail,Release decision and blockers,CH projection,watermarked,EXTEND,P0,GET /v1/benchmark-runs/{runId}/release-gate,"Current summary lacks typed blocker items, critical-risk failures and change-vs-baseline detail."
+runs,GET,/v1/benchmark-runs/{runId}/repetitions,Run Detail / Stability,List repetition-level execution/evaluation states,PG+CH,mixed explicit,NEW,P1,,
+runs,GET,/v1/benchmark-runs/{runId}/events,Run Detail / Timeline,Run and case lifecycle event timeline,PG run events + CH anomalies,current/watermarked,NEW,P1,,
+runs,GET,/v1/benchmark-runs/{runId}/evidence-funnel,Run Detail,Run-scoped Case→Episode→Manifest→Bundle→Ready→Formal funnel,PG execution + CH evaluation facts,pinned watermark,NEW,P1,,
+runs,GET,/v1/benchmark-runs/{runId}/operational-summary,Run Detail / Operational,Run-scoped operational KPI comparisons,CH operational summary,watermarked,BLOCKED_DATA,P1,,No authoritative automatic upstream producers for several operational samples; nullable/partial contract required.
+baselines,POST,/v1/baselines,Baseline command,Promote comparable completed formal run,PG authority,transactional/current,EXISTING,P0,POST /v1/baselines,
+baselines,GET,/v1/baselines,Context Bar / Compare,List baseline versions with linked run/candidate/dataset/profile,PG authority + CH summary,mixed explicit,NEW,P0,,
+baselines,GET,/v1/baselines/{baselineId},Baseline detail,Get immutable baseline identity and qualification summary,PG authority,transactional/current,NEW,P1,,
+comparisons,POST,/v1/comparisons,Compare command,Create exact run comparison,PG authority,transactional/current,EXISTING,P0,POST /v1/comparisons,
+comparisons,GET,/v1/comparisons,Compare list,List comparisons and status,PG authority + CH projection,mixed explicit,NEW,P1,,
+comparisons,GET,/v1/comparisons/{comparisonId},Compare,Comparison summary,CH projection,watermarked,EXTEND,P0,GET /v1/comparisons/{comparisonId},"Return typed score/pass/verdict deltas, blocker counts, context and links instead of generic rows/result_json."
+comparisons,GET,/v1/comparisons/{comparisonId}/cases,Compare / Regression Explorer,Paged paired case changes,CH projection,watermarked,EXTEND,P0,GET /v1/comparisons/{comparisonId}/cases,Add track/risk/metric/gate/changeType filters and bundle/evaluation refs.
+comparisons,GET,/v1/comparisons/{comparisonId}/dashboard,Compare,"Consistent comparison snapshot for KPIs, waterfall, dimensions, metrics, tracks, risks and regression groups",CH analytics,single pinned watermark,NEW,P1,,
+comparisons,GET,/v1/comparisons/{comparisonId}/evidence-diffs,Compare / Evidence Diff,List or load case-level Evidence structural differences,Artifact bundle snapshots + CH refs,immutable snapshot,NEW,P1,,
+cases,GET,/v1/benchmark-cases,Cases,List case definitions with track/risk/scenario/split/runnable status,PG registry,transactional/current,NEW,P1,,
+cases,GET,/v1/benchmark-cases/{caseId},Case detail,"Case identity, versions, metadata and latest coverage",PG registry + CH history summary,mixed explicit,NEW,P1,,
+cases,GET,/v1/benchmark-cases/{caseId}/history,Case detail,Projected historical result aggregates,CH projection,watermarked,EXTEND,P1,GET /v1/benchmark-cases/{caseId}/history,"Add Candidate labels, Baseline markers, profile/dataset context and stability fields."
+cases,GET,/v1/benchmark-cases/{caseId}/executions,Case detail,List case executions across runs,PG+CH,mixed explicit,NEW,P1,,
+cases,GET,/v1/benchmark-cases/{caseId}/repetitions,Case detail,List individual repetition results and terminal stability,PG+CH,mixed explicit,NEW,P1,,
+cases,GET,/v1/benchmark-cases/{caseId}/expected-contract,Case detail,Get versioned ExpectedContract view,PG registry/artifact,immutable,NEW,P1,,
+cases,GET,/v1/benchmark-cases/{caseId}/evaluation-binding,Case detail,Get exact CaseEvaluationBinding and rule refs,PG registry,immutable,NEW,P1,,
+cases,GET,/v1/benchmark-cases/{caseId}/stability,Case drawer,"Aggregate score, verdict and trajectory stability",CH repetition facts,watermarked,NEW,P1,,
+evaluations,GET,/v1/evaluations,Evaluations,Paged evaluation explorer with full filters,CH projection,watermarked,NEW,P1,,
+evaluations,GET,/v1/evaluations/{evaluationId},Evaluation Detail,Typed evaluation summary and section links,CH projection + PG authority metadata,watermarked,EXTEND,P0,GET /v1/evaluations/{evaluationId},Current route exposes generic row plus opaque result_json; Console needs typed readiness/score/verdict/provenance/counts.
+evaluations,GET,/v1/evaluations/{evaluationId}/readiness,Evaluation Detail,"Source and evaluation readiness, missing/conflicting evidence",CH evaluation/readiness tables,watermarked,NEW,P1,,
+evaluations,GET,/v1/evaluations/{evaluationId}/evidence-grades,Evaluation Detail,M1-M15 E0/E1/E2 evidence grades,CH evaluation evidence-grade table,watermarked,NEW,P1,,
+evaluations,GET,/v1/evaluations/{evaluationId}/fatals,Evaluation Detail,"F1-F7 applicability, proof and evidence",CH fatal results,watermarked,NEW,P1,,
+evaluations,GET,/v1/evaluations/{evaluationId}/hard-gates,Evaluation Detail,HG1-HG7 result and evidence,CH gate results,watermarked,NEW,P1,,
+evaluations,GET,/v1/evaluations/{evaluationId}/metrics,Evaluation Detail / Metric drawer,M1-M15 raw/weighted/formalization/evidence,CH metric results,watermarked,NEW,P0,,
+evaluations,GET,/v1/evaluations/{evaluationId}/dimensions,Evaluation Detail,Five dimension scores/gates,CH dimension results,watermarked,NEW,P1,,
+evaluations,GET,/v1/evaluations/{evaluationId}/findings,Evaluation Detail,Deterministic findings and improvement areas,Derived result/PG result JSON,immutable/watermarked,NEW,P1,,
+evaluations,GET,/v1/evaluations/{evaluationId}/evidence-links,Evaluation Detail,"Bundle, record and artifact refs used by the evaluation",PG bundle index + CH result refs,immutable,NEW,P0,,
+evaluations,GET,/v1/episodes/{episodeId}/evaluations,Episode view,Evaluation history,CH projection,watermarked,EXTEND,P1,GET /v1/episodes/{episodeId}/evaluations,Add profile/origin/level/readiness filters and typed rows.
+evaluations,GET,/v1/episodes/{episodeId}/evaluations/latest,Episode view,Latest evaluation,CH projection,watermarked,EXTEND,P1,GET /v1/episodes/{episodeId}/evaluations/latest,Add profile/origin selector to avoid ambiguous latest.
+evaluations,GET,/v1/episodes/{episodeId}/readiness,Episode view,Source Evidence readiness,CH projection,watermarked,EXTEND,P1,GET /v1/episodes/{episodeId}/readiness,"Add evaluation readiness and manifest/bundle links, or rename source-only semantics explicitly."
+evaluations,GET,/v1/episodes/{episodeId}/evidence-bundles,Episode view,List immutable bundles for all manifest revisions,PG bundle authority,transactional/current,NEW,P1,,
+evaluations,POST,/v1/evidence-bundles/{bundleId}/evaluations,Evaluation action,Re-evaluate same bundle with exact profile without re-running Candidate,PG authority,transactional/current,NEW,P1,,
+evidence,GET,/v1/evidence-bundles,Evidence Browser,List bundles filtered by episode/run/case/evaluation/hash/status,PG bundle authority,transactional/current,NEW,P1,,
+evidence,GET,/v1/evidence-bundles/{bundleId},Evidence Bundle Detail,"Bundle metadata, manifest, hashes, family coverage and usage counts",PG authority + Artifact metadata,transactional/current,NEW,P0,,
+evidence,GET,/v1/evidence-bundles/{bundleId}/records,Evidence Explorer,Paged immutable record index,PG index + Artifact,immutable,NEW,P1,,
+evidence,GET,/v1/evidence-bundles/{bundleId}/timeline,Evidence Explorer,Ordered semantic Evidence timeline,Artifact bundle + catalog,immutable,NEW,P0,,
+evidence,GET,/v1/evidence-bundles/{bundleId}/graph,Evidence Explorer,Goal→Skill→Plan→Action→Task→Receipt→Verification graph,Artifact bundle + relation catalog,immutable,NEW,P1,,
+evidence,GET,/v1/evidence-bundles/{bundleId}/diff,Evidence Diff,Structural/record/relationship diff against another bundle,Two immutable Artifact bundles,immutable,NEW,P0,,
+evidence,GET,/v1/evidence-bundles/{bundleId}/usage,Evidence Bundle Detail,Evaluations and comparisons referencing bundle,PG authority + CH projections,mixed explicit,NEW,P1,,
+evidence,GET,/v1/evidence-bundles/{bundleId}/records/{recordId},Evidence Record Drawer,"Record envelope, refs and bounded payload from frozen bundle",Artifact bundle,immutable,NEW,P1,,
+evidence,GET,telemetry-platform:/v1/evidence/trace,External raw trace,Raw canonical evidence search remains Telemetry Query API responsibility,Telemetry Platform ClickHouse Query API,watermarked,EXTERNAL,P1,,Benchmark Console links to it; Benchmark Server should not duplicate arbitrary trace search.
+analytics,GET,/v1/analytics/candidates,Analytics,Candidate summary,CH summary,watermarked,EXTEND,P1,GET /v1/analytics/candidates,"Add candidate/version labels, dataset/profile scope and rich filters; rows may be absent before summary projection."
+analytics,GET,/v1/analytics/tracks,Overview / Analytics,Track summary,CH summary,watermarked,EXTEND,P0,GET /v1/analytics/tracks,"Add risk cross filters, baseline delta and formal/diagnostic counts."
+analytics,GET,/v1/analytics/scenario-families,Analytics,Scenario-family summary,CH summary,watermarked,EXTEND,P1,GET /v1/analytics/scenario-families,Add candidate/baseline/dataset/profile filters and regression impact.
+analytics,GET,/v1/analytics/risks,Overview / Analytics,Risk summary,CH summary,watermarked,EXTEND,P0,GET /v1/analytics/risks,Add track cross dimension and critical failure details.
+analytics,GET,/v1/analytics/skills,Analytics,Skill-version summary,CH summary,watermarked,BLOCKED_DATA,P1,GET /v1/analytics/skills,"Route exists, but no automatic authoritative Run-scoped skill summary producer."
+analytics,GET,/v1/analytics/providers,Analytics,Provider-operation summary,CH summary,watermarked,BLOCKED_DATA,P1,GET /v1/analytics/providers,"Route exists, but no automatic authoritative Run-scoped provider summary producer."
+analytics,GET,/v1/analytics/quality-trend,Overview,"Candidate/run trend for mean, P10, pass and critical pass",CH run/candidate facts,watermarked,NEW,P0,,
+analytics,GET,/v1/analytics/change-summary,Overview / Compare,Recovered/Improved/Regressed/New HG/NR counts and score impact,CH comparison facts,watermarked,NEW,P0,,
+analytics,GET,/v1/analytics/track-risk-matrix,Overview,Track × Risk matrix for pass/score/failure,CH case results,watermarked,NEW,P0,,
+analytics,GET,/v1/analytics/metrics,Overview / Metrics,M1-M15 heatmap/detail aggregates,CH metric/evidence-grade results,watermarked,NEW,P0,,
+analytics,GET,/v1/analytics/dimensions,Metrics,Five dimension aggregates and trend,CH dimension results,watermarked,NEW,P1,,
+analytics,GET,/v1/analytics/readiness-funnel,Overview,Case→Episode→Manifest→Bundle→Ready→Formal funnel,PG execution + CH readiness,pinned watermark,NEW,P0,,
+analytics,GET,/v1/analytics/stability,Overview / Cases,Quality × repetition stability points,CH case/repetition results,watermarked,NEW,P0,,
+analytics,GET,/v1/analytics/regression-contributors,Overview / Compare,Top regression contributors by scenario/skill/metric/provider/failure/gate,CH comparison/evaluation facts,watermarked,NEW,P0,,Impact algorithm must be versioned and returned in response provenance.
+analytics,GET,/v1/analytics/score-distribution,Overview / Metrics,P10/P25/median/P75/P90 distribution,CH formal scores,watermarked,BLOCKED_DATA,P0,,Current frozen package lacks approved P50/P90 summary algorithm; API must remain partial/null until frozen or use an explicitly non-formal UI-only algorithm.
+analytics,GET,/v1/analytics/operational,Overview / Analytics,Operational KPI current/baseline summary,CH operational samples,watermarked,BLOCKED_DATA,P0,,Automatic upstream producers are absent for several metrics; response must expose availability and nulls.
+analytics,GET,/v1/analytics/gates,Metrics / Alerts,"HG aggregate counts, rates and trends",CH gate results,watermarked,NEW,P1,,
+analytics,GET,/v1/analytics/fatals,Metrics / Alerts,Fatal check aggregate counts and proof distribution,CH fatal results,watermarked,NEW,P1,,
+reports,POST,/v1/reports,Reports,Create immutable report snapshot from exact context/snapshot,PG authority + Artifact,transactional/current,NEW,P2,,
+reports,GET,/v1/reports,Reports,List generated reports,PG authority,transactional/current,NEW,P2,,
+reports,GET,/v1/reports/{reportId},Reports,Report metadata and generation status,PG authority,transactional/current,NEW,P2,,
+reports,GET,/v1/reports/{reportId}/content,Reports,Structured report content,Artifact,immutable,NEW,P2,,
+reports,GET,/v1/reports/{reportId}/download,Reports,Download Markdown/JSON/PDF artifact,Artifact,immutable,NEW,P2,,

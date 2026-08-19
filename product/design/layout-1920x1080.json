@@ -1,0 +1,144 @@
+{
+  "version": "0.1.0",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "sidebar": {
+    "x": 0,
+    "y": 0,
+    "width": 136,
+    "height": 1080
+  },
+  "main": {
+    "x": 136,
+    "y": 0,
+    "width": 1784,
+    "height": 1080,
+    "padding": 16,
+    "columns": 12,
+    "gap": 10
+  },
+  "rows": [
+    {
+      "id": "context",
+      "height": 72,
+      "items": [
+        {
+          "id": "contextBar",
+          "colStart": 1,
+          "colSpan": 12
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "height": 132,
+      "items": [
+        {
+          "id": "releaseGate",
+          "colStart": 1,
+          "colSpan": 2
+        },
+        {
+          "id": "kpiStrip",
+          "colStart": 3,
+          "colSpan": 8
+        },
+        {
+          "id": "coverageKpi",
+          "colStart": 11,
+          "colSpan": 2
+        }
+      ]
+    },
+    {
+      "id": "insight",
+      "height": 242,
+      "items": [
+        {
+          "id": "conclusions",
+          "colStart": 1,
+          "colSpan": 3
+        },
+        {
+          "id": "attention",
+          "colStart": 4,
+          "colSpan": 2
+        },
+        {
+          "id": "qualityTrend",
+          "colStart": 6,
+          "colSpan": 3
+        },
+        {
+          "id": "waterfall",
+          "colStart": 9,
+          "colSpan": 2
+        },
+        {
+          "id": "trackRisk",
+          "colStart": 11,
+          "colSpan": 2
+        }
+      ]
+    },
+    {
+      "id": "diagnosis",
+      "height": 228,
+      "items": [
+        {
+          "id": "metricHeatmap",
+          "colStart": 1,
+          "colSpan": 4
+        },
+        {
+          "id": "evidenceFunnel",
+          "colStart": 5,
+          "colSpan": 3
+        },
+        {
+          "id": "qualityStability",
+          "colStart": 8,
+          "colSpan": 3
+        },
+        {
+          "id": "contributors",
+          "colStart": 11,
+          "colSpan": 2
+        }
+      ]
+    },
+    {
+      "id": "operations",
+      "height": 250,
+      "items": [
+        {
+          "id": "anomalyTimeline",
+          "colStart": 1,
+          "colSpan": 3
+        },
+        {
+          "id": "operational",
+          "colStart": 4,
+          "colSpan": 3
+        },
+        {
+          "id": "scoreDistribution",
+          "colStart": 7,
+          "colSpan": 2
+        },
+        {
+          "id": "systemStatus",
+          "colStart": 9,
+          "colSpan": 2
+        },
+        {
+          "id": "recentRuns",
+          "colStart": 11,
+          "colSpan": 2
+        }
+      ]
+    }
+  ]
+}

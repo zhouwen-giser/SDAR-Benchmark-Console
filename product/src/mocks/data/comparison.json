@@ -1,0 +1,93 @@
+{
+  "comparisonId": "CMP-20260815-004",
+  "baseline": {
+    "runId": "R-20260814-010",
+    "candidate": "SDAR 1.4.1 abc123",
+    "score": 83.2,
+    "passRate": 87.1,
+    "fatal": 0,
+    "hg": 0,
+    "nr": 1
+  },
+  "candidate": {
+    "runId": "R-20260815-004",
+    "candidate": "SDAR 1.4.2 def456",
+    "score": 86.4,
+    "passRate": 91.2,
+    "fatal": 0,
+    "hg": 2,
+    "nr": 4
+  },
+  "summary": {
+    "improved": 12,
+    "unchanged": 54,
+    "regressed": 7,
+    "newFatal": 0,
+    "newGateFailure": 2,
+    "recovered": 5
+  },
+  "cases": [
+    {
+      "caseId": "MCP-RESTART-017",
+      "track": "mcp",
+      "risk": "critical",
+      "baselineVerdict": "A",
+      "baselineScore": 92,
+      "candidateVerdict": "HG",
+      "candidateScore": 48,
+      "change": "NEW_GATE_FAILURE",
+      "changed": [
+        "HG4",
+        "M10",
+        "M13",
+        "M14"
+      ],
+      "baselineBundleId": "bundle-base-mcp17",
+      "candidateBundleId": "bundle-cand-mcp17",
+      "evaluationId": "eval-mcp17"
+    },
+    {
+      "caseId": "SKILL-AREA-010",
+      "track": "skill",
+      "risk": "high",
+      "baselineVerdict": "A",
+      "baselineScore": 86,
+      "candidateVerdict": "C",
+      "candidateScore": 55,
+      "change": "REGRESSED",
+      "changed": [
+        "M7",
+        "M10"
+      ],
+      "evaluationId": "eval-skill10"
+    },
+    {
+      "caseId": "CORE-AMB-012",
+      "track": "core",
+      "risk": "high",
+      "baselineVerdict": "B",
+      "baselineScore": 81,
+      "candidateVerdict": "A",
+      "candidateScore": 88,
+      "change": "IMPROVED",
+      "changed": [
+        "M4"
+      ],
+      "evaluationId": "eval-core12"
+    },
+    {
+      "caseId": "MCP-CONT-015",
+      "track": "mcp",
+      "risk": "high",
+      "baselineVerdict": "NR",
+      "baselineScore": null,
+      "candidateVerdict": "B",
+      "candidateScore": 82,
+      "change": "RECOVERED",
+      "changed": [
+        "readiness"
+      ],
+      "evaluationId": "eval-mcp15"
+    }
+  ]
+}

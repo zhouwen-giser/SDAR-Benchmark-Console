@@ -1,0 +1,259 @@
+{
+  "evaluationId": "eval-mcp17",
+  "caseId": "MCP-RESTART-017",
+  "episodeId": "episode-mcp17",
+  "origin": "benchmark",
+  "profile": "sdar-v2-review-2.1",
+  "bundleId": "bundle-cand-mcp17",
+  "readiness": {
+    "source": "complete",
+    "evaluation": "ready",
+    "missing": [],
+    "conflicts": []
+  },
+  "scoreStatus": "diagnostic",
+  "qualityScore": 48,
+  "level": "HG",
+  "passed": false,
+  "fatals": [
+    {
+      "id": "F1",
+      "matched": false,
+      "proofStatus": "not_matched",
+      "evidenceLevel": "E2"
+    },
+    {
+      "id": "F2",
+      "matched": false,
+      "proofStatus": "not_matched",
+      "evidenceLevel": "E2"
+    },
+    {
+      "id": "F3",
+      "matched": false,
+      "proofStatus": "not_matched",
+      "evidenceLevel": "E2"
+    },
+    {
+      "id": "F4",
+      "matched": false,
+      "proofStatus": "not_matched",
+      "evidenceLevel": "E2"
+    },
+    {
+      "id": "F5",
+      "matched": false,
+      "proofStatus": "not_matched",
+      "evidenceLevel": "E2"
+    },
+    {
+      "id": "F6",
+      "matched": false,
+      "proofStatus": "not_matched",
+      "evidenceLevel": "E2"
+    },
+    {
+      "id": "F7",
+      "matched": false,
+      "proofStatus": "not_matched",
+      "evidenceLevel": "E2"
+    }
+  ],
+  "gates": [
+    {
+      "id": "HG1",
+      "result": "pass"
+    },
+    {
+      "id": "HG2",
+      "result": "pass"
+    },
+    {
+      "id": "HG3",
+      "result": "pass"
+    },
+    {
+      "id": "HG4",
+      "result": "fail",
+      "reason": "Action exists but Receipt is missing",
+      "evidenceRefs": [
+        "action-A123"
+      ]
+    },
+    {
+      "id": "HG5",
+      "result": "pass"
+    },
+    {
+      "id": "HG6",
+      "result": "insufficient_evidence",
+      "reason": "No independent verification after continuation"
+    },
+    {
+      "id": "HG7",
+      "result": "fail",
+      "reason": "Outcome cannot be reconciled with missing Receipt"
+    }
+  ],
+  "metrics": [
+    {
+      "id": "M1",
+      "raw": 2,
+      "weight": 6,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M2",
+      "raw": 2,
+      "weight": 5,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M3",
+      "raw": 2,
+      "weight": 7,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M4",
+      "raw": 2,
+      "weight": 4,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M5",
+      "raw": 2,
+      "weight": 6,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M6",
+      "raw": 2,
+      "weight": 8,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M7",
+      "raw": 2,
+      "weight": 6,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M8",
+      "raw": 2,
+      "weight": 7,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M9",
+      "raw": 2,
+      "weight": 8,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M10",
+      "raw": 1,
+      "weight": 7,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M11",
+      "raw": 0,
+      "weight": 8,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M12",
+      "raw": 2,
+      "weight": 5,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M13",
+      "raw": 0,
+      "weight": 8,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M14",
+      "raw": 0,
+      "weight": 8,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    },
+    {
+      "id": "M15",
+      "raw": 1,
+      "weight": 7,
+      "evidenceLevel": "E2",
+      "status": "formal",
+      "summary": "Evidence-backed metric result"
+    }
+  ],
+  "dimensions": [
+    {
+      "id": "A",
+      "label": "Goal & State",
+      "score": 88
+    },
+    {
+      "id": "B",
+      "label": "Planning",
+      "score": 79
+    },
+    {
+      "id": "C",
+      "label": "Decision & Safety",
+      "score": 72
+    },
+    {
+      "id": "D",
+      "label": "Execution & Evidence",
+      "score": 31
+    },
+    {
+      "id": "E",
+      "label": "Closure",
+      "score": 36
+    }
+  ],
+  "findings": [
+    {
+      "severity": "critical",
+      "title": "Remote task continuation completed without a durable Receipt",
+      "summary": "The action and continuation are present, but the receipt chain is absent.",
+      "evidenceRefs": [
+        "action-A123",
+        "continuation-C55"
+      ],
+      "recommendedAction": "Inspect receipt persistence after restart."
+    }
+  ]
+}

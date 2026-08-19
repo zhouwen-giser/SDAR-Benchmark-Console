@@ -1,0 +1,405 @@
+{
+  "snapshot": {
+    "snapshotId": "overview-invalid-001",
+    "watermark": "2026-08-15T20:28:42.000Z",
+    "projectionLagMs": 180000
+  },
+  "context": {
+    "candidate": {
+      "id": "cand-142-def456",
+      "runtimeVersion": "1.4.2",
+      "commit": "def456"
+    },
+    "baseline": {
+      "id": "cand-141-abc123",
+      "runtimeVersion": "1.4.1",
+      "commit": "abc123"
+    },
+    "dataset": {
+      "id": "release-v0.1",
+      "version": "0.1.0"
+    },
+    "profile": {
+      "id": "sdar-v2-review-2.1",
+      "version": "2.1.0"
+    },
+    "run": {
+      "id": "R-20260815-004",
+      "status": "completed"
+    }
+  },
+  "qualityTrend": [
+    {
+      "label": "v1.3.9",
+      "meanScore": 72.0,
+      "passRate": 70.0,
+      "criticalRiskPassRate": 60.0,
+      "p10": 48.0
+    },
+    {
+      "label": "v1.4.0",
+      "meanScore": 78.0,
+      "passRate": 79.0,
+      "criticalRiskPassRate": 75.0,
+      "p10": 56.0
+    },
+    {
+      "label": "v1.4.1",
+      "meanScore": 83.2,
+      "passRate": 87.1,
+      "criticalRiskPassRate": 92.0,
+      "p10": 68.0
+    },
+    {
+      "label": "current",
+      "meanScore": 86.4,
+      "passRate": 91.2,
+      "criticalRiskPassRate": 92.0,
+      "p10": 63.0
+    }
+  ],
+  "trackRiskMatrix": [
+    {
+      "track": "core",
+      "risk": "critical",
+      "passRate": 100
+    },
+    {
+      "track": "skill",
+      "risk": "critical",
+      "passRate": 92
+    },
+    {
+      "track": "mcp",
+      "risk": "critical",
+      "passRate": 75
+    },
+    {
+      "track": "node",
+      "risk": "critical",
+      "passRate": 100
+    },
+    {
+      "track": "cross",
+      "risk": "critical",
+      "passRate": 83
+    },
+    {
+      "track": "core",
+      "risk": "high",
+      "passRate": 88
+    },
+    {
+      "track": "skill",
+      "risk": "high",
+      "passRate": 82
+    },
+    {
+      "track": "mcp",
+      "risk": "high",
+      "passRate": 71
+    },
+    {
+      "track": "node",
+      "risk": "high",
+      "passRate": 89
+    },
+    {
+      "track": "cross",
+      "risk": "high",
+      "passRate": 76
+    },
+    {
+      "track": "core",
+      "risk": "medium",
+      "passRate": 91
+    },
+    {
+      "track": "skill",
+      "risk": "medium",
+      "passRate": 88
+    },
+    {
+      "track": "mcp",
+      "risk": "medium",
+      "passRate": 84
+    },
+    {
+      "track": "node",
+      "risk": "medium",
+      "passRate": 92
+    },
+    {
+      "track": "cross",
+      "risk": "medium",
+      "passRate": 87
+    },
+    {
+      "track": "core",
+      "risk": "low",
+      "passRate": 96
+    },
+    {
+      "track": "skill",
+      "risk": "low",
+      "passRate": 93
+    },
+    {
+      "track": "mcp",
+      "risk": "low",
+      "passRate": 91
+    },
+    {
+      "track": "node",
+      "risk": "low",
+      "passRate": 98
+    },
+    {
+      "track": "cross",
+      "risk": "low",
+      "passRate": 94
+    }
+  ],
+  "metricHeatmap": [],
+  "qualityStabilityPoints": [
+    {
+      "caseId": "MCP-RESTART-017",
+      "track": "mcp",
+      "risk": "critical",
+      "averageScore": 84,
+      "passStability": 33,
+      "repetitions": 3
+    },
+    {
+      "caseId": "NODE-CTRL-004",
+      "track": "node",
+      "risk": "low",
+      "averageScore": 92,
+      "passStability": 100,
+      "repetitions": 3
+    },
+    {
+      "caseId": "SKILL-AREA-010",
+      "track": "skill",
+      "risk": "high",
+      "averageScore": 55,
+      "passStability": 67,
+      "repetitions": 3
+    }
+  ],
+  "regressionContributors": [
+    {
+      "label": "MCP restart",
+      "impactPercent": 31
+    },
+    {
+      "label": "embodied.area_patrol",
+      "impactPercent": 24
+    },
+    {
+      "label": "verification missing",
+      "impactPercent": 18
+    },
+    {
+      "label": "provider timeout",
+      "impactPercent": 9
+    },
+    {
+      "label": "node config drift",
+      "impactPercent": 7
+    },
+    {
+      "label": "others",
+      "impactPercent": 11
+    }
+  ],
+  "scoreDistribution": {
+    "p10": 63,
+    "p25": 76,
+    "median": 87,
+    "p75": 94,
+    "p90": 97
+  },
+  "anomalyTimeline": [
+    {
+      "at": "2026-08-15T20:31:00Z",
+      "severity": "critical",
+      "title": "NEW HG4 — MCP-RESTART-017",
+      "target": {
+        "type": "case",
+        "id": "MCP-RESTART-017"
+      }
+    },
+    {
+      "at": "2026-08-15T20:30:00Z",
+      "severity": "high",
+      "title": "NR — missing runtime.verification",
+      "target": {
+        "type": "evaluation",
+        "id": "eval-102"
+      }
+    },
+    {
+      "at": "2026-08-15T20:28:00Z",
+      "severity": "warning",
+      "title": "Projection lag reached 18s",
+      "target": {
+        "type": "system",
+        "id": "mart-projection"
+      }
+    }
+  ],
+  "operationalSummary": [
+    {
+      "metric": "wallClockP50",
+      "current": 41,
+      "baseline": 44,
+      "unit": "s",
+      "changePercent": -7
+    },
+    {
+      "metric": "timeToFirstAction",
+      "current": 1.8,
+      "baseline": 1.5,
+      "unit": "s",
+      "changePercent": 20
+    },
+    {
+      "metric": "llmCalls",
+      "current": 5.2,
+      "baseline": 5.8,
+      "unit": "count",
+      "changePercent": -10
+    },
+    {
+      "metric": "mcpRetry",
+      "current": 0.9,
+      "baseline": 0.3,
+      "unit": "count",
+      "changePercent": 200
+    },
+    {
+      "metric": "recoveryLatency",
+      "current": 4.1,
+      "baseline": 3.2,
+      "unit": "s",
+      "changePercent": 28
+    }
+  ],
+  "systemStatus": [
+    {
+      "component": "Evidence Ingestion",
+      "status": "healthy"
+    },
+    {
+      "component": "Domain Projection",
+      "status": "healthy"
+    },
+    {
+      "component": "Benchmark Evaluation",
+      "status": "healthy"
+    },
+    {
+      "component": "Mart Projection",
+      "status": "lagging",
+      "detail": "3.2s"
+    },
+    {
+      "component": "Contract Release",
+      "status": "healthy",
+      "detail": "0.1.0"
+    },
+    {
+      "component": "ClickHouse Schema",
+      "status": "healthy",
+      "detail": "1.5.0"
+    }
+  ],
+  "recentRuns": [
+    {
+      "runId": "R-20260815-004",
+      "candidate": "1.4.2",
+      "caseCount": 80,
+      "status": "completed",
+      "completedAt": "2026-08-15T20:26:00Z"
+    },
+    {
+      "runId": "R-20260815-003",
+      "candidate": "1.4.2",
+      "caseCount": 80,
+      "status": "completed",
+      "completedAt": "2026-08-15T18:12:00Z"
+    },
+    {
+      "runId": "R-20260814-010",
+      "candidate": "1.4.1",
+      "caseCount": 80,
+      "status": "completed",
+      "completedAt": "2026-08-14T16:05:00Z"
+    }
+  ],
+  "releaseGate": {
+    "status": "invalid",
+    "blockingReasons": [
+      "Formal evaluation coverage is insufficient",
+      "Projection lag exceeds freshness threshold"
+    ]
+  },
+  "kpis": {
+    "qualityScore": null,
+    "qualityDelta": null,
+    "passRate": null,
+    "passDelta": null,
+    "provenFatal": 0,
+    "requiredHgFailures": 0,
+    "notReady": 39,
+    "regressions": null,
+    "formalEvaluationRate": 31,
+    "criticalRiskPassRate": null
+  },
+  "analysisConclusions": [
+    {
+      "id": "i1",
+      "severity": "critical",
+      "category": "evidence_quality",
+      "title": "当前数据不足以作发布判断",
+      "summary": "仅 31% Case 完成正式评价，Mart Projection 延迟 180 秒",
+      "affectedCases": 55,
+      "generatedBy": "deterministic",
+      "formalizationStatus": "formal",
+      "drillDown": {
+        "page": "system-status",
+        "filters": {}
+      }
+    }
+  ],
+  "attentionItems": [
+    {
+      "priority": "P0",
+      "title": "Projection Lag",
+      "value": "180s",
+      "status": "open"
+    },
+    {
+      "priority": "P0",
+      "title": "Formal Evaluation Coverage",
+      "value": "31%",
+      "status": "open"
+    }
+  ],
+  "regressionWaterfall": null,
+  "evidenceReadinessFunnel": {
+    "caseRepetitions": 80,
+    "episodeResolved": 68,
+    "manifestSealed": 54,
+    "bundleComplete": 42,
+    "evaluationReady": 30,
+    "formalEvaluation": 25,
+    "lossReasons": {
+      "manifestMissing": 14,
+      "requiredFamilyMissing": 12,
+      "evidenceConflicts": 4,
+      "semanticEvaluatorPending": 5
+    }
+  }
+}

@@ -1,0 +1,709 @@
+openapi: 3.1.0
+info:
+  title: SDAR Benchmark Console API Extension
+  version: 0.2.0-design
+  description: >-
+    Design-only API additions and extensions required by the SDAR Benchmark Console.
+    PostgreSQL remains command/registry authority; ClickHouse remains analytics projection.
+    No authentication is defined for this design-stage v0.2 contract.
+security: []
+servers:
+  - url: http://127.0.0.1:18090
+paths:
+  /v1/context/options:
+    get:
+      operationId: getConsoleContextOptions
+      tags: [Context]
+      parameters:
+        - $ref: '#/components/parameters/CandidateIdOptional'
+        - $ref: '#/components/parameters/DatasetVersionOptional'
+      responses:
+        '200':
+          description: Selector and filter options
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContextOptionsResponse' }
+  /v1/catalogs/evaluation:
+    get:
+      operationId: getEvaluationCatalog
+      tags: [Context]
+      responses:
+        '200':
+          description: Versioned M/HG/F/dimension catalog
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EvaluationCatalogResponse' }
+  /v1/dashboard/overview:
+    get:
+      operationId: getDashboardOverview
+      tags: [Dashboard]
+      parameters:
+        - $ref: '#/components/parameters/CandidateId'
+        - $ref: '#/components/parameters/BaselineIdOptional'
+        - $ref: '#/components/parameters/DatasetVersion'
+        - $ref: '#/components/parameters/ProfileVersionId'
+        - $ref: '#/components/parameters/RunIdOptional'
+        - $ref: '#/components/parameters/TrackOptional'
+        - $ref: '#/components/parameters/RiskOptional'
+        - $ref: '#/components/parameters/PeriodOptional'
+      responses:
+        '200':
+          description: One pinned-watermark Quality Command Center snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardOverviewResponse' }
+  /v1/case-results:
+    get:
+      operationId: listCaseResults
+      tags: [Explorer]
+      parameters:
+        - $ref: '#/components/parameters/RunIdOptional'
+        - $ref: '#/components/parameters/ComparisonIdOptional'
+        - $ref: '#/components/parameters/TrackOptional'
+        - $ref: '#/components/parameters/RiskOptional'
+        - { name: metricId, in: query, schema: { type: string } }
+        - { name: gateId, in: query, schema: { type: string } }
+        - { name: fatalId, in: query, schema: { type: string } }
+        - { name: readiness, in: query, schema: { type: string } }
+        - { name: changeType, in: query, schema: { type: string } }
+        - $ref: '#/components/parameters/SearchOptional'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Cross-filtered case explorer
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QueryEnvelope' }
+  /v1/cases/{caseId}:
+    get:
+      operationId: getCaseDetail
+      tags: [Explorer]
+      parameters:
+        - $ref: '#/components/parameters/CaseId'
+      responses:
+        '200':
+          description: Versioned Case contract and execution history
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CaseDetail' }
+  /v1/benchmark-runs:
+    get:
+      operationId: listBenchmarkRuns
+      tags: [Runs]
+      parameters:
+        - { name: status, in: query, schema: { type: string } }
+        - $ref: '#/components/parameters/CandidateIdOptional'
+        - $ref: '#/components/parameters/DatasetVersionOptional'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Run list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QueryEnvelope' }
+  /v1/benchmark-runs/{runId}/dashboard:
+    get:
+      operationId: getBenchmarkRunDashboard
+      tags: [Runs]
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - $ref: '#/components/parameters/BaselineIdOptional'
+      responses:
+        '200':
+          description: Consistent Run Detail snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SnapshotEnvelope' }
+  /v1/comparisons/{comparisonId}:
+    get:
+      operationId: getComparisonDetail
+      tags: [Comparisons]
+      parameters:
+        - $ref: '#/components/parameters/ComparisonId'
+      responses:
+        '200':
+          description: Typed baseline-to-candidate comparison
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ComparisonDetail' }
+  /v1/evaluations:
+    get:
+      operationId: listEvaluations
+      tags: [Evaluations]
+      parameters:
+        - $ref: '#/components/parameters/TrackOptional'
+        - $ref: '#/components/parameters/RiskOptional'
+        - { name: readiness, in: query, schema: { type: string, enum: [all, ready, not_ready], default: all } }
+        - { name: verdict, in: query, schema: { type: string } }
+        - $ref: '#/components/parameters/SearchOptional'
+      responses:
+        '200':
+          description: Filterable Evaluation Explorer collection
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EvaluationSummaryEnvelope' }
+  /v1/evaluations/{evaluationId}:
+    get:
+      operationId: getTypedEvaluationDetail
+      tags: [Evaluations]
+      parameters:
+        - $ref: '#/components/parameters/EvaluationId'
+      responses:
+        '200':
+          description: Typed evaluation detail; replaces opaque result_json consumption
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EvaluationDetail' }
+  /v1/evaluations/{evaluationId}/metrics:
+    get:
+      operationId: listEvaluationMetrics
+      tags: [Evaluations]
+      parameters:
+        - $ref: '#/components/parameters/EvaluationId'
+      responses:
+        '200':
+          description: M1-M15 result rows
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QueryEnvelope' }
+  /v1/evaluations/{evaluationId}/evidence-links:
+    get:
+      operationId: getEvaluationEvidenceLinks
+      tags: [Evaluations]
+      parameters:
+        - $ref: '#/components/parameters/EvaluationId'
+      responses:
+        '200':
+          description: Bundle, record and artifact refs
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QueryEnvelope' }
+  /v1/evidence-bundles:
+    get:
+      operationId: listEvidenceBundles
+      tags: [Evidence]
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [all, complete, partial, pending], default: all } }
+        - { name: family, in: query, schema: { type: string, enum: [all, complete, missing], default: all } }
+        - $ref: '#/components/parameters/SearchOptional'
+      responses:
+        '200':
+          description: Filterable immutable Evidence Bundle catalog
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EvidenceBundleSummaryEnvelope' }
+  /v1/evidence-bundles/{bundleId}:
+    get:
+      operationId: getEvidenceBundle
+      tags: [Evidence]
+      parameters:
+        - $ref: '#/components/parameters/BundleId'
+      responses:
+        '200':
+          description: Immutable bundle metadata and coverage
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EvidenceDetail' }
+  /v1/evidence-bundles/{bundleId}/timeline:
+    get:
+      operationId: getEvidenceTimeline
+      tags: [Evidence]
+      parameters:
+        - $ref: '#/components/parameters/BundleId'
+      responses:
+        '200':
+          description: Semantic timeline from frozen bundle
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthorityObject' }
+  /v1/evidence-bundles/{bundleId}/diff:
+    get:
+      operationId: getEvidenceBundleDiff
+      tags: [Evidence]
+      parameters:
+        - $ref: '#/components/parameters/BundleId'
+        - { name: baselineBundleId, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Structural Evidence diff
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthorityObject' }
+  /v1/analysis-conclusions:
+    get:
+      operationId: listAnalysisConclusions
+      tags: [Analysis]
+      parameters:
+        - $ref: '#/components/parameters/RunIdOptional'
+        - $ref: '#/components/parameters/ComparisonIdOptional'
+      responses:
+        '200':
+          description: Verifiable deterministic/statistical conclusions
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QueryEnvelope' }
+  /v1/attention-items:
+    get:
+      operationId: listAttentionItems
+      tags: [Analysis]
+      parameters:
+        - $ref: '#/components/parameters/RunIdOptional'
+        - { name: priority, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: Ordered attention queue
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QueryEnvelope' }
+  /v1/anomalies:
+    get:
+      operationId: listAnomalies
+      tags: [Analysis]
+      parameters:
+        - $ref: '#/components/parameters/RunIdOptional'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Anomaly timeline
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QueryEnvelope' }
+  /v1/analytics/workspace:
+    get:
+      operationId: getAnalyticsWorkspace
+      tags: [Analysis]
+      parameters:
+        - $ref: '#/components/parameters/CandidateIdOptional'
+        - $ref: '#/components/parameters/BaselineIdOptional'
+        - $ref: '#/components/parameters/DatasetVersionOptional'
+        - $ref: '#/components/parameters/ProfileVersionIdOptional'
+        - $ref: '#/components/parameters/RunIdOptional'
+        - $ref: '#/components/parameters/TrackOptional'
+        - $ref: '#/components/parameters/RiskOptional'
+        - $ref: '#/components/parameters/PeriodOptional'
+        - $ref: '#/components/parameters/ScenarioOptional'
+        - $ref: '#/components/parameters/DataStateOptional'
+      responses:
+        '200':
+          description: Watermarked deep-analysis workspace snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardOverviewResponse' }
+  /v1/reports:
+    get:
+      operationId: listReports
+      tags: [Reports]
+      responses:
+        '200':
+          description: Report catalog; draft creation remains a client-session prototype
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportRecordEnvelope' }
+  /v1/alerts:
+    get:
+      operationId: listAlerts
+      tags: [Alerts]
+      responses:
+        '200':
+          description: Alert lifecycle collection
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AlertRecordEnvelope' }
+  /v1/system/status:
+    get:
+      operationId: getSystemStatus
+      tags: [System]
+      responses:
+        '200':
+          description: Evaluation-trust status snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SnapshotEnvelope' }
+  /v1/system/workspace:
+    get:
+      operationId: getSystemWorkspace
+      tags: [System]
+      responses:
+        '200':
+          description: Services, contracts, projections and adapter modes
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SystemWorkspace' }
+  /v1/candidates/{candidateId}:
+    get:
+      operationId: getCandidateDetail
+      tags: [Registry]
+      parameters:
+        - $ref: '#/components/parameters/CandidateIdPath'
+      responses:
+        '200':
+          description: Candidate registry detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResourceDetail' }
+  /v1/baselines/{baselineId}:
+    get:
+      operationId: getBaselineDetail
+      tags: [Registry]
+      parameters:
+        - $ref: '#/components/parameters/BaselineIdPath'
+      responses:
+        '200':
+          description: Approved baseline detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResourceDetail' }
+  /v1/datasets/{datasetVersion}:
+    get:
+      operationId: getDatasetDetail
+      tags: [Registry]
+      parameters:
+        - $ref: '#/components/parameters/DatasetVersionPath'
+      responses:
+        '200':
+          description: Versioned Dataset manifest summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResourceDetail' }
+  /v1/profiles/{profileVersionId}:
+    get:
+      operationId: getProfileDetail
+      tags: [Registry]
+      parameters:
+        - $ref: '#/components/parameters/ProfileVersionIdPath'
+      responses:
+        '200':
+          description: Versioned Evaluation Profile detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResourceDetail' }
+components:
+  parameters:
+    CandidateId: { name: candidateId, in: query, required: true, schema: { type: string } }
+    CandidateIdOptional: { name: candidateId, in: query, required: false, schema: { type: string } }
+    CandidateIdPath: { name: candidateId, in: path, required: true, schema: { type: string } }
+    BaselineIdOptional: { name: baselineId, in: query, required: false, schema: { type: string } }
+    BaselineIdPath: { name: baselineId, in: path, required: true, schema: { type: string } }
+    DatasetVersion: { name: datasetVersion, in: query, required: true, schema: { type: string } }
+    DatasetVersionOptional: { name: datasetVersion, in: query, required: false, schema: { type: string } }
+    DatasetVersionPath: { name: datasetVersion, in: path, required: true, schema: { type: string } }
+    ProfileVersionId: { name: profileVersionId, in: query, required: true, schema: { type: string } }
+    ProfileVersionIdOptional: { name: profileVersionId, in: query, required: false, schema: { type: string } }
+    ProfileVersionIdPath: { name: profileVersionId, in: path, required: true, schema: { type: string } }
+    RunId: { name: runId, in: path, required: true, schema: { type: string } }
+    RunIdOptional: { name: runId, in: query, required: false, schema: { type: string } }
+    CaseId: { name: caseId, in: path, required: true, schema: { type: string } }
+    ComparisonId: { name: comparisonId, in: path, required: true, schema: { type: string } }
+    ComparisonIdOptional: { name: comparisonId, in: query, required: false, schema: { type: string } }
+    EvaluationId: { name: evaluationId, in: path, required: true, schema: { type: string } }
+    BundleId: { name: bundleId, in: path, required: true, schema: { type: string } }
+    TrackOptional: { name: track, in: query, required: false, schema: { type: string, default: all } }
+    RiskOptional: { name: riskLevel, in: query, required: false, schema: { type: string, default: all } }
+    PeriodOptional: { name: period, in: query, required: false, schema: { type: string, default: 7d } }
+    SearchOptional: { name: search, in: query, required: false, schema: { type: string } }
+    ScenarioOptional: { name: scenario, in: query, required: false, schema: { type: string, enum: [blocked, ready, invalid], default: blocked } }
+    DataStateOptional: { name: dataState, in: query, required: false, schema: { type: string, enum: [loaded, loading, empty, error, stale, partial], default: loaded } }
+    Limit: { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+    Cursor: { name: cursor, in: query, required: false, schema: { type: string } }
+  schemas:
+    SnapshotMeta:
+      type: object
+      additionalProperties: false
+      required: [snapshotId, watermark, projectionLagMs, dataStatus]
+      properties:
+        snapshotId: { type: string }
+        watermark: { type: [string, 'null'], format: date-time }
+        projectionLagMs: { type: [integer, 'null'], minimum: 0 }
+        dataStatus: { type: string, enum: [complete, partial, stale, empty] }
+        moduleErrors: { type: array, items: { type: object } }
+    DashboardOverviewResponse:
+      type: object
+      additionalProperties: false
+      required: [snapshot, context, releaseGate, kpis, analysisConclusions, attentionItems, qualityTrend, regressionWaterfall, trackRiskMatrix, metricHeatmap, evidenceReadinessFunnel, qualityStabilityPoints, regressionContributors, scoreDistribution, anomalyTimeline, operationalSummary, systemStatus, recentRuns]
+      properties:
+        snapshot: { $ref: '#/components/schemas/SnapshotMeta' }
+        context: { type: object }
+        releaseGate: { type: object }
+        kpis: { type: object }
+        analysisConclusions: { type: array, items: { type: object } }
+        attentionItems: { type: array, items: { type: object } }
+        qualityTrend: { type: array, items: { type: object } }
+        regressionWaterfall: { type: [object, 'null'] }
+        trackRiskMatrix: { type: array, items: { type: object } }
+        metricHeatmap: { type: array, items: { type: object } }
+        evidenceReadinessFunnel: { type: object }
+        qualityStabilityPoints: { type: array, items: { type: object } }
+        regressionContributors: { type: array, items: { type: object } }
+        scoreDistribution: { type: object }
+        anomalyTimeline: { type: array, items: { type: object } }
+        operationalSummary: { type: array, items: { type: object } }
+        systemStatus: { type: array, items: { type: object } }
+        recentRuns: { type: array, items: { type: object } }
+    ContextOptionsResponse:
+      type: object
+      properties:
+        candidates: { type: array, items: { type: object } }
+        baselines: { type: array, items: { type: object } }
+        datasets: { type: array, items: { type: object } }
+        profiles: { type: array, items: { type: object } }
+        runs: { type: array, items: { type: object } }
+        filters: { type: object }
+        defaults: { type: object }
+    EvaluationCatalogResponse:
+      type: object
+      properties:
+        release: { type: object }
+        dimensions: { type: array, items: { type: object } }
+        metrics: { type: array, items: { type: object } }
+        hardGates: { type: array, items: { type: object } }
+        fatals: { type: array, items: { type: object } }
+        enums: { type: object }
+    CollectionPage:
+      type: object
+      required: [nextCursor]
+      properties:
+        nextCursor: { type: [string, 'null'] }
+    CollectionContractMeta:
+      type: object
+      required: [page, watermark, projectionLagMs, contracts, generatedAt]
+      properties:
+        page: { $ref: '#/components/schemas/CollectionPage' }
+        watermark: { type: [string, 'null'], format: date-time }
+        projectionLagMs: { type: [integer, 'null'], minimum: 0 }
+        contracts: { type: array, items: { type: string } }
+        generatedAt: { type: string, format: date-time }
+    CaseExecution:
+      type: object
+      additionalProperties: false
+      required: [repetition, episodeId, status, verdict, score, durationMs]
+      properties:
+        repetition: { type: integer, minimum: 1 }
+        episodeId: { type: string }
+        status: { type: string, enum: [completed, failed, pending] }
+        verdict: { type: string }
+        score: { type: [number, 'null'] }
+        durationMs: { type: [integer, 'null'], minimum: 0 }
+        evaluationId: { type: string }
+        bundleId: { type: string }
+    CaseDetail:
+      type: object
+      additionalProperties: false
+      required: [caseId, title, description, track, risk, status, owner, sourceRevision, tags, preconditions, actions, expectedOutcomes, requiredEvidenceFamilies, requiredGates, executions, history]
+      properties:
+        caseId: { type: string }
+        title: { type: string }
+        description: { type: string }
+        track: { type: string }
+        risk: { type: string }
+        status: { type: string, enum: [active, draft, retired] }
+        owner: { type: string }
+        sourceRevision: { type: integer, minimum: 1 }
+        tags: { type: array, items: { type: string } }
+        preconditions: { type: array, items: { type: string } }
+        actions: { type: array, items: { type: string } }
+        expectedOutcomes: { type: array, items: { type: string } }
+        requiredEvidenceFamilies: { type: array, items: { type: string } }
+        requiredGates: { type: array, items: { type: string } }
+        executions: { type: array, items: { $ref: '#/components/schemas/CaseExecution' } }
+        history:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [revision, at, author, summary]
+            properties:
+              revision: { type: integer }
+              at: { type: string, format: date-time }
+              author: { type: string }
+              summary: { type: string }
+    ComparisonDetail:
+      type: object
+      required: [comparisonId, baseline, candidate, summary, cases]
+      properties:
+        comparisonId: { type: string }
+        baseline: { type: object }
+        candidate: { type: object }
+        summary: { type: object, additionalProperties: { type: number } }
+        cases: { type: array, items: { type: object } }
+    EvaluationSummary:
+      type: object
+      additionalProperties: false
+      required: [evaluationId, caseId, track, risk, verdict, qualityScore, readiness, scoreStatus, fatalCount, failedGates, completedAt]
+      properties:
+        evaluationId: { type: string }
+        caseId: { type: string }
+        track: { type: string }
+        risk: { type: string }
+        verdict: { type: string }
+        qualityScore: { type: [number, 'null'] }
+        readiness: { type: string, enum: [ready, not_ready] }
+        scoreStatus: { type: string, enum: [formal, diagnostic, not_ready] }
+        fatalCount: { type: integer, minimum: 0 }
+        failedGates: { type: array, items: { type: string } }
+        bundleId: { type: string }
+        completedAt: { type: string, format: date-time }
+    EvaluationSummaryEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CollectionContractMeta'
+        - type: object
+          required: [data]
+          properties:
+            data: { type: array, items: { $ref: '#/components/schemas/EvaluationSummary' } }
+    EvaluationDetail:
+      type: object
+      additionalProperties: false
+      required: [evaluationId, caseId, episodeId, origin, profile, bundleId, readiness, scoreStatus, qualityScore, level, passed, fatals, gates, metrics, dimensions, findings]
+      properties:
+        evaluationId: { type: string }
+        caseId: { type: string }
+        episodeId: { type: string }
+        origin: { type: string }
+        profile: { type: string }
+        bundleId: { type: string }
+        readiness:
+          type: object
+          required: [source, evaluation, missing, conflicts]
+          properties:
+            source: { type: string }
+            evaluation: { type: string }
+            missing: { type: array, items: { type: string } }
+            conflicts: { type: array, items: { type: string } }
+        scoreStatus: { type: string }
+        qualityScore: { type: [number, 'null'] }
+        level: { type: string }
+        passed: { type: boolean }
+        fatals: { type: array, items: { type: object } }
+        gates: { type: array, items: { type: object } }
+        metrics: { type: array, items: { type: object } }
+        dimensions: { type: array, items: { type: object } }
+        findings: { type: array, items: { type: object } }
+    EvidenceBundleSummary:
+      type: object
+      additionalProperties: false
+      required: [bundleId, caseId, episodeId, status, manifestRevision, recordCount, missingFamilies, bundleHash, createdAt]
+      properties:
+        bundleId: { type: string }
+        caseId: { type: string }
+        episodeId: { type: string }
+        status: { type: string, enum: [complete, partial, pending] }
+        manifestRevision: { type: integer, minimum: 1 }
+        recordCount: { type: integer, minimum: 0 }
+        missingFamilies: { type: array, items: { type: string } }
+        evaluationId: { type: string }
+        bundleHash: { type: string }
+        createdAt: { type: string, format: date-time }
+    EvidenceBundleSummaryEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CollectionContractMeta'
+        - type: object
+          required: [data]
+          properties:
+            data: { type: array, items: { $ref: '#/components/schemas/EvidenceBundleSummary' } }
+    EvidenceDetail:
+      type: object
+      additionalProperties: false
+      required: [bundleId, episodeId, manifestRevision, status, recordCount, sequenceRange, bundleHash, requiredFamilies, missingFamilies, timeline, diff]
+      properties:
+        bundleId: { type: string }
+        episodeId: { type: string }
+        manifestRevision: { type: integer, minimum: 1 }
+        status: { type: string }
+        recordCount: { type: integer, minimum: 0 }
+        sequenceRange: { type: array, items: { type: integer } }
+        bundleHash: { type: string }
+        requiredFamilies: { type: array, items: { type: string } }
+        missingFamilies: { type: array, items: { type: string } }
+        timeline: { type: array, items: { type: object } }
+        diff: { type: object }
+    ReportRecord:
+      type: object
+      additionalProperties: false
+      required: [reportId, title, type, status, scope, format, sections, createdAt, createdBy]
+      properties:
+        reportId: { type: string }
+        title: { type: string }
+        type: { type: string, enum: [release_review, regression_digest, evidence_audit] }
+        status: { type: string, enum: [ready, draft] }
+        scope: { type: string }
+        format: { type: string, enum: [JSON, Markdown] }
+        sections: { type: array, items: { type: string } }
+        createdAt: { type: string, format: date-time }
+        createdBy: { type: string }
+    ReportRecordEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CollectionContractMeta'
+        - type: object
+          required: [data]
+          properties:
+            data: { type: array, items: { $ref: '#/components/schemas/ReportRecord' } }
+    AlertRecord:
+      type: object
+      additionalProperties: false
+      required: [alertId, severity, status, title, source, targetType, targetId, reason, createdAt]
+      properties:
+        alertId: { type: string }
+        severity: { type: string, enum: [critical, high, medium] }
+        status: { type: string, enum: [open, acknowledged, resolved] }
+        title: { type: string }
+        source: { type: string }
+        targetType: { type: string, enum: [case, run, evaluation, projection] }
+        targetId: { type: string }
+        reason: { type: string }
+        createdAt: { type: string, format: date-time }
+        owner: { type: string }
+        acknowledgedAt: { type: string, format: date-time }
+        resolvedAt: { type: string, format: date-time }
+    AlertRecordEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CollectionContractMeta'
+        - type: object
+          required: [data]
+          properties:
+            data: { type: array, items: { $ref: '#/components/schemas/AlertRecord' } }
+    SystemWorkspace:
+      type: object
+      additionalProperties: false
+      required: [services, contracts, projections, adapters]
+      properties:
+        services: { type: array, items: { type: object } }
+        contracts: { type: array, items: { type: object } }
+        projections: { type: array, items: { type: object } }
+        adapters: { type: array, items: { type: object } }
+    ResourceDetail:
+      type: object
+      additionalProperties: false
+      required: [kind, id, title, status, description, properties, relations, history]
+      properties:
+        kind: { type: string, enum: [candidate, baseline, dataset, profile] }
+        id: { type: string }
+        title: { type: string }
+        status: { type: string }
+        description: { type: string }
+        properties: { type: array, items: { type: object } }
+        relations: { type: array, items: { type: object } }
+        history: { type: array, items: { type: object } }
+    QueryEnvelope:
+      type: object
+      required: [data, page, watermark, projectionLagMs, contracts, generatedAt]
+      properties:
+        data: { type: array, items: { type: object } }
+        page: { type: object, properties: { nextCursor: { type: [string, 'null'] } } }
+        watermark: { type: [string, 'null'], format: date-time }
+        projectionLagMs: { type: [integer, 'null'] }
+        contracts: { type: array, items: { type: string } }
+        generatedAt: { type: string, format: date-time }
+    SnapshotEnvelope:
+      type: object
+      required: [snapshot, data]
+      properties:
+        snapshot: { $ref: '#/components/schemas/SnapshotMeta' }
+        data: { type: object }
+    AuthorityObject:
+      type: object
+      required: [data, generatedAt]
+      properties:
+        data: { type: object }
+        generatedAt: { type: string, format: date-time }

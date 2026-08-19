@@ -1,0 +1,68 @@
+{
+  "version": "0.1.0",
+  "viewport": {
+    "primary": {
+      "width": 1920,
+      "height": 1080
+    },
+    "minSupportedWidth": 1440
+  },
+  "layout": {
+    "sidebarWidth": 136,
+    "mainPadding": 16,
+    "gridColumns": 12,
+    "gridGap": 10,
+    "cardRadius": 6
+  },
+  "colors": {
+    "canvas": "#06111C",
+    "sidebar": "#071522",
+    "surface1": "#0B1824",
+    "surface2": "#0F1F2D",
+    "border": "#203247",
+    "textPrimary": "#F2F6FA",
+    "textSecondary": "#97A8B9",
+    "textMuted": "#66798B",
+    "accentBlue": "#3B82F6",
+    "positive": "#28C76F",
+    "warning": "#F5B942",
+    "orange": "#F57C35",
+    "danger": "#EF4444",
+    "fatal": "#FF304D",
+    "notReady": "#8B97A5",
+    "diagnostic": "#8B5CF6"
+  },
+  "typography": {
+    "fontFamily": [
+      "Inter",
+      "Noto Sans SC",
+      "Microsoft YaHei",
+      "system-ui",
+      "sans-serif"
+    ],
+    "pageTitle": {
+      "size": 20,
+      "weight": 600
+    },
+    "cardTitle": {
+      "size": 14,
+      "weight": 600
+    },
+    "kpiValue": {
+      "size": 26,
+      "weight": 600
+    },
+    "body": {
+      "size": 13,
+      "weight": 400
+    },
+    "chart": {
+      "size": 12,
+      "weight": 400
+    },
+    "caption": {
+      "size": 11,
+      "weight": 400
+    }
+  }
+}
