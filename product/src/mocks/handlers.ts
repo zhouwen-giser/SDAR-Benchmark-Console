@@ -28,7 +28,7 @@ function collection<T>(data: T[]) {
     page: { nextCursor: null },
     watermark,
     projectionLagMs,
-    contracts: ["console-api-extension@0.2.0-design"],
+    contracts: ["sdar-benchmark-server@0.1.0"],
     generatedAt: watermark,
   };
 }
@@ -45,12 +45,7 @@ export const handlers = [
     return HttpResponse.json(buildOverview(scenario, dataState));
   }),
 
-  http.get("*/v1/analytics/workspace", ({ request }) => {
-    const url = new URL(request.url);
-    const scenario = (url.searchParams.get("scenario") ?? "blocked") as Scenario;
-    const dataState = (url.searchParams.get("dataState") ?? "loaded") as UiDataState;
-    return HttpResponse.json(buildOverview(scenario, dataState));
-  }),
+  http.get("*/v1/analytics/:module", ({ params }) => HttpResponse.json({ ...collection([]), operationId: `mock-${String(params.module)}`, availability: { status: "partial", reasonCodes: ["MSW_FIXTURE"], unavailableFields: [] }, warnings: ["MSW fixture"] })),
 
   http.get("*/v1/benchmark-runs", () => HttpResponse.json(collection(runSummaries))),
 
@@ -77,7 +72,7 @@ export const handlers = [
     return HttpResponse.json(collection(data));
   }),
 
-  http.get("*/v1/cases/:caseId", ({ params }) =>
+  http.get("*/v1/benchmark-cases/:caseId", ({ params }) =>
     HttpResponse.json(buildCaseDetail(String(params.caseId))),
   ),
 
@@ -125,11 +120,13 @@ export const handlers = [
   ),
 
   http.get("*/v1/reports", () => HttpResponse.json(collection(reportRecords))),
-  http.get("*/v1/alerts", () => HttpResponse.json(collection(alertRecords))),
-  http.get("*/v1/system/workspace", () => HttpResponse.json(structuredClone(systemWorkspace))),
+  http.get("*/v1/attention-items", () => HttpResponse.json({ ...collection(alertRecords), operationId: "getAttentionItems", availability: { status: "available", reasonCodes: [], unavailableFields: [] }, warnings: [] })),
+  http.get("*/v1/system/status", () => HttpResponse.json({ ...collection([]), operationId: "getSystemStatus", data: { postgres: {}, clickhouse: {}, contracts: {}, operations: {}, trust: {} }, availability: { status: "available", reasonCodes: [], unavailableFields: [] }, warnings: [] })),
+  http.get("*/v1/system/contracts", () => HttpResponse.json({ ...collection([]), operationId: "getSystemContracts", data: { releases: systemWorkspace.contracts, frozenEvaluationProfile: {}, telemetryHandoffs: {}, executableRuleBodiesAvailable: false }, availability: { status: "partial", reasonCodes: ["RULE_BODIES_UNAVAILABLE"], unavailableFields: ["executableRuleBodiesAvailable"] }, warnings: [] })),
+  http.get("*/v1/system/projections", () => HttpResponse.json({ ...collection([]), operationId: "getSystemProjections", data: { checkpoints: systemWorkspace.projections, outbox: [], sourceWatermarks: [] }, availability: { status: "available", reasonCodes: [], unavailableFields: [] }, warnings: [] })),
 
   ...(["candidate", "baseline", "dataset", "profile"] as const).map((kind) => {
-    const plural = kind === "candidate" ? "candidates" : kind === "baseline" ? "baselines" : kind === "dataset" ? "datasets" : "profiles";
+    const plural = kind === "candidate" ? "candidates" : kind === "baseline" ? "baselines" : kind === "dataset" ? "datasets" : "evaluation-profiles";
     return http.get(`*/v1/${plural}/:resourceId`, ({ params }) =>
       HttpResponse.json(getResourceDetail(kind satisfies ResourceKind, String(params.resourceId))),
     );

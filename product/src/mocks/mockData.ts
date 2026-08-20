@@ -285,6 +285,10 @@ export function buildRunDashboard(runId: string): RunDashboard {
       { label: "Closure", score: 66 },
     ],
     cases: caseResults,
+    repetitions: [],
+    events: [],
+    evidenceFunnel: null,
+    releaseGateDetail: null,
   };
 }
 

@@ -2,14 +2,14 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Descriptions, Drawer, Input, Select, Space, Table, Tag, Timeline, message } from "antd";
 import { AlertOutlined, ArrowRightOutlined, EyeOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
-import { consoleApi } from "../api/consoleApi";
+import { consoleApi, currentApiMode } from "../api/consoleApi";
 import { PageHeader, SectionCard } from "../components/common";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
 import type { AlertRecord } from "../types";
 import { actorName, compactTime, severityName, sourceName, statusName, targetTypeName } from "../utils/format";
 
 const severityColor: Record<AlertRecord["severity"], string> = { critical: "red", high: "orange", medium: "gold" };
-const statusColor: Record<AlertRecord["status"], string> = { open: "red", acknowledged: "blue", resolved: "green" };
+const statusColor: Record<AlertRecord["status"], string> = { open: "red", acknowledged: "blue", resolved: "green", ignored: "default" };
 
 export function AlertsPage() {
   const { navigateWithContext } = useAnalysisContext();
@@ -20,17 +20,29 @@ export function AlertsPage() {
   const [severity, setSeverity] = useState("all");
   const [search, setSearch] = useState("");
   const [messageApi, contextHolder] = message.useMessage();
+  const live = currentApiMode() === "http";
+  const detailQuery = useQuery({ queryKey: ["attention-item", selectedId], queryFn: ({ signal }) => consoleApi.getAttention(selectedId!, { signal }), enabled: live && Boolean(selectedId) });
   const records = useMemo(() => (query.data?.data ?? []).map((item) => ({ ...item, ...overrides[item.alertId] })).filter((item) => {
     if (status !== "all" && item.status !== status) return false;
     if (severity !== "all" && item.severity !== severity) return false;
     if (search && !`${item.alertId} ${item.title} ${item.targetId}`.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   }), [query.data, overrides, search, severity, status]);
-  const selectedBase = query.data?.data.find((item) => item.alertId === selectedId);
+  const selectedBase = detailQuery.data?.data ?? query.data?.data.find((item) => item.alertId === selectedId);
   const selected = selectedBase ? { ...selectedBase, ...overrides[selectedBase.alertId] } : null;
 
-  const transition = (next: AlertRecord["status"]) => {
+  const transition = async (next: AlertRecord["status"]) => {
     if (!selected) return;
+    if (live) {
+      try {
+        await consoleApi.updateAttention(selected.alertId, next);
+        messageApi.success(`关注项状态已由后端持久化为 ${next}`);
+        await query.refetch();
+      } catch (error) {
+        messageApi.error(error instanceof Error ? error.message : "更新关注项失败");
+      }
+      return;
+    }
     const timestamp = next === "acknowledged" ? { acknowledgedAt: "2026-08-15T20:42:00Z" } : { resolvedAt: "2026-08-15T20:43:00Z" };
     setOverrides((current) => ({ ...current, [selected.alertId]: { ...current[selected.alertId], status: next, owner: "current-session", ...timestamp } }));
     messageApi.success(next === "acknowledged" ? "已在当前浏览会话中确认告警" : "已在当前浏览会话中标记为已解决");
@@ -55,8 +67,8 @@ export function AlertsPage() {
   return (
     <div className="standard-page alerts-page">
       {contextHolder}
-      <PageHeader title="告警中心" subtitle="聚合发布门槛、评价结果与数据投影关注项；仅展示轻量会话级生命周期，不扩展为通用工单平台。" meta={query.data?.meta} actions={<Button icon={<ReloadOutlined />} onClick={() => query.refetch()}>刷新</Button>} />
-      <div className="session-boundary-banner"><b>仅当前会话</b><span>确认与解决告警尚无后端生命周期接口；本页操作只在当前浏览会话有效。</span></div>
+      <PageHeader title="重点关注队列" subtitle={live ? "确认与解决操作通过 /v1/attention-items 持久化。" : "Mock 模式使用会话级生命周期。"} meta={query.data?.meta} actions={<Button icon={<ReloadOutlined />} onClick={() => query.refetch()}>刷新</Button>} />
+      {!live && <div className="session-boundary-banner"><b>仅当前会话</b><span>Mock 模式操作只在当前浏览会话有效。</span></div>}
       <div className="collection-stat-grid">
         <SectionCard className="collection-stat-danger"><span>待处理</span><strong>{records.filter((item) => item.status === "open").length}</strong><small>需要采取措施</small></SectionCard>
         <SectionCard><span>已确认</span><strong>{records.filter((item) => item.status === "acknowledged").length}</strong><small>已分配负责人</small></SectionCard>
@@ -73,7 +85,7 @@ export function AlertsPage() {
         </div>
         <Table<AlertRecord> rowKey="alertId" columns={columns} dataSource={records} loading={query.isLoading} pagination={false} scroll={{ x: 1180 }} rowClassName={(row) => row.severity === "critical" && row.status !== "resolved" ? "critical-table-row" : ""} />
       </SectionCard>
-      <Drawer title={`告警详情 · ${selected?.alertId ?? ""}`} width={720} open={Boolean(selected)} onClose={() => setSelectedId(null)} extra={selected && <Space>{selected.status === "open" && <Button onClick={() => transition("acknowledged")}>确认告警</Button>}{selected.status !== "resolved" && <Button type="primary" onClick={() => transition("resolved")}>标记为已解决</Button>}</Space>}>
+      <Drawer title={`关注项详情 · ${selected?.alertId ?? ""}`} width={720} open={Boolean(selected)} onClose={() => setSelectedId(null)} extra={selected && <Space>{selected.status === "open" && <Button onClick={() => void transition("acknowledged")}>确认关注项</Button>}{selected.status !== "resolved" && <Button type="primary" onClick={() => void transition("resolved")}>标记为已解决</Button>}</Space>}>
         {selected && <div className="alert-detail">
           <div className={`alert-detail-hero severity-${selected.severity}`}><AlertOutlined /><div><Tag color={severityColor[selected.severity]}>{severityName(selected.severity)}</Tag><h2>{selected.title}</h2><p>{selected.reason}</p></div></div>
           <Descriptions bordered column={2} size="small" items={[

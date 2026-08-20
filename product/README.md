@@ -1,6 +1,6 @@
 # Formal Frontend Project
 
-这是 `sdar-benchmark-console` 的正式前端工程。业务代码不依赖托管壳，入口为 `src/main.tsx`，默认使用高保真 Mock Adapter。
+这是 `sdar-benchmark-console` 的正式前端工程。业务代码不依赖托管壳，入口为 `src/main.tsx`；内网集成默认通过同源 `/benchmark-api` 访问真实 Benchmark Server。
 
 ## 技术栈
 
@@ -28,10 +28,10 @@ pnpm dev
 cp .env.example .env.local
 ```
 
-- `VITE_API_MODE=mock`：直接使用强类型 Mock Adapter，默认值。
+- `VITE_API_MODE=mock`：直接使用强类型 Mock Adapter，仅用于离线开发。
 - `VITE_API_MODE=msw`：HTTP 调用由 MSW 拦截。
 - `VITE_API_MODE=http`：调用 `VITE_BENCHMARK_API_BASE_URL`。
-- `VITE_API_MODE=hybrid`：当前仅尝试真实 Run Dashboard，失败后显式回退到 Mock。
+- `VITE_API_MODE=hybrid`：仅用于并行开发，每个 Mock capability 必须显示 `MOCK`。
 
 ## 校验
 
@@ -49,7 +49,7 @@ Playwright 用例包含 1920×1080 Overview 无滚动、1600 的 18 路由矩阵
 
 - P0：Overview、Runs、Run Detail、Compare、Cases、Evaluation Detail、Evidence Explorer。
 - 扩展：Case Detail、Evaluation Explorer、Evidence Bundle Browser、Analytics Workspace。
-- 会话级：Reports 草稿与 Alerts 生命周期，页面内明确标注不持久化。
+- HTTP 模式：Reports 与 Attention 生命周期由后端持久化；Mock 模式才使用会话级状态。
 - 只读系统/资源：Settings & System、Candidate、Baseline、Dataset、Profile Detail。
 
 ## 数据真实性
@@ -58,4 +58,4 @@ Playwright 用例包含 1920×1080 Overview 无滚动、1600 的 18 路由矩阵
 
 ## 本次环境说明
 
-当前环境已完成真实 pnpm 依赖安装并提交锁文件；`pnpm check` 已实际跑通 Orval、21 项 Vitest/RTL/MSW 测试、strict TypeScript 与正式 Vite production build。Playwright runner 与 7 项 E2E 规格可被发现和编译，但其 Chromium 二进制下载被当前网络策略返回空包，因此精确 1920/1600/1440 的终端 Playwright 执行与 23 张截图仍待具备浏览器缓存的环境完成。Sites 云端预览已实测 18/18 路由与关键交互，视口为 1363×936。
+当前环境已实际跑通 `pnpm check`（固定 OpenAPI 校验、Orval、25 项 Vitest/RTL/MSW、strict TypeScript 与 Vite production build）。Playwright 使用本机 Chrome 对 Vite 与 Nginx 的真实 HTTP 代理完成联调；覆盖 1920/1600/1440、deep-route refresh、模块级降级与代理故障恢复。数据级限制见 `reports/internal-http-integration-report.md`。

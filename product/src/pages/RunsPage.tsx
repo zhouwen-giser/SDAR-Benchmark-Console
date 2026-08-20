@@ -22,7 +22,7 @@ export function RunsPage() {
       title: "用例数 / 已完成",
       key: "progress",
       width: 160,
-      render: (_, row) => <div className="run-progress"><Progress percent={Math.round((row.completed / row.cases) * 100)} size="small" showInfo={false} /><span>{row.completed}/{row.cases}</span></div>,
+      render: (_, row) => <div className="run-progress"><Progress percent={row.completed != null && row.cases != null && row.cases > 0 ? Math.round((row.completed / row.cases) * 100) : 0} size="small" showInfo={false} /><span>{row.completed ?? "—"}/{row.cases ?? "—"}</span></div>,
     },
     { title: "通过率", dataIndex: "passRate", width: 100, render: (_, row) => displayValue(row.passRate, "%") },
     { title: "质量得分", dataIndex: "qualityScore", width: 95, render: (_, row) => displayValue(row.qualityScore) },

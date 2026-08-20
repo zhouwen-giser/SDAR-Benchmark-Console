@@ -43,6 +43,8 @@ next-env.d.ts
 /outputs/
 /work/
 .codex/
+product/dist/
+product/node_modules/
 
 # checked-in formal frontend environment template
 !product/.env.example

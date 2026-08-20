@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import apiCatalog from "../../api/api-catalog.json";
+import sourceLock from "../../api/benchmark-server.openapi.source-lock.json";
+import { apiCapabilityMap } from "../api/capability-map";
 import { buildOverview } from "./mockData";
 
 describe("mock adapter normalization", () => {
-  it("preserves the frozen API catalog status counts", () => {
-    const counts = apiCatalog.interfaces.reduce<Record<string, number>>((result, item) => {
-      result[item.current_status] = (result[item.current_status] ?? 0) + 1;
-      return result;
-    }, {});
-    expect(apiCatalog.interfaces).toHaveLength(99);
-    expect(counts).toEqual({ EXISTING: 8, EXTEND: 15, NEW: 70, BLOCKED_DATA: 5, EXTERNAL: 1 });
+  it("pins the formal 105-operation server contract", () => {
+    expect(sourceLock.operationCount).toBe(105);
+    expect(sourceLock.openapiSha256).toBe("6d7c46f4f85e9a8ce936bfa71d31dcd6909a6a2481ac490dbfb2623524569910");
+    expect(apiCapabilityMap.overview.operationId).toBe("getDashboardOverview");
+    expect(apiCapabilityMap.evidenceUsage.operationId).toBe("getEvidenceBundlesByBundleIdUsage");
+    expect(apiCapabilityMap.reportDownload.operationId).toBe("getReportsByReportIdDownload");
   });
 
   it("fills the required mock-derived M1–M15 matrix explicitly", () => {

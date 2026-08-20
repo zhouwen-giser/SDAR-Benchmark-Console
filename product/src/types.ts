@@ -18,10 +18,18 @@ export interface CapabilityMeta {
   key: string;
   endpoint: string;
   status: ApiCapabilityStatus;
+  mode: "mock" | "msw" | "http" | "hybrid";
   mocked: boolean;
+  operationId: string;
+  availability: "available" | "partial" | "unavailable";
+  reasonCodes: string[];
+  unavailableFields: string[];
+  warnings: string[];
   sourceOfTruth: string;
   watermark: string | null;
   projectionLagMs: number | null;
+  contracts: string[];
+  generatedAt: string;
   availabilityReason?: string;
 }
 
@@ -32,10 +40,10 @@ export interface ApiResource<T> {
 
 export interface SnapshotMeta {
   snapshotId: string;
-  watermark: string;
-  projectionLagMs: number;
+  watermark: string | null;
+  projectionLagMs: number | null;
   dataStatus: "complete" | "partial" | "stale" | "empty";
-  moduleErrors: Array<{ module: string; reason: string }>;
+  moduleErrors: Array<{ module: string; code?: string; reason: string }>;
 }
 
 export interface OverviewContext {
@@ -74,7 +82,7 @@ export interface AnalysisConclusion {
 export interface OverviewSnapshot {
   snapshot: SnapshotMeta;
   context: OverviewContext;
-  releaseGate: { status: "blocked" | "ready" | "invalid" | "warning"; blockingReasons: string[] };
+  releaseGate: { status: "blocked" | "ready" | "invalid" | "warning" | "unavailable"; blockingReasons: string[] };
   kpis: OverviewKpis;
   analysisConclusions: AnalysisConclusion[];
   attentionItems: Array<{
@@ -105,20 +113,21 @@ export interface OverviewSnapshot {
   metricHeatmap: Array<{
     track: string;
     metric: string;
-    score: number;
+    score: number | null;
     formalCount: number;
     diagnosticCount: number;
-    delta: number;
+    delta: number | null;
   }>;
   evidenceReadinessFunnel: {
-    caseRepetitions: number;
-    episodeResolved: number;
-    manifestSealed: number;
-    bundleComplete: number;
-    evaluationReady: number;
-    formalEvaluation: number;
+    caseRepetitions: number | null;
+    episodeResolved: number | null;
+    manifestSealed: number | null;
+    bundleComplete: number | null;
+    evaluationReady: number | null;
+    formalEvaluation: number | null;
     lossReasons: Record<string, number>;
   };
+  sourceAwareEvidenceFunnel: Record<string, unknown>;
   qualityStabilityPoints: Array<{
     caseId: string;
     track: string;
@@ -149,6 +158,14 @@ export interface OverviewSnapshot {
     changePercent: number | null;
   }>;
   systemStatus: Array<{ component: string; status: string; detail?: string }>;
+  telemetryTrust: null | {
+    status: string;
+    reasonCodes: string[];
+    watermark: string | null;
+    canonical: Record<string, unknown>;
+    domain: Record<string, unknown>;
+    provider: Record<string, unknown>;
+  };
   recentRuns: Array<{
     runId: string;
     candidate: string;
@@ -163,8 +180,8 @@ export interface RunSummary {
   candidate: string;
   dataset: string;
   profile: string;
-  cases: number;
-  completed: number;
+  cases: number | null;
+  completed: number | null;
   passRate: number | null;
   qualityScore: number | null;
   fatal: number | null;
@@ -200,6 +217,10 @@ export interface RunDashboard {
   riskSummary: Array<{ label: string; value: number }>;
   dimensions: Array<{ label: string; score: number }>;
   cases: CaseResult[];
+  repetitions: unknown[];
+  events: unknown[];
+  evidenceFunnel: unknown | null;
+  releaseGateDetail: unknown | null;
 }
 
 export interface ComparisonCase {
@@ -260,6 +281,222 @@ export interface EvaluationDetail {
     evidenceRefs: string[];
     recommendedAction: string;
   }>;
+}
+
+export interface ContextOption {
+  id: string;
+  label: string;
+  secondary?: string;
+}
+
+export interface ContextOptionsView {
+  candidates: ContextOption[];
+  baselines: ContextOption[];
+  datasets: ContextOption[];
+  profiles: ContextOption[];
+  runs: ContextOption[];
+  defaults: {
+    candidateSnapshotId: string | null;
+    baselineId: string | null;
+    datasetVersionRef: string | null;
+    profileVersionId: string | null;
+  };
+  compatibilityPolicy: string;
+}
+
+export interface EvaluationHeaderView {
+  evaluationId: string;
+  caseId: string;
+  episodeId: string | null;
+  origin: string;
+  profileVersionId: string;
+  bundleSnapshotId: string;
+  readiness: string;
+  scoreStatus: string;
+  qualityScore: number | null;
+  level: string;
+  passed: boolean | null;
+  createdAt: string | null;
+}
+
+export interface EvaluationReadinessView {
+  sourceEvidenceReadiness: string | null;
+  evaluationReadiness: string;
+  missingFamilies: string[];
+  conflictingFamilies: string[];
+  reasonCodes: string[];
+}
+
+export interface EvaluationEvidenceGradeView {
+  family: string;
+  grade: string | null;
+  reasonCodes: string[];
+  evidenceRefs: string[];
+}
+
+export interface EvaluationFatalView {
+  id: string;
+  matched: boolean | null;
+  proofStatus: string;
+  evidenceLevel: string | null;
+  evidenceRefs: string[];
+  reasonCodes: string[];
+}
+
+export interface EvaluationHardGateView {
+  id: string;
+  result: string;
+  reason: string | null;
+  evidenceRefs: string[];
+  reasonCodes: string[];
+}
+
+export interface EvaluationMetricView {
+  id: string;
+  raw: number | null;
+  weight: number | null;
+  evidenceLevel: string | null;
+  status: string;
+  summary: string | null;
+  reasonCodes: string[];
+}
+
+export interface EvaluationDimensionView {
+  id: string;
+  label: string;
+  score: number | null;
+  threshold: number | null;
+  passed: boolean | null;
+  applicable: boolean;
+  metricIds: string[];
+}
+
+export interface EvaluationFindingView {
+  id: string;
+  type: string;
+  severity: string | null;
+  summary: string;
+  evidenceRefs: string[];
+  priority: string | null;
+}
+
+export interface EvaluationEvidenceLinksView {
+  evaluationId: string;
+  bundleSnapshotId: string;
+  bundleArtifactRef: string;
+  bundleContentHash: string | null;
+  inputSnapshotId: string | null;
+  inputSnapshotContentHash: string | null;
+  inputSnapshotArtifactUri: string | null;
+  formalInputEligible: boolean | null;
+  compositeReadiness: string | null;
+  inputSourceWatermark: string | null;
+  inputSourceRefs: EvaluationInputSourceRefView[];
+  evidenceRefs: string[];
+}
+
+export interface EvaluationInputSourceRefView {
+  sourceType: "canonical" | "domain" | "provider" | string;
+  readiness: string;
+  required: boolean | null;
+  watermark: string | null;
+  reasonCodes: string[];
+  artifactUri: string | null;
+  artifactHash: string | null;
+  contentHash: string | null;
+  schemaVersion: string | null;
+}
+
+export interface TelemetryProvenanceView {
+  evaluationId: string;
+  origin: string;
+  inputSnapshotId: string;
+  inputSnapshotContentHash: string;
+  overallReadiness: string;
+  formalInputEligible: boolean;
+  effectiveWatermark: string;
+  sources: EvaluationInputSourceRefView[];
+}
+
+export interface EvaluationInputSnapshotView {
+  snapshotId: string;
+  contentHash: string;
+  episodeId: string;
+  profileVersionId: string;
+  overallReadiness: string;
+  overallReasonCodes: string[];
+  formalInputEligible: boolean;
+  effectiveWatermark: string;
+  artifactUri: string;
+  artifactHash: string;
+  recordedAt: string;
+  sources: EvaluationInputSourceRefView[];
+}
+
+export interface EvaluationInputMaterialView {
+  snapshotId: string;
+  source: EvaluationInputSourceRefView;
+  immutable: true;
+  material: unknown;
+  rawTracePath: string | null;
+  authority: string;
+}
+
+export interface EvidenceRecordView {
+  recordId: string;
+  recordFamily: string;
+  recordType: string;
+  sourceSystem: string;
+  evidenceSequence: string;
+  occurredAt: string;
+  evidenceRefs: string[];
+  artifactRefs: string[];
+  payloadHash: string;
+  payload: Record<string, unknown>;
+}
+
+export interface EvidenceGraphView {
+  nodes: Array<Record<string, unknown>>;
+  edges: Array<Record<string, unknown>>;
+  inferredEdges: Array<Record<string, unknown>>;
+  warnings: string[];
+}
+
+export interface EvidenceDiffView {
+  mode: string;
+  leftBundleId: string;
+  rightBundleId: string;
+  pairs: Array<Record<string, unknown>>;
+  added: Array<string | null>;
+  removed: Array<string | null>;
+  changed: Array<Record<string, unknown>>;
+  relationChanges: Array<Record<string, unknown>>;
+  sequenceChanges: Array<Record<string, unknown>>;
+  missingExpectedLinks: string[];
+  warnings: string[];
+}
+
+export interface AnalyticsModuleView {
+  key: string;
+  title: string;
+  rows: unknown[];
+}
+
+export interface ReportContentView {
+  reportId: string;
+  mediaType: string;
+  content: unknown;
+  contentHash: string | null;
+}
+
+export interface ReportDownloadView {
+  reportId: string;
+  filename: string;
+  mediaType: string;
+  contentHash: string;
+  sizeBytes: number;
+  encoding: "base64";
+  content: string;
 }
 
 export interface EvidenceTimelineItem {
@@ -364,10 +601,10 @@ export interface CaseDetail {
 export interface ReportRecord {
   reportId: string;
   title: string;
-  type: "release_review" | "regression_digest" | "evidence_audit";
-  status: "ready" | "draft";
+  type: "release_review" | "regression_digest" | "evidence_audit" | "snapshot" | "run" | "comparison" | "evaluation";
+  status: "ready" | "draft" | "queued" | "rendering" | "completed" | "failed";
   scope: string;
-  format: "JSON" | "Markdown";
+  format: "JSON" | "Markdown" | "HTML";
   sections: string[];
   createdAt: string;
   createdBy: string;
@@ -376,7 +613,7 @@ export interface ReportRecord {
 export interface AlertRecord {
   alertId: string;
   severity: "critical" | "high" | "medium";
-  status: "open" | "acknowledged" | "resolved";
+  status: "open" | "acknowledged" | "resolved" | "ignored";
   title: string;
   source: string;
   targetType: "case" | "run" | "evaluation" | "projection";

@@ -13,7 +13,7 @@ describe("SDAR Benchmark Console integration", () => {
     window.history.replaceState(null, "", "/overview?scenario=blocked&dataState=loaded");
     render(<App />);
     expect(await screen.findByRole("button", { name: "发布门槛：已阻塞" })).toHaveTextContent("已阻塞");
-    expect(screen.getAllByText("演示数据").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("MOCK").length).toBeGreaterThan(0);
     expect(screen.getByText("运行指标摘要（不影响质量得分）")).toBeInTheDocument();
   });
 

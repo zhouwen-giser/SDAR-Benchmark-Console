@@ -223,10 +223,10 @@ export function MetricHeatmap({
   const metrics = Array.from({ length: 15 }, (_, index) => `M${index + 1}`);
   const tracks = ["Core", "Skill", "MCP", "Node", "Cross"];
   const trackLabels = tracks.map(trackName);
-  const points: Array<[number, number, number]> = data.map((item) => [
+  const points: Array<[number, number, number]> = data.filter((item) => item.score != null).map((item) => [
     metrics.indexOf(item.metric),
     tracks.indexOf(item.track),
-    item.score,
+    item.score!,
   ]);
   const option: EChartsOption = {
     grid: { left: 50, right: 8, top: 12, bottom: 28 },
@@ -270,14 +270,14 @@ export function MetricHeatmap({
 }
 
 export function EvidenceFunnelChart({ data }: { data: OverviewSnapshot["evidenceReadinessFunnel"] }) {
-  const points: Array<[string, number]> = [
+  const points: Array<[string, number]> = ([
     ["用例重复执行", data.caseRepetitions],
     ["过程已完成", data.episodeResolved],
     ["清单已封存", data.manifestSealed],
     ["证据包完整", data.bundleComplete],
     ["评价已就绪", data.evaluationReady],
     ["正式评价", data.formalEvaluation],
-  ];
+  ] as Array<[string, number | null]>).filter((item): item is [string, number] => item[1] != null);
   const lossReasonNames: Record<string, string> = {
     manifestMissing: "清单缺失",
     requiredFamilyMissing: "必需证据族缺失",

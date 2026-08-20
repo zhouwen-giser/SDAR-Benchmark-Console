@@ -1,14 +1,14 @@
 import { defineConfig } from "orval";
 
 export default defineConfig({
-  console: {
-    input: "./api/console-api-extension.openapi.yaml",
+  benchmarkServer: {
+    input: "./api/benchmark-server.openapi.yaml",
     output: {
-      target: "./src/api/generated/console.ts",
+      target: "./src/api/generated/benchmark-server.ts",
       schemas: "./src/api/generated/model",
-      client: "react-query",
+      client: "fetch",
       httpClient: "fetch",
-      mock: true,
+      mock: false,
       clean: true,
       prettier: false,
     },

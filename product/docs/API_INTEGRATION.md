@@ -1,29 +1,48 @@
-# API Integration
+# Benchmark Server HTTP Integration
 
-## Adapter 模式
+## Source lock
 
-| 模式 | 用途 | 真实性 |
-|---|---|---|
-| `mock` | 默认演示、离线开发 | 所有页面标记 `MOCK DATA` |
-| `msw` | 验证真实 HTTP 调用形状 | 浏览器拦截，仍标记 Mock |
-| `http` | 对接 Benchmark Server | 不回退，不可用时进入 Error |
-| `hybrid` | 分阶段接入 | 仅已实现的 Adapter 方法尝试真实 API，其余显式 Mock |
+- 单一合同：`api/benchmark-server.openapi.yaml`
+- 来源：`zhouwen-giser/sdar-benchmark-server@900ee5f004b3ebb649ad775df8d0015a9575fed0`
+- OpenAPI SHA-256：`6d7c46f4f85e9a8ce936bfa71d31dcd6909a6a2481ac490dbfb2623524569910`
+- HTTP operation：105
+- `api/benchmark-server.openapi.source-lock.json` 记录可复现同步信息。
+- `pnpm api:generate` 是 `src/api/generated/` 的唯一生成入口；生成文件不手改。
 
-## OpenAPI / Orval
+## Runtime layers
 
-- `api/dashboard-overview.openapi.yaml`：统一 Overview Snapshot 合同。
-- `api/console-api-extension.openapi.yaml`：Console 增量接口合同。
-- `orval.config.ts`：生成 React Query client、schemas 与 Mock。
-- `src/api/generated/`：运行 `pnpm api:generate` 后生成；生成文件不手改。
-- 增量合同当前包含 28 个 operation；Orval 已生成 Fetch + React Query client、142 个 model 文件与可选 MSW mock handlers。
-- 手写 `src/mocks/handlers.ts` 覆盖页面实际使用的 Overview、Runs、Cases、Comparisons、Evaluations、Evidence、Analytics、Reports、Alerts、System 与四类 Registry detail，并由 `consoleApi.http.test.ts` 验证 HTTP Adapter 映射。
+```text
+Generated OpenAPI Client / Schemas
+  → BenchmarkApiTransport (relative base URL, timeout, abort, HTTP error)
+  → LiveHttpConsoleApi (envelope and capability composition)
+  → viewModelMappers (backend DTO → existing Chinese UI view model)
+  → TanStack Query / Pages
+```
 
-## 查询参数映射
+浏览器仅请求 `/benchmark-api` 和可选的 `/telemetry-api`。不发送 Token/Cookie，不包含数据库凭据，也不直连 PostgreSQL/ClickHouse。
 
-UI 使用 `risk`，HTTP Adapter 映射为 Server 合同中的 `riskLevel`。Candidate、Baseline、Dataset、Profile、Run、Track、Period 和状态均保留在 URL。
+## Truthful states
 
-## 错误与水位
+`CapabilityMeta` 保留 `operationId`、`availability`、`reasonCodes`、`unavailableFields`、`warnings`、`watermark`、`projectionLagMs`、`contracts` 和 `generatedAt`。HTTP 失败直接进入 Error/Partial，绝不回退 Mock；`null` 不转换成 0/PASS。
 
-HTTP 非 2xx 直接抛出，由 TanStack Query 和页面状态处理。Server 响应必须携带一致水位；在异步 PG authority + CH projection 场景中，未完成投影返回 `null / partial / projection pending`，不得返回 0。
+Analytics capability 独立 Query；一个模块的 `BLOCKED_DATA` 或 503 不会让整个页面 first-failure。Evaluation Tab、Evidence records/timeline/graph/diff 和评价输入 Material 同样按需加载。
 
-完整能力清单保留在 `api/api-catalog.json`（99 项）和 `api/api-matrix.csv`；实现优先级见 `reports/api-gap-report.md`。
+## Local HTTP development
+
+```bash
+cp .env.example .env.local
+pnpm install --frozen-lockfile
+pnpm api:generate
+pnpm dev
+```
+
+Vite 将 `/benchmark-api/*` 代理到 `VITE_BENCHMARK_API_UPSTREAM`，并去掉前缀。默认上游为 `http://127.0.0.1:18090`。
+
+## Internal deployment
+
+```bash
+cp .env.integration.example .env.integration
+docker compose --env-file .env.integration -f docker-compose.integration.yml up --build -d
+```
+
+Console 地址为 `http://127.0.0.1:18091`。Nginx 保留 4xx/5xx、关闭 API buffering、为 SPA deep route 回退 `/index.html`。

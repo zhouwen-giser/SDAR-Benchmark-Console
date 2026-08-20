@@ -2704,6 +2704,15 @@ pre {
   font-size: 9px;
 }
 
+.standard-page pre,
+.ant-drawer pre {
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 1540px) {
   .case-identity-grid {
     grid-template-columns: 180px minmax(0, 1fr) 130px 130px;

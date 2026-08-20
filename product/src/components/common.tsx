@@ -30,9 +30,10 @@ export function ApiStatusTag({ meta, compact = false }: { meta: CapabilityMeta; 
   const content = (
     <Space size={4} wrap>
       <Tag color={colors[meta.status]} icon={<ApiOutlined />}>
-        {capabilityStatusLabel[meta.status]}
+        {meta.availability === "unavailable" ? "UNAVAILABLE" : meta.availability === "partial" ? "PARTIAL" : capabilityStatusLabel[meta.status]}
       </Tag>
-      {meta.mocked && <Tag color="purple">演示数据</Tag>}
+      {meta.mocked && <Tag color="purple">MOCK</Tag>}
+      {!meta.mocked && <Tag color="green">HTTP</Tag>}
       {!compact && meta.watermark && (
         <span className="api-watermark">
           <ClockCircleOutlined /> {meta.watermark.slice(11, 19)}
@@ -46,8 +47,14 @@ export function ApiStatusTag({ meta, compact = false }: { meta: CapabilityMeta; 
       title={
         <div className="api-tooltip">
           <b>接口：{meta.endpoint}</b>
+          <div>Operation：{meta.operationId}</div>
+          <div>可用性：{meta.availability}</div>
           <div>数据来源：{meta.sourceOfTruth}</div>
           <div>投影延迟：{meta.projectionLagMs == null ? "—" : `${(meta.projectionLagMs / 1000).toFixed(1)} 秒`}</div>
+          {meta.reasonCodes.length > 0 && <div>原因码：{meta.reasonCodes.join("、")}</div>}
+          {meta.unavailableFields.length > 0 && <div>不可用字段：{meta.unavailableFields.join("、")}</div>}
+          {meta.warnings.length > 0 && <div>警告：{meta.warnings.join("；")}</div>}
+          {meta.contracts.length > 0 && <div>合同：{meta.contracts.join("、")}</div>}
           {meta.availabilityReason && <div>{meta.availabilityReason}</div>}
         </div>
       }
@@ -151,8 +158,8 @@ export function SnapshotAlert({
   moduleErrors,
 }: {
   status: "complete" | "partial" | "stale" | "empty";
-  watermark: string;
-  lagMs: number;
+  watermark: string | null;
+  lagMs: number | null;
   moduleErrors: Array<{ module: string; reason: string }>;
 }) {
   if (status === "complete") return null;
@@ -166,7 +173,7 @@ export function SnapshotAlert({
       message={stale ? "数据快照已过期" : status === "partial" ? "数据不完整" : "数据快照为空"}
       description={
         <span>
-          数据水位 {watermark.slice(11, 19)} · 投影延迟 {(lagMs / 1000).toFixed(1)} 秒
+          数据水位 {watermark?.slice(11, 19) ?? "—"} · 投影延迟 {lagMs == null ? "—" : `${(lagMs / 1000).toFixed(1)} 秒`}
           {moduleErrors.length > 0 && ` · 受影响模块：${moduleErrors.map((item) => overviewText(item.module)).join("、")}`}
         </span>
       }

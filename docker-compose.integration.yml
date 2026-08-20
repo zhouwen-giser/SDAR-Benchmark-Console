@@ -1,0 +1,18 @@
+services:
+  benchmark-console:
+    build:
+      context: .
+      dockerfile: product/Dockerfile.integration
+      args:
+        VITE_API_MODE: http
+        VITE_BENCHMARK_API_BASE_URL: /benchmark-api
+        VITE_TELEMETRY_QUERY_BASE_URL: /telemetry-api
+    ports:
+      - "${CONSOLE_PORT:-18091}:80"
+    environment:
+      CONSOLE_LISTEN_PORT: "80"
+      BENCHMARK_API_UPSTREAM: "${BENCHMARK_API_UPSTREAM:-http://host.docker.internal:18090}"
+      TELEMETRY_QUERY_UPSTREAM: "${TELEMETRY_QUERY_UPSTREAM:-http://host.docker.internal:18080}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

@@ -20,7 +20,7 @@ import {
   ReloadOutlined,
   WarningFilled,
 } from "@ant-design/icons";
-import { consoleApi } from "../api/consoleApi";
+import { consoleApi, currentApiMode } from "../api/consoleApi";
 import { capabilityMeta } from "../api/capability-map";
 import { ApiStatusTag, DataStatePanel, SectionCard, SnapshotAlert } from "../components/common";
 import {
@@ -34,7 +34,7 @@ import {
   TrackRiskHeatmap,
 } from "../components/charts";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
-import type { AnalysisConclusion, CaseResult, OverviewSnapshot } from "../types";
+import type { AnalysisConclusion, CaseResult, ContextOptionsView, OverviewSnapshot } from "../types";
 import {
   changeName,
   displayValue,
@@ -64,7 +64,7 @@ const dataStateOptions = [
   { label: "数据不完整", value: "partial" },
 ];
 
-function ContextBar({ data, onRefresh }: { data: OverviewSnapshot; onRefresh: () => void }) {
+function ContextBar({ data, options, onRefresh }: { data: OverviewSnapshot; options?: ContextOptionsView; onRefresh: () => void }) {
   const { filters, setFilters, navigateWithContext } = useAnalysisContext();
   const context = data.context;
   const localFilters = [
@@ -83,7 +83,7 @@ function ContextBar({ data, onRefresh }: { data: OverviewSnapshot; onRefresh: ()
               aria-label="候选版本"
               size="small"
               value={filters.candidateId}
-              options={[{ value: context.candidate.id, label: `SDAR ${context.candidate.runtimeVersion} (${context.candidate.commit})` }]}
+              options={(options?.candidates ?? [{ id: context.candidate.id, label: `SDAR ${context.candidate.runtimeVersion} (${context.candidate.commit})` }]).map((item) => ({ value: item.id, label: item.label }))}
               onChange={(candidateId) => setFilters({ candidateId }, { clearLocal: true })}
             />
           </div>
@@ -93,7 +93,7 @@ function ContextBar({ data, onRefresh }: { data: OverviewSnapshot; onRefresh: ()
               aria-label="基准版本"
               size="small"
               value={filters.baselineId}
-              options={[{ value: context.baseline.id, label: `SDAR ${context.baseline.runtimeVersion} (${context.baseline.commit})` }]}
+              options={(options?.baselines ?? [{ id: context.baseline.id, label: context.baseline.id }]).map((item) => ({ value: item.id, label: item.label }))}
               onChange={(baselineId) => setFilters({ baselineId }, { clearLocal: true })}
             />
           </div>
@@ -103,7 +103,7 @@ function ContextBar({ data, onRefresh }: { data: OverviewSnapshot; onRefresh: ()
               aria-label="数据集"
               size="small"
               value={filters.datasetVersion}
-              options={[{ value: context.dataset.id, label: context.dataset.id }]}
+              options={(options?.datasets ?? [{ id: context.dataset.id, label: context.dataset.id }]).map((item) => ({ value: item.id, label: item.label }))}
               onChange={(datasetVersion) => setFilters({ datasetVersion }, { clearLocal: true })}
             />
           </div>
@@ -113,7 +113,7 @@ function ContextBar({ data, onRefresh }: { data: OverviewSnapshot; onRefresh: ()
               aria-label="评价配置"
               size="small"
               value={filters.profileVersionId}
-              options={[{ value: context.profile.id, label: context.profile.id }]}
+              options={(options?.profiles ?? [{ id: context.profile.id, label: context.profile.id }]).map((item) => ({ value: item.id, label: item.label }))}
               onChange={(profileVersionId) => setFilters({ profileVersionId }, { clearLocal: true })}
             />
           </div>
@@ -123,17 +123,17 @@ function ContextBar({ data, onRefresh }: { data: OverviewSnapshot; onRefresh: ()
               aria-label="评测运行"
               size="small"
               value={filters.runId}
-              options={[{ value: context.run.id, label: context.run.id }]}
+              options={(options?.runs ?? [{ id: context.run.id, label: context.run.id }]).map((item) => ({ value: item.id, label: item.label }))}
               onChange={(runId) => setFilters({ runId }, { clearLocal: true })}
             />
           </div>
-          <span className="context-watermark">数据水位 <b>{data.snapshot.watermark.slice(11, 19)}</b></span>
-          <span className="context-watermark">投影延迟 <b>{(data.snapshot.projectionLagMs / 1000).toFixed(1)} 秒</b></span>
+          <span className="context-watermark">数据水位 <b>{data.snapshot.watermark?.slice(11, 19) ?? "—"}</b></span>
+          <span className="context-watermark">投影延迟 <b>{data.snapshot.projectionLagMs == null ? "—" : `${(data.snapshot.projectionLagMs / 1000).toFixed(1)} 秒`}</b></span>
         </div>
       </div>
       <div className="context-actions">
         <Space size={6} wrap>
-          <Tooltip title="高保真演示数据场景">
+          {currentApiMode() !== "http" && <Tooltip title="高保真演示数据场景">
             <Select
               aria-label="业务场景"
               size="small"
@@ -142,8 +142,8 @@ function ContextBar({ data, onRefresh }: { data: OverviewSnapshot; onRefresh: ()
               options={scenarioOptions}
               onChange={(scenario) => setFilters({ scenario }, { clearLocal: true })}
             />
-          </Tooltip>
-          <Tooltip title="数据生命周期演示状态">
+          </Tooltip>}
+          {currentApiMode() !== "http" && <Tooltip title="数据生命周期演示状态">
             <Select
               aria-label="数据状态"
               size="small"
@@ -151,7 +151,7 @@ function ContextBar({ data, onRefresh }: { data: OverviewSnapshot; onRefresh: ()
               options={dataStateOptions}
               onChange={(dataState) => setFilters({ dataState })}
             />
-          </Tooltip>
+          </Tooltip>}
           <Select
             aria-label="分轨筛选"
             size="small"
@@ -312,7 +312,7 @@ function OverviewDrawers({ data }: { data: OverviewSnapshot }) {
         width={520}
         open={drawer === "release"}
         onClose={close}
-        extra={<ApiStatusTag compact meta={capabilityMeta("runCases", { mocked: true, watermark: data.snapshot.watermark, projectionLagMs: data.snapshot.projectionLagMs })} />}
+        extra={<ApiStatusTag compact meta={capabilityMeta("runCases", { mocked: currentApiMode() !== "http", mode: currentApiMode(), watermark: data.snapshot.watermark, projectionLagMs: data.snapshot.projectionLagMs })} />}
       >
         <div className={`drawer-gate-state release-${data.releaseGate.status}`}><GateIcon status={data.releaseGate.status} /><strong>{releaseStatusName(data.releaseGate.status)}</strong></div>
         <Divider orientation="left">阻塞原因</Divider>
@@ -328,7 +328,7 @@ function OverviewDrawers({ data }: { data: OverviewSnapshot }) {
         width={720}
         open={drawer === "cases"}
         onClose={close}
-        extra={<ApiStatusTag compact meta={capabilityMeta("caseResults", { mocked: true, watermark: data.snapshot.watermark, projectionLagMs: data.snapshot.projectionLagMs })} />}
+        extra={<ApiStatusTag compact meta={capabilityMeta("caseResults", { mocked: currentApiMode() !== "http", mode: currentApiMode(), watermark: data.snapshot.watermark, projectionLagMs: data.snapshot.projectionLagMs })} />}
       >
         <p className="drawer-intro">当前筛选：{activeFilter}。点击用例编号可进入结构化评价结果。</p>
         <Table<CaseResult> rowKey="caseId" loading={casesQuery.isLoading} columns={columns} dataSource={cases} pagination={false} />
@@ -338,14 +338,14 @@ function OverviewDrawers({ data }: { data: OverviewSnapshot }) {
         width={720}
         open={drawer === "metric"}
         onClose={close}
-        extra={<ApiStatusTag compact meta={capabilityMeta("evaluationMetrics", { mocked: true, watermark: data.snapshot.watermark, projectionLagMs: data.snapshot.projectionLagMs })} />}
+        extra={<ApiStatusTag compact meta={capabilityMeta("evaluationMetrics", { mocked: currentApiMode() !== "http", mode: currentApiMode(), watermark: data.snapshot.watermark, projectionLagMs: data.snapshot.projectionLagMs })} />}
       >
-        <p className="drawer-intro">该聚合来自明确标注的演示数据；服务端尚未提供 M1–M15 结构化指标接口。</p>
+        <p className="drawer-intro">该聚合来自当前 Snapshot；null 表示对应正式输入或投影尚不可用。</p>
         {metricRows.map((item) => (
           <SectionCard key={`${item.track}-${item.metric}`} title={`${trackName(item.track)} · ${item.metric}`}>
             <div className="metric-detail-row">
-              <Progress type="circle" percent={item.score} size={92} />
-              <dl><dt>正式评价次数</dt><dd>{item.formalCount}</dd><dt>诊断评价次数</dt><dd>{item.diagnosticCount}</dd><dt>较基准变化</dt><dd className={item.delta < 0 ? "text-danger" : "text-positive"}>{signedDelta(item.delta)}</dd></dl>
+              <Progress type="circle" percent={item.score ?? undefined} size={92} />
+              <dl><dt>正式评价次数</dt><dd>{item.formalCount}</dd><dt>诊断评价次数</dt><dd>{item.diagnosticCount}</dd><dt>较基准变化</dt><dd className={(item.delta ?? 0) < 0 ? "text-danger" : "text-positive"}>{item.delta == null ? "—" : signedDelta(item.delta)}</dd></dl>
             </div>
           </SectionCard>
         ))}
@@ -373,10 +373,18 @@ export function OverviewPage() {
     queryFn: () => consoleApi.getOverview(filters),
     retry: false,
   });
+  const contextQuery = useQuery({
+    queryKey: ["context-options"],
+    queryFn: ({ signal }) => consoleApi.getContextOptions({ signal }),
+    enabled: currentApiMode() === "http",
+    staleTime: 300_000,
+  });
 
   const data = query.data?.data;
   const meta = query.data?.meta;
-  const effectiveState = filters.dataState;
+  const effectiveState = currentApiMode() === "http"
+    ? query.isError ? "error" : data?.snapshot.dataStatus === "empty" ? "empty" : data?.snapshot.dataStatus === "stale" ? "stale" : data?.snapshot.dataStatus === "partial" ? "partial" : "loaded"
+    : filters.dataState;
 
   const openCases = (next: { gate?: string; change?: string; readiness?: string }) => {
     setQueryParams({ drawer: "cases", gate: next.gate, change: next.change, readiness: next.readiness });
@@ -399,21 +407,21 @@ export function OverviewPage() {
   };
 
   if (!data || !meta) {
-    const fallback = filters.dataState === "error" ? "error" : "loading";
+    const fallback = query.isError || filters.dataState === "error" ? "error" : "loading";
     return (
       <div className="overview-page">
         <div className="overview-loading-header"><h1>SDAR 基准质量指挥中心</h1></div>
-        <DataStatePanel state={fallback} onRetry={() => setFilters({ dataState: "loaded" })}><span /></DataStatePanel>
+        <DataStatePanel state={fallback} onRetry={() => { if (currentApiMode() === "http") void query.refetch(); else setFilters({ dataState: "loaded" }); }}><span /></DataStatePanel>
       </div>
     );
   }
 
-  const scoreMeta = capabilityMeta("scoreDistribution", { mocked: true, watermark: data.snapshot.watermark, projectionLagMs: data.snapshot.projectionLagMs });
-  const operationalMeta = capabilityMeta("operational", { mocked: true, watermark: data.snapshot.watermark, projectionLagMs: data.snapshot.projectionLagMs });
+  const scoreMeta = capabilityMeta("scoreDistribution", { mocked: meta.mocked, mode: meta.mode, availability: data.scoreDistribution ? "available" : "partial", reasonCodes: data.scoreDistribution ? [] : ["SCORE_DISTRIBUTION_UNAVAILABLE"], watermark: data.snapshot.watermark, projectionLagMs: data.snapshot.projectionLagMs, contracts: meta.contracts });
+  const operationalMeta = capabilityMeta("operational", { mocked: meta.mocked, mode: meta.mode, availability: data.operationalSummary.length ? "available" : "partial", reasonCodes: data.operationalSummary.length ? [] : ["OPERATIONAL_SAMPLES_UNAVAILABLE"], watermark: data.snapshot.watermark, projectionLagMs: data.snapshot.projectionLagMs, contracts: meta.contracts });
 
   return (
     <div className="overview-page">
-      <ContextBar data={data} onRefresh={() => query.refetch()} />
+      <ContextBar data={data} options={contextQuery.data?.data} onRefresh={() => { void query.refetch(); void contextQuery.refetch(); }} />
       <SnapshotAlert status={data.snapshot.dataStatus} watermark={data.snapshot.watermark} lagMs={data.snapshot.projectionLagMs} moduleErrors={data.snapshot.moduleErrors} />
       <DataStatePanel state={effectiveState} onRetry={() => setFilters({ dataState: "loaded" })}>
         <div className="overview-grid overview-summary">
@@ -462,6 +470,12 @@ export function OverviewPage() {
         </div>
 
         <div className="overview-grid overview-diagnosis">
+          <SectionCard title="Canonical Evidence" className="card-source-canonical"><pre>{JSON.stringify(data.sourceAwareEvidenceFunnel?.canonical ?? {}, null, 2)}</pre></SectionCard>
+          <SectionCard title="Domain Projection" className="card-source-domain"><pre>{JSON.stringify(data.sourceAwareEvidenceFunnel?.domain ?? {}, null, 2)}</pre></SectionCard>
+          <SectionCard title="MCP Provider Telemetry" className="card-source-provider"><pre>{JSON.stringify(data.sourceAwareEvidenceFunnel?.provider ?? {}, null, 2)}</pre></SectionCard>
+          <SectionCard title="Telemetry Trust" className="card-telemetry-trust">
+            {data.telemetryTrust ? <div className="system-list"><div><span>状态</span><b>{data.telemetryTrust.status}</b></div><div><span>水位</span><b>{data.telemetryTrust.watermark ?? "—"}</b></div><div><span>原因码</span><b>{data.telemetryTrust.reasonCodes.join("、") || "—"}</b></div></div> : <div className="unavailable-card"><DatabaseOutlined /><span>UNAVAILABLE · telemetryTrust 未返回</span></div>}
+          </SectionCard>
           <SectionCard title="指标 M1–M15 热力图" className="card-metric"><MetricHeatmap data={data.metricHeatmap} onCell={(metric, track) => {
             setQueryParams({ drawer: "metric", metric, metricTrack: track });
           }} /></SectionCard>

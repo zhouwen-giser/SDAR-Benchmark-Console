@@ -55,7 +55,7 @@ export function RunDetailPage() {
             { key: "dataset", label: "数据集", children: run.dataset },
             { key: "profile", label: "评价配置", children: run.profile },
             { key: "watermark", label: "数据水位", children: data.snapshot.watermark },
-            { key: "lag", label: "投影延迟", children: `${(data.snapshot.projectionLagMs / 1000).toFixed(1)} 秒` },
+            { key: "lag", label: "投影延迟", children: data.snapshot.projectionLagMs == null ? "—" : `${(data.snapshot.projectionLagMs / 1000).toFixed(1)} 秒` },
             { key: "source", label: "数据来源", children: "PostgreSQL 权威数据 + ClickHouse 数据投影" },
           ]} />
         </SectionCard>
@@ -64,6 +64,9 @@ export function RunDetailPage() {
         <SectionCard title="五维摘要" className="detail-span-4"><SummaryBars data={data.dimensions.map((item) => ({ label: dimensionName(item.label), value: item.score }))} /></SectionCard>
         <SectionCard title="重复执行稳定性" className="detail-span-4"><div className="stability-summary"><Progress type="dashboard" percent={80} strokeColor="#3b82f6" /><div><b>5 组中有 4 组稳定</b><span>MCP 重启恢复 33%</span><span>技能区域巡检 67%</span></div></div></SectionCard>
         <SectionCard title="证据就绪度" className="detail-span-4"><div className="mini-funnel-list">{[["测试用例",80],["执行过程",80],["证据清单",79],["证据包",76],["评价已就绪",72],["正式评价",68]].map(([label,value]) => <div key={String(label)}><span>{label}</span><Progress percent={Number(value)/80*100} size="small" format={() => String(value)} /></div>)}</div></SectionCard>
+        <SectionCard title="真实 Repetitions" className="detail-span-4"><pre>{JSON.stringify(data.repetitions, null, 2)}</pre></SectionCard>
+        <SectionCard title="真实 Run Events" className="detail-span-4"><pre>{JSON.stringify(data.events, null, 2)}</pre></SectionCard>
+        <SectionCard title="Evidence Funnel / Release Gate" className="detail-span-4"><pre>{JSON.stringify({ evidenceFunnel: data.evidenceFunnel, releaseGate: data.releaseGateDetail }, null, 2)}</pre></SectionCard>
         <SectionCard title="用例矩阵" extra={<ApiStatusTag compact meta={caseMeta} />} className="detail-span-12 table-card">
           <Table<CaseResult> rowKey="caseId" columns={columns} dataSource={data.cases} pagination={false} scroll={{ x: 1200 }} />
         </SectionCard>

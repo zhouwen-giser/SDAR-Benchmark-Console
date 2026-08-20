@@ -12,6 +12,7 @@ import { RunDetailPage } from "./pages/RunDetailPage";
 import { ComparePage } from "./pages/ComparePage";
 import { CasesPage } from "./pages/CasesPage";
 import { EvaluationPage } from "./pages/EvaluationPage";
+import { EvaluationInputSnapshotPage } from "./pages/EvaluationInputSnapshotPage";
 import { EvidencePage } from "./pages/EvidencePage";
 import { CaseDetailPage } from "./pages/CaseDetailPage";
 import { EvaluationsPage } from "./pages/EvaluationsPage";
@@ -85,6 +86,7 @@ function ApplicationRoutes() {
         <Route path="/cases/:caseId" element={<CaseDetailPage />} />
         <Route path="/evaluations" element={<EvaluationsPage />} />
         <Route path="/evaluations/:evaluationId" element={<EvaluationPage />} />
+        <Route path="/evaluation-input-snapshots/:snapshotId" element={<EvaluationInputSnapshotPage />} />
         <Route path="/evidence-bundles" element={<EvidenceBundlesPage />} />
         <Route path="/evidence-bundles/:bundleId" element={<EvidencePage />} />
         <Route path="/evidence/:bundleId" element={<LegacyEvidenceRedirect />} />

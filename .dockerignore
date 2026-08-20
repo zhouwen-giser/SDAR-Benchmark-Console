@@ -1,0 +1,9 @@
+.git
+.codex
+product/node_modules
+product/dist
+product/dist-preview
+product/playwright-report
+product/test-results
+product/coverage
+**/*.log

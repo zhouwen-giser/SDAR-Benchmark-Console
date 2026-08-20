@@ -11,4 +11,4 @@
 
 ## 后续自动化
 
-正式依赖下的 RTL 可访问名称与键盘交互断言已通过；Playwright 规格也已可发现/编译。后续仍需在可运行 Chromium 的环境增加 axe-core 扫描，并人工复核真实 AntD Drawer 焦点圈定、Esc 关闭、Tooltip 键盘触发与屏幕阅读器图表摘要。Sites 兼容层的浏览器结果不替代真实 AntD 的完整无障碍结论。
+正式依赖下的 RTL 可访问名称与键盘交互断言已通过；Playwright 已使用本机 Chrome 对真实 Vite/Nginx HTTP 模式运行。后续仍需增加 axe-core 扫描，并人工复核 AntD Drawer 焦点圈定、Esc 关闭、Tooltip 键盘触发与屏幕阅读器图表摘要。

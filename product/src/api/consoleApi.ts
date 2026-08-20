@@ -1,4 +1,6 @@
 import { capabilityMeta } from "./capability-map";
+import { LiveHttpConsoleApi } from "./httpConsoleApi";
+import type { TransportRequestOptions } from "./benchmarkApiTransport";
 import {
   buildOverview,
   buildRunDashboard,
@@ -19,22 +21,40 @@ import {
 } from "../mocks/extendedData";
 import type {
   AlertRecord,
+  AnalyticsModuleView,
   ApiResource,
   CaseDetail,
   CaseResult,
   ComparisonDetail,
+  ContextOptionsView,
   EvaluationDetail,
+  EvaluationDimensionView,
+  EvaluationEvidenceGradeView,
+  EvaluationFatalView,
+  EvaluationFindingView,
+  EvaluationHardGateView,
+  EvaluationHeaderView,
+  EvaluationInputMaterialView,
+  EvaluationInputSnapshotView,
+  EvaluationMetricView,
+  EvaluationReadinessView,
   EvaluationSummary,
   EvidenceDetail,
+  EvidenceDiffView,
+  EvidenceGraphView,
+  EvidenceRecordView,
   EvidenceBundleSummary,
   OverviewSnapshot,
   ReportRecord,
+  ReportContentView,
+  ReportDownloadView,
   ResourceDetail,
   ResourceKind,
   RunDashboard,
   RunSummary,
   Scenario,
   SystemWorkspace,
+  TelemetryProvenanceView,
   UiDataState,
 } from "../types";
 
@@ -74,19 +94,46 @@ export interface EvidenceQuery {
 }
 
 export interface ConsoleApi {
-  getOverview(input: OverviewInput): Promise<ApiResource<OverviewSnapshot>>;
-  listRuns(): Promise<ApiResource<RunSummary[]>>;
-  getRun(runId: string): Promise<ApiResource<RunDashboard>>;
+  getContextOptions(options?: TransportRequestOptions): Promise<ApiResource<ContextOptionsView>>;
+  getOverview(input: OverviewInput, options?: TransportRequestOptions): Promise<ApiResource<OverviewSnapshot>>;
+  listRuns(options?: TransportRequestOptions): Promise<ApiResource<RunSummary[]>>;
+  getRun(runId: string, options?: TransportRequestOptions): Promise<ApiResource<RunDashboard>>;
   listCases(query?: CaseQuery): Promise<ApiResource<CaseResult[]>>;
   getCase(caseId: string): Promise<ApiResource<CaseDetail>>;
   getComparison(comparisonId: string): Promise<ApiResource<ComparisonDetail>>;
   listEvaluations(query?: EvaluationQuery): Promise<ApiResource<EvaluationSummary[]>>;
   getEvaluation(evaluationId: string): Promise<ApiResource<EvaluationDetail>>;
+  getEvaluationHeader(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationHeaderView>>;
+  getEvaluationReadiness(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationReadinessView>>;
+  getEvaluationEvidenceGrades(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationEvidenceGradeView[]>>;
+  getEvaluationFatals(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationFatalView[]>>;
+  getEvaluationHardGates(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationHardGateView[]>>;
+  getEvaluationMetrics(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationMetricView[]>>;
+  getEvaluationDimensions(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationDimensionView[]>>;
+  getEvaluationFindings(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationFindingView[]>>;
+  getEvaluationEvidenceLinks(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<Record<string, unknown>>>;
+  getTelemetryProvenance(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<TelemetryProvenanceView>>;
+  listInputSnapshots(episodeId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationInputSnapshotView[]>>;
+  getLatestInputSnapshot(episodeId: string, identity: { profileVersionId: string; requirementSetId: string; requirementSetVersion: number }, options?: TransportRequestOptions): Promise<ApiResource<EvaluationInputSnapshotView>>;
+  getInputSnapshot(snapshotId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationInputSnapshotView>>;
+  getInputMaterial(snapshotId: string, source: "domain" | "provider", options?: TransportRequestOptions): Promise<ApiResource<EvaluationInputMaterialView | null>>;
+  reconcileInputSnapshot(episodeId: string, profileVersionId: string, options?: TransportRequestOptions): Promise<ApiResource<Record<string, unknown>>>;
   listEvidenceBundles(query?: EvidenceQuery): Promise<ApiResource<EvidenceBundleSummary[]>>;
   getEvidence(bundleId: string): Promise<ApiResource<EvidenceDetail>>;
+  getEvidenceRecords(bundleId: string, options?: TransportRequestOptions): Promise<ApiResource<EvidenceRecordView[]>>;
+  getEvidenceTimeline(bundleId: string, options?: TransportRequestOptions): Promise<ApiResource<EvidenceRecordView[]>>;
+  getEvidenceGraph(bundleId: string, options?: TransportRequestOptions): Promise<ApiResource<EvidenceGraphView>>;
+  getEvidenceDiff(bundleId: string, otherBundleId: string, mode?: string, options?: TransportRequestOptions): Promise<ApiResource<EvidenceDiffView>>;
+  getEvidenceUsage(bundleId: string, options?: TransportRequestOptions): Promise<ApiResource<Record<string, unknown>>>;
   getAnalytics(input: OverviewInput): Promise<ApiResource<OverviewSnapshot>>;
+  getAnalyticsModule(key: string, input: OverviewInput, options?: TransportRequestOptions): Promise<ApiResource<AnalyticsModuleView>>;
   listReports(): Promise<ApiResource<ReportRecord[]>>;
+  createReport(input: { reportType: "snapshot" | "run" | "comparison" | "evaluation"; sourceId: string; format: "json" | "markdown" | "html" }, options?: TransportRequestOptions): Promise<ApiResource<ReportRecord>>;
+  getReportContent(reportId: string, options?: TransportRequestOptions): Promise<ApiResource<ReportContentView>>;
+  getReportDownload(reportId: string, options?: TransportRequestOptions): Promise<ApiResource<ReportDownloadView>>;
   listAlerts(): Promise<ApiResource<AlertRecord[]>>;
+  getAttention(attentionId: string, options?: TransportRequestOptions): Promise<ApiResource<AlertRecord>>;
+  updateAttention(attentionId: string, state: "open" | "acknowledged" | "resolved" | "ignored", options?: TransportRequestOptions): Promise<ApiResource<AlertRecord>>;
   getSystemWorkspace(): Promise<ApiResource<SystemWorkspace>>;
   getResource(kind: ResourceKind, id: string): Promise<ApiResource<ResourceDetail>>;
 }
@@ -99,7 +146,7 @@ function clone<T>(value: T): T {
   return structuredClone(value);
 }
 
-export class MockConsoleApi implements ConsoleApi {
+export class MockConsoleApi {
   async getOverview(input: OverviewInput): Promise<ApiResource<OverviewSnapshot>> {
     await sleep();
     if (input.dataState === "error") {
@@ -300,7 +347,12 @@ function readViteEnv(name: string): string | undefined {
   return env?.[name];
 }
 
-export class HttpConsoleApi implements ConsoleApi {
+export function currentApiMode(): "mock" | "msw" | "http" | "hybrid" {
+  const value = readViteEnv("VITE_API_MODE");
+  return value === "msw" || value === "http" || value === "hybrid" ? value : "mock";
+}
+
+class PrototypeHttpConsoleApi {
   constructor(private readonly baseUrl = readViteEnv("VITE_BENCHMARK_API_BASE_URL") ?? "http://127.0.0.1:18090") {}
 
   private async request<T>(path: string): Promise<T> {
@@ -319,8 +371,6 @@ export class HttpConsoleApi implements ConsoleApi {
       track: input.track ?? "all",
       riskLevel: input.risk ?? "all",
       period: input.period ?? "7d",
-      scenario: input.scenario,
-      dataState: input.dataState,
     });
     if (input.baselineId) query.set("baselineId", input.baselineId);
     if (input.runId) query.set("runId", input.runId);
@@ -385,12 +435,12 @@ export class HttpConsoleApi implements ConsoleApi {
   }
 
   async getCase(caseId: string): Promise<ApiResource<CaseDetail>> {
-    const data = await this.request<CaseDetail>(`/v1/cases/${encodeURIComponent(caseId)}`);
+    const data = await this.request<CaseDetail>(`/v1/benchmark-cases/${encodeURIComponent(caseId)}`);
     return { data, meta: capabilityMeta("caseDetail", { mocked: false }) };
   }
 
   async getComparison(comparisonId: string): Promise<ApiResource<ComparisonDetail>> {
-    const data = await this.request<ComparisonDetail>(`/v1/comparisons/${encodeURIComponent(comparisonId)}`);
+    const data = await this.request<ComparisonDetail>(`/v1/comparisons/${encodeURIComponent(comparisonId)}/dashboard`);
     return { data, meta: capabilityMeta("comparison", { mocked: false }) };
   }
 
@@ -424,8 +474,6 @@ export class HttpConsoleApi implements ConsoleApi {
 
   async getAnalytics(input: OverviewInput): Promise<ApiResource<OverviewSnapshot>> {
     const query = new URLSearchParams({
-      scenario: input.scenario,
-      dataState: input.dataState,
       track: input.track ?? "all",
       riskLevel: input.risk ?? "all",
       period: input.period ?? "7d",
@@ -435,7 +483,7 @@ export class HttpConsoleApi implements ConsoleApi {
     if (input.datasetVersion) query.set("datasetVersion", input.datasetVersion);
     if (input.profileVersionId) query.set("profileVersionId", input.profileVersionId);
     if (input.runId) query.set("runId", input.runId);
-    const data = await this.request<OverviewSnapshot>(`/v1/analytics/workspace?${query}`);
+    const data = await this.request<OverviewSnapshot>(`/v1/dashboard/overview?${query}`);
     return {
       data,
       meta: capabilityMeta("analytics", {
@@ -452,17 +500,17 @@ export class HttpConsoleApi implements ConsoleApi {
   }
 
   async listAlerts(): Promise<ApiResource<AlertRecord[]>> {
-    const envelope = await this.request<{ data: AlertRecord[] }>("/v1/alerts");
+    const envelope = await this.request<{ data: AlertRecord[] }>("/v1/attention-items");
     return { data: envelope.data, meta: capabilityMeta("alerts", { mocked: false }) };
   }
 
   async getSystemWorkspace(): Promise<ApiResource<SystemWorkspace>> {
-    const data = await this.request<SystemWorkspace>("/v1/system/workspace");
+    const data = await this.request<SystemWorkspace>("/v1/system/status");
     return { data, meta: capabilityMeta("systemWorkspace", { mocked: false }) };
   }
 
   async getResource(kind: ResourceKind, id: string): Promise<ApiResource<ResourceDetail>> {
-    const plural = kind === "candidate" ? "candidates" : kind === "baseline" ? "baselines" : kind === "dataset" ? "datasets" : "profiles";
+    const plural = kind === "candidate" ? "candidates" : kind === "baseline" ? "baselines" : kind === "dataset" ? "datasets" : "evaluation-profiles";
     const key = kind === "candidate" ? "candidateDetail" : kind === "baseline" ? "baselineDetail" : kind === "dataset" ? "datasetDetail" : "profileDetail";
     const data = await this.request<ResourceDetail>(`/v1/${plural}/${encodeURIComponent(id)}`);
     return { data, meta: capabilityMeta(key, { mocked: false }) };
@@ -470,7 +518,7 @@ export class HttpConsoleApi implements ConsoleApi {
 }
 
 export class HybridConsoleApi extends MockConsoleApi {
-  private readonly http = new HttpConsoleApi();
+  private readonly http = new LiveHttpConsoleApi();
 
   override async getRun(runId: string): Promise<ApiResource<RunDashboard>> {
     try {
@@ -481,11 +529,29 @@ export class HybridConsoleApi extends MockConsoleApi {
   }
 }
 
+export function hybridSourceAware(api: HybridConsoleApi): ConsoleApi {
+  return new Proxy(api, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== "function") return value;
+      return async (...args: unknown[]) => {
+        const resource = await value.apply(target, args) as ApiResource<unknown>;
+        if (resource?.meta) {
+          resource.meta.mode = "hybrid";
+          resource.meta.warnings = [...resource.meta.warnings, resource.meta.mocked ? "HYBRID source: deterministic Mock adapter." : "HYBRID source: live Benchmark HTTP API."];
+        }
+        return resource;
+      };
+    },
+  }) as unknown as ConsoleApi;
+}
+
 export function createConsoleApi(): ConsoleApi {
-  const mode = readViteEnv("VITE_API_MODE") ?? "mock";
-  if (mode === "http" || mode === "msw") return new HttpConsoleApi(mode === "msw" ? "" : undefined);
-  if (mode === "hybrid") return new HybridConsoleApi();
-  return new MockConsoleApi();
+  const mode = currentApiMode();
+  if (mode === "http" || mode === "msw") return new LiveHttpConsoleApi(mode === "msw" ? "" : undefined);
+  if (mode === "hybrid") return hybridSourceAware(new HybridConsoleApi());
+  return new MockConsoleApi() as unknown as ConsoleApi;
 }
 
 export const consoleApi = createConsoleApi();
+export { LiveHttpConsoleApi as HttpConsoleApi };

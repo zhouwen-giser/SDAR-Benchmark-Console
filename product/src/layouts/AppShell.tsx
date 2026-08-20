@@ -15,6 +15,7 @@ import {
 } from "@ant-design/icons";
 import { NavLink, useLocation } from "react-router-dom";
 import { MockCornerBadge } from "../components/common";
+import { currentApiMode } from "../api/consoleApi";
 
 const navigation = [
   { path: "/overview", label: "总览", icon: FundProjectionScreenOutlined },
@@ -24,7 +25,7 @@ const navigation = [
   { path: "/evidence-bundles", label: "证据浏览", icon: AreaChartOutlined },
   { path: "/analytics", label: "指标中心", icon: BarChartOutlined },
   { path: "/reports", label: "报告中心", icon: FileTextOutlined },
-  { path: "/alerts", label: "告警中心", icon: AlertOutlined },
+  { path: "/alerts", label: "关注队列", icon: AlertOutlined },
   { path: "/settings", label: "设置中心", icon: SettingOutlined },
 ];
 
@@ -38,6 +39,7 @@ function isActive(pathname: string, itemPath: string) {
 export function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const mode = currentApiMode();
 
   return (
     <div className={`app-shell ${collapsed ? "sidebar-collapsed" : ""}`}>
@@ -93,7 +95,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         {children}
       </main>
-      <MockCornerBadge />
+      {mode !== "http" && <MockCornerBadge />}
     </div>
   );
 }

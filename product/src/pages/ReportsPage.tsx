@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Descriptions, Drawer, Input, Select, Table, Tag, message } from "antd";
 import { EyeOutlined, FileTextOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
-import { consoleApi } from "../api/consoleApi";
+import { consoleApi, currentApiMode } from "../api/consoleApi";
 import { PageHeader, SectionCard } from "../components/common";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
 import type { ReportRecord } from "../types";
@@ -16,6 +16,28 @@ export function ReportsPage() {
   const [type, setType] = useState("all");
   const [search, setSearch] = useState("");
   const [messageApi, contextHolder] = message.useMessage();
+  const live = currentApiMode() === "http";
+  const createMutation = useMutation({
+    mutationFn: () => consoleApi.createReport({ reportType: "run", sourceId: filters.runId, format: "markdown" }),
+    onSuccess: async (resource) => { setSelected(resource.data); messageApi.success("报告命令已由后端持久化"); await query.refetch(); },
+    onError: (error) => messageApi.error(error instanceof Error ? error.message : "创建报告失败"),
+  });
+  const contentQuery = useQuery({ queryKey: ["report-content", selected?.reportId], queryFn: ({ signal }) => consoleApi.getReportContent(selected!.reportId, { signal }), enabled: live && Boolean(selected) && selected?.status === "completed" });
+  const downloadMutation = useMutation({
+    mutationFn: (reportId: string) => consoleApi.getReportDownload(reportId),
+    onSuccess: (resource) => {
+      const payload = resource.data;
+      const bytes = Uint8Array.from(atob(payload.content), (character) => character.charCodeAt(0));
+      const url = URL.createObjectURL(new Blob([bytes], { type: payload.mediaType }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = payload.filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      messageApi.success(`已下载并校验 ${payload.contentHash}`);
+    },
+    onError: (error) => messageApi.error(error instanceof Error ? error.message : "下载报告失败"),
+  });
   const records = useMemo(() => [...drafts, ...(query.data?.data ?? [])].filter((item) => {
     if (type !== "all" && item.type !== type) return false;
     if (search && !`${item.reportId} ${item.title} ${item.scope}`.toLowerCase().includes(search.toLowerCase())) return false;
@@ -23,6 +45,7 @@ export function ReportsPage() {
   }), [drafts, query.data, search, type]);
 
   const createDraft = () => {
+    if (live) { createMutation.mutate(); return; }
     const draft: ReportRecord = {
       reportId: `DRAFT-${String(drafts.length + 1).padStart(3, "0")}`,
       title: `候选版本 ${filters.candidateId} 发布评审`,
@@ -40,7 +63,8 @@ export function ReportsPage() {
   };
 
   const downloadJson = (report: ReportRecord) => {
-    const payload = {
+    if (live) { downloadMutation.mutate(report.reportId); return; }
+    const payload = live && contentQuery.data ? contentQuery.data.data.content : {
       report,
       context: filters,
       releaseDecision: "BLOCKED",
@@ -71,11 +95,11 @@ export function ReportsPage() {
   return (
     <div className="standard-page reports-page">
       {contextHolder}
-      <PageHeader title="报告中心" subtitle="生成可审阅的发布、回归与证据摘要；后端报告服务尚未实现。" meta={query.data?.meta} actions={<><Button icon={<ReloadOutlined />} onClick={() => query.refetch()}>刷新</Button><Button type="primary" icon={<FileTextOutlined />} onClick={createDraft}>新建发布评审草稿</Button></>} />
-      <div className="session-boundary-banner"><b>仅当前会话</b><span>新建草稿与预览不会写入后端；离开页面或刷新后会丢失。可下载 JSON 数据用于交接。</span></div>
+      <PageHeader title="报告中心" subtitle={live ? "报告创建、列表、内容与下载均由 Benchmark Server 持久化。" : "离线 Mock 模式下使用会话级草稿。"} meta={query.data?.meta} actions={<><Button icon={<ReloadOutlined />} onClick={() => query.refetch()}>刷新</Button><Button type="primary" loading={createMutation.isPending} icon={<FileTextOutlined />} onClick={createDraft}>{live ? "创建运行报告" : "新建发布评审草稿"}</Button></>} />
+      {!live && <div className="session-boundary-banner"><b>仅当前会话</b><span>Mock 模式草稿不会写入后端。</span></div>}
       <div className="collection-stat-grid">
-        <SectionCard><span>可用报告</span><strong>{records.length}</strong><small>包含当前会话草稿</small></SectionCard>
-        <SectionCard><span>可供评审</span><strong>{records.filter((item) => item.status === "ready").length}</strong><small>已生成可审阅内容</small></SectionCard>
+        <SectionCard><span>可用报告</span><strong>{records.length}</strong><small>{live ? "后端持久化" : "包含当前会话草稿"}</small></SectionCard>
+        <SectionCard><span>可供评审</span><strong>{records.filter((item) => item.status === "ready" || item.status === "completed").length}</strong><small>已生成可审阅内容</small></SectionCard>
         <SectionCard><span>草稿</span><strong>{records.filter((item) => item.status === "draft").length}</strong><small>尚未持久化</small></SectionCard>
         <SectionCard><span>导出格式</span><strong>JSON</strong><small>在浏览器本地生成</small></SectionCard>
       </div>
@@ -88,7 +112,7 @@ export function ReportsPage() {
         </div>
         <Table<ReportRecord> rowKey="reportId" columns={columns} dataSource={records} loading={query.isLoading} pagination={false} scroll={{ x: 1180 }} />
       </SectionCard>
-      <Drawer title={`报告预览 · ${selected?.reportId ?? ""}`} width={760} open={Boolean(selected)} onClose={() => setSelected(null)} extra={selected && <Button type="primary" onClick={() => downloadJson(selected)}>下载 JSON 数据</Button>}>
+      <Drawer title={`报告预览 · ${selected?.reportId ?? ""}`} width={760} open={Boolean(selected)} onClose={() => setSelected(null)} extra={selected && <Button type="primary" loading={downloadMutation.isPending} disabled={live && selected.status !== "completed"} onClick={() => downloadJson(selected)}>{live ? "下载后端制品" : "下载验证内容"}</Button>}>
         {selected && <div className="report-preview">
           <div className="report-cover"><span>SDAR 基准质量评测</span><h2>{selected.title}</h2><p>{selected.scope}</p><Tag color={selected.status === "ready" ? "green" : "gold"}>{statusName(selected.status)}</Tag></div>
           <Descriptions column={2} bordered size="small" items={[
@@ -98,6 +122,8 @@ export function ReportsPage() {
             { key: "by", label: "创建者", children: actorName(selected.createdBy) },
           ]} />
           <h3>报告章节</h3>
+          {live && contentQuery.isLoading && <div className="page-loading">正在读取后端报告内容…</div>}
+          {live && contentQuery.data && <pre>{JSON.stringify(contentQuery.data.data.content, null, 2)}</pre>}
           <ol className="report-section-list">{selected.sections.map((section, index) => <li key={section}><span>{String(index + 1).padStart(2, "0")}</span><div><b>{reportSectionName(section)}</b><p>{section === "Release decision" || section === "发布结论" ? "发布已阻塞：2 个新增硬门槛失败需要修复证据链。" : "根据当前具有明确数据水位的分析上下文生成。"}</p></div></li>)}</ol>
         </div>}
       </Drawer>

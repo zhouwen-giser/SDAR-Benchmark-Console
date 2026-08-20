@@ -1,10 +1,8 @@
 # Known Limitations
 
-1. 正式 pnpm 依赖、锁文件、Orval 生成、Vitest/RTL/MSW 与 Vite production build 已在当前环境完成；不再属于阻塞项。
-2. Playwright runner 与 7 项 E2E 规格已验证可发现/编译，但 Chromium 二进制下载被当前网络策略返回空包。精确 1920/1600/1440 自动化与 23 张截图仍需在预装或可下载 Chromium 的环境执行。
-3. `dist-preview/` 和 Sites 托管构建使用根目录兼容层；正式独立前端构建为 `product/dist/`，两者用途不混淆。
-4. Overview、Case、Run Dashboard、Evaluation、Evidence 等核心 Console 接口仍为 NEW 或 EXTEND；默认 Mock/MSW 不冒充 Server 已实现。
-5. Score Distribution 与若干 Operational 指标为 `BLOCKED_DATA`，正式算法或上游 Producer 未冻结时必须允许 null/partial。
-6. Reports 草稿、Alerts 生命周期为 session-local；Settings 偏好为设备 localStorage。后端持久化 API 未实现，这些边界已在 UI 中明确标注。
-7. Candidate、Baseline、Dataset、Profile 为只读 Mock registry projection；不包含创建、编辑、发布或权限管理。
-8. Sites 云端浏览器视口为 1363×936；已实际验证 18 条路由无页面横向溢出，并验证三次下钻 Evidence、报告草稿、告警生命周期、设置持久化与资源跳转。
+1. 当前联调机的 ClickHouse `127.0.0.1:8123` 不可达；Benchmark Server `/ready`、Overview 和依赖分析投影的端点会真实返回 503。Console 保持 PARTIAL/UNAVAILABLE，不回退 Mock。
+2. 已迁移的 PostgreSQL 没有正式 Run/Evaluation/Evidence/Report/Attention 业务记录，因此无法在本环境完成动态首条 ID 的数据级全链路、真实报告生命周期与 Attention 状态变更验收。
+3. Score Distribution 与若干 Operational 指标在正式统计量缺失时保留 null/partial，不用 0 或 PASS 冒充。
+4. 原始 Telemetry Trace 是外部诊断来源，不是不可变 Benchmark authority；Console 只提供外链。
+5. 本次完成表示内网 HTTP 接口、视图模型、代理与降级语义已接通，不表示正式 release、80 Case Dataset、F/HG/M 规则冻结、三次 Baseline 或生产安全已完成。
+6. v0.1 可信研发网边界不包含登录、TLS、RBAC、SSO、CSRF、Rate Limit 或 IP allowlist。

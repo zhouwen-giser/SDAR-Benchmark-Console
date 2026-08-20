@@ -360,8 +360,8 @@ export const systemWorkspace: SystemWorkspace = {
     { name: "遥测查询接口", role: "原始权威追踪记录", status: "external", detail: "属于外部边界，演示环境未配置服务地址" },
   ],
   contracts: [
-    { name: "总览看板合同", version: "0.2.0-draft", source: "dashboard-overview.openapi.yaml", status: "draft" },
-    { name: "控制台扩展合同", version: "0.2.0-draft", source: "console-api-extension.openapi.yaml", status: "draft" },
+    { name: "Benchmark Server Console 合同", version: "0.1.0", source: "benchmark-server.openapi.yaml", status: "active" },
+    { name: "Benchmark Server 正式合同", version: "0.1.0", source: "benchmark-server.openapi.yaml", status: "active" },
     { name: "证据合同", version: "0.1.0", source: "immutable-artifact-schema（不可变制品结构）", status: "active" },
   ],
   projections: [
