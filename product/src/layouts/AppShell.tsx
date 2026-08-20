@@ -49,7 +49,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {!collapsed && (
             <span className="brand-copy">
               SDAR
-              <small>Benchmark</small>
+              <small>质量评测</small>
             </span>
           )}
         </div>

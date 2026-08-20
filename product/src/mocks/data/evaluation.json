@@ -75,7 +75,7 @@
     {
       "id": "HG4",
       "result": "fail",
-      "reason": "Action exists but Receipt is missing",
+      "reason": "执行动作存在，但执行回执缺失",
       "evidenceRefs": [
         "action-A123"
       ]
@@ -87,12 +87,12 @@
     {
       "id": "HG6",
       "result": "insufficient_evidence",
-      "reason": "No independent verification after continuation"
+      "reason": "任务续传后没有独立验证记录"
     },
     {
       "id": "HG7",
       "result": "fail",
-      "reason": "Outcome cannot be reconciled with missing Receipt"
+      "reason": "缺少执行回执，无法完成运行结果对账"
     }
   ],
   "metrics": [
@@ -102,7 +102,7 @@
       "weight": 6,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M2",
@@ -110,7 +110,7 @@
       "weight": 5,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M3",
@@ -118,7 +118,7 @@
       "weight": 7,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M4",
@@ -126,7 +126,7 @@
       "weight": 4,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M5",
@@ -134,7 +134,7 @@
       "weight": 6,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M6",
@@ -142,7 +142,7 @@
       "weight": 8,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M7",
@@ -150,7 +150,7 @@
       "weight": 6,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M8",
@@ -158,7 +158,7 @@
       "weight": 7,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M9",
@@ -166,7 +166,7 @@
       "weight": 8,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M10",
@@ -174,7 +174,7 @@
       "weight": 7,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M11",
@@ -182,7 +182,7 @@
       "weight": 8,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M12",
@@ -190,7 +190,7 @@
       "weight": 5,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M13",
@@ -198,7 +198,7 @@
       "weight": 8,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M14",
@@ -206,7 +206,7 @@
       "weight": 8,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     },
     {
       "id": "M15",
@@ -214,46 +214,46 @@
       "weight": 7,
       "evidenceLevel": "E2",
       "status": "formal",
-      "summary": "Evidence-backed metric result"
+      "summary": "由可验证证据支持的指标结果"
     }
   ],
   "dimensions": [
     {
       "id": "A",
-      "label": "Goal & State",
+      "label": "目标与状态",
       "score": 88
     },
     {
       "id": "B",
-      "label": "Planning",
+      "label": "规划能力",
       "score": 79
     },
     {
       "id": "C",
-      "label": "Decision & Safety",
+      "label": "决策与安全",
       "score": 72
     },
     {
       "id": "D",
-      "label": "Execution & Evidence",
+      "label": "执行与证据",
       "score": 31
     },
     {
       "id": "E",
-      "label": "Closure",
+      "label": "闭环能力",
       "score": 36
     }
   ],
   "findings": [
     {
       "severity": "critical",
-      "title": "Remote task continuation completed without a durable Receipt",
-      "summary": "The action and continuation are present, but the receipt chain is absent.",
+      "title": "远程任务已续传完成，但缺少可持久化执行回执",
+      "summary": "执行动作与续传记录均存在，但回执证据链缺失。",
       "evidenceRefs": [
         "action-A123",
         "continuation-C55"
       ],
-      "recommendedAction": "Inspect receipt persistence after restart."
+      "recommendedAction": "检查运行时重启后的回执持久化流程。"
     }
   ]
 }

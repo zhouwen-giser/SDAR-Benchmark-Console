@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SDAR Benchmark Console",
-  description: "SDAR 内部研发质量决策、回归定位与 Evidence 分析工作台",
+  title: "SDAR 基准质量控制台",
+  description: "SDAR 内部研发质量决策、回归定位与证据分析工作台",
   other: {
     "codex-preview": "development",
   },

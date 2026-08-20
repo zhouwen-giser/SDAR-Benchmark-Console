@@ -12,11 +12,11 @@ async function expectNoHorizontalOverflow(page: Page) {
   expect(overflow.main).toBeLessThanOrEqual(2);
 }
 
-test("BLOCKED Overview fits 1920×1080 and exposes provenance", async ({ page }) => {
+test("blocked Overview fits 1920×1080 and exposes provenance", async ({ page }) => {
   await page.goto("/overview?scenario=blocked&dataState=loaded");
-  await expect(page.getByRole("heading", { name: "SDAR Benchmark Quality Command Center" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Release Gate blocked" })).toContainText("BLOCKED");
-  await expect(page.getByText("MOCK DATA").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "SDAR 基准质量指挥中心" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "发布门槛：已阻塞" })).toContainText("已阻塞");
+  await expect(page.getByText("演示数据").first()).toBeVisible();
   const dimensions = await page.evaluate(() => {
     const main = document.querySelector<HTMLElement>(".app-main");
     return main ? { scrollHeight: main.scrollHeight, clientHeight: main.clientHeight } : null;
@@ -47,12 +47,12 @@ test("Compare filters new gate failures and opens Evidence Diff", async ({ page 
   await expect(page.getByText("Candidate 缺少 durable Receipt")).toBeVisible();
 });
 
-test("STALE and INVALID states keep score semantics explicit", async ({ page }) => {
+test("stale and invalid states keep score semantics explicit", async ({ page }) => {
   await page.goto("/overview?scenario=blocked&dataState=stale");
-  await expect(page.getByText("STALE SNAPSHOT")).toBeVisible();
+  await expect(page.getByText("数据快照已过期")).toBeVisible();
   await page.goto("/overview?scenario=invalid&dataState=loaded");
-  await expect(page.getByRole("button", { name: "Release Gate invalid" })).toContainText("INVALID");
-  const quality = page.getByRole("button", { name: /Quality Score/ });
+  await expect(page.getByRole("button", { name: "发布门槛：不可判定" })).toContainText("不可判定");
+  const quality = page.getByRole("button", { name: /质量得分/ });
   await expect(quality).toContainText("—");
 });
 
@@ -69,7 +69,7 @@ test("extended workspaces complete their session-local workflows", async ({ page
   await expect(page.getByText("resolved", { exact: true }).last()).toBeVisible();
 
   await page.goto("/overview?scenario=ready&dataState=loaded");
-  await page.getByRole("button", { name: "Candidate ↗" }).click();
+  await page.getByRole("button", { name: "候选版本 ↗" }).click();
   await expect(page).toHaveURL(/\/candidates\/cand-142-def456/);
   await expect(page.getByRole("heading", { name: "Candidate Detail" })).toBeVisible();
 });

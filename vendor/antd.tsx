@@ -229,7 +229,7 @@ export function Table<T extends Record<string, any>>({
           })}
         </tbody>
       </table>
-      {pagination !== false && dataSource.length > 0 && <div className="ant-table-pagination">1 / {Math.max(1, Math.ceil(dataSource.length / Math.max(1, pageSize)))} · {dataSource.length} records</div>}
+      {pagination !== false && dataSource.length > 0 && <div className="ant-table-pagination">第 1 / {Math.max(1, Math.ceil(dataSource.length / Math.max(1, pageSize)))} 页 · 共 {dataSource.length} 条记录</div>}
     </div>
   );
 }

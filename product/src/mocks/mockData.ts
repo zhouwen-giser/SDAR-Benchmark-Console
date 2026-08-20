@@ -103,8 +103,8 @@ export function buildOverview(scenario: Scenario, state: UiDataState = "loaded")
     moduleErrors:
       scenario === "invalid"
         ? [
-            { module: "formalEvaluation", reason: "Formal coverage is only 31%." },
-            { module: "martProjection", reason: "Projection lag is 180 seconds." },
+            { module: "formalEvaluation", reason: "正式评价覆盖率仅为 31%。" },
+            { module: "martProjection", reason: "数据投影延迟为 180 秒。" },
           ]
         : [],
   };
@@ -131,14 +131,14 @@ export function buildOverview(scenario: Scenario, state: UiDataState = "loaded")
     source.snapshot.dataStatus = "stale";
     source.snapshot.projectionLagMs = 68_000;
     source.snapshot.moduleErrors = [
-      { module: "martProjection", reason: "The latest refresh failed; previous snapshot retained." },
+      { module: "martProjection", reason: "最新刷新失败，已保留上一次数据快照。" },
     ];
   }
   if (state === "partial") {
     source.snapshot.dataStatus = "partial";
     source.snapshot.moduleErrors = [
-      { module: "scoreDistribution", reason: "Percentile algorithm release unavailable." },
-      { module: "operationalSummary", reason: "Provider samples are incomplete." },
+      { module: "scoreDistribution", reason: "分位数算法尚未发布。" },
+      { module: "operationalSummary", reason: "服务提供方样本不完整。" },
     ];
     source.releaseGate = {
       status: "invalid",
@@ -155,7 +155,7 @@ export const runSummaries = (runsJson as unknown as { data: RunSummary[] }).data
 export const caseResults: CaseResult[] = [
   {
     caseId: "MCP-RESTART-017",
-    title: "Remote task restart must preserve durable receipt chain",
+    title: "远程任务重启后必须保留可持久化回执链",
     track: "mcp",
     risk: "critical",
     repetitions: 3,
@@ -172,7 +172,7 @@ export const caseResults: CaseResult[] = [
   },
   {
     caseId: "MCP-RESTART-021",
-    title: "Continuation after provider reconnect must reconcile outcome",
+    title: "服务提供方重连后的任务续传必须完成结果对账",
     track: "mcp",
     risk: "high",
     repetitions: 3,
@@ -189,7 +189,7 @@ export const caseResults: CaseResult[] = [
   },
   {
     caseId: "SKILL-AREA-010",
-    title: "Area patrol replanning under changing constraints",
+    title: "约束变化条件下的区域巡检重规划",
     track: "skill",
     risk: "high",
     repetitions: 3,
@@ -205,7 +205,7 @@ export const caseResults: CaseResult[] = [
   },
   {
     caseId: "CORE-AMB-012",
-    title: "Ambiguous goal resolution with evidence-backed clarification",
+    title: "基于证据澄清歧义目标",
     track: "core",
     risk: "high",
     repetitions: 3,
@@ -221,7 +221,7 @@ export const caseResults: CaseResult[] = [
   },
   {
     caseId: "MCP-CONT-015",
-    title: "MCP task continuation with terminal verification",
+    title: "具备终态验证的 MCP 任务续传",
     track: "mcp",
     risk: "high",
     repetitions: 3,
@@ -237,7 +237,7 @@ export const caseResults: CaseResult[] = [
   },
   {
     caseId: "NODE-CTRL-004",
-    title: "Node control configuration reconciliation",
+    title: "节点控制配置对账",
     track: "node",
     risk: "low",
     repetitions: 3,

@@ -52,7 +52,7 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { error?: Erro
           status="error"
           title="页面渲染失败"
           subTitle={this.state.error.message}
-          extra={<Button type="primary" onClick={() => window.location.assign("/overview")}>返回 Overview</Button>}
+          extra={<Button type="primary" onClick={() => window.location.assign("/overview")}>返回总览</Button>}
         />
       );
     }

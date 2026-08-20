@@ -6,7 +6,7 @@ import { consoleApi } from "../api/consoleApi";
 import { PageHeader, SectionCard } from "../components/common";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
 import type { AlertRecord } from "../types";
-import { compactTime } from "../utils/format";
+import { actorName, compactTime, severityName, sourceName, statusName, targetTypeName } from "../utils/format";
 
 const severityColor: Record<AlertRecord["severity"], string> = { critical: "red", high: "orange", medium: "gold" };
 const statusColor: Record<AlertRecord["status"], string> = { open: "red", acknowledged: "blue", resolved: "green" };
@@ -42,53 +42,53 @@ export function AlertsPage() {
   };
 
   const columns = [
-    { title: "Severity", dataIndex: "severity", key: "severity", width: 105, render: (value: AlertRecord["severity"]) => <Tag color={severityColor[value]}>{value.toUpperCase()}</Tag> },
-    { title: "Alert", dataIndex: "title", key: "title", render: (value: string, row: AlertRecord) => <button className="alert-title-button" onClick={() => setSelectedId(row.alertId)}><b>{value}</b><small>{row.alertId}</small></button> },
-    { title: "Status", dataIndex: "status", key: "status", width: 125, render: (value: AlertRecord["status"]) => <Tag color={statusColor[value]}>{value}</Tag> },
-    { title: "Source", dataIndex: "source", key: "source", width: 150 },
-    { title: "Target", dataIndex: "targetId", key: "targetId", width: 180, render: (value: string, row: AlertRecord) => <button className="link-button" onClick={() => openTarget(row)}>{row.targetType} · {value}</button> },
-    { title: "Owner", dataIndex: "owner", key: "owner", width: 140 },
-    { title: "Created", dataIndex: "createdAt", key: "createdAt", width: 145, render: (value: string) => compactTime(value) },
+    { title: "严重度", dataIndex: "severity", key: "severity", width: 105, render: (value: AlertRecord["severity"]) => <Tag color={severityColor[value]}>{severityName(value)}</Tag> },
+    { title: "告警", dataIndex: "title", key: "title", render: (value: string, row: AlertRecord) => <button className="alert-title-button" onClick={() => setSelectedId(row.alertId)}><b>{value}</b><small>{row.alertId}</small></button> },
+    { title: "状态", dataIndex: "status", key: "status", width: 125, render: (value: AlertRecord["status"]) => <Tag color={statusColor[value]}>{statusName(value)}</Tag> },
+    { title: "来源", dataIndex: "source", key: "source", width: 150, render: (value: string) => sourceName(value) },
+    { title: "关联对象", dataIndex: "targetId", key: "targetId", width: 200, render: (value: string, row: AlertRecord) => <button className="link-button" onClick={() => openTarget(row)}>{targetTypeName(row.targetType)} · {value}</button> },
+    { title: "负责人", dataIndex: "owner", key: "owner", width: 140, render: (value: string | undefined) => actorName(value) },
+    { title: "创建时间", dataIndex: "createdAt", key: "createdAt", width: 145, render: (value: string) => compactTime(value) },
     { title: "", key: "actions", width: 64, render: (_: unknown, row: AlertRecord) => <Button type="text" icon={<EyeOutlined />} aria-label={`查看 ${row.alertId}`} onClick={() => setSelectedId(row.alertId)} /> },
   ];
 
   return (
     <div className="standard-page alerts-page">
       {contextHolder}
-      <PageHeader title="Alert Center" subtitle="聚合 Release Gate、Evaluation 与 Projection 关注项；仅展示轻量会话级生命周期，不扩张为通用工单平台。" meta={query.data?.meta} actions={<Button icon={<ReloadOutlined />} onClick={() => query.refetch()}>刷新</Button>} />
-      <div className="session-boundary-banner"><b>SESSION-LOCAL</b><span>Acknowledge / Resolve 尚无后端生命周期 API；本页操作只在当前浏览会话有效。</span></div>
+      <PageHeader title="告警中心" subtitle="聚合发布门槛、评价结果与数据投影关注项；仅展示轻量会话级生命周期，不扩展为通用工单平台。" meta={query.data?.meta} actions={<Button icon={<ReloadOutlined />} onClick={() => query.refetch()}>刷新</Button>} />
+      <div className="session-boundary-banner"><b>仅当前会话</b><span>确认与解决告警尚无后端生命周期接口；本页操作只在当前浏览会话有效。</span></div>
       <div className="collection-stat-grid">
-        <SectionCard className="collection-stat-danger"><span>OPEN</span><strong>{records.filter((item) => item.status === "open").length}</strong><small>requires action</small></SectionCard>
-        <SectionCard><span>ACKNOWLEDGED</span><strong>{records.filter((item) => item.status === "acknowledged").length}</strong><small>owner assigned</small></SectionCard>
-        <SectionCard><span>RESOLVED</span><strong>{records.filter((item) => item.status === "resolved").length}</strong><small>closed in lifecycle</small></SectionCard>
-        <SectionCard><span>CRITICAL</span><strong>{records.filter((item) => item.severity === "critical").length}</strong><small>release impact</small></SectionCard>
+        <SectionCard className="collection-stat-danger"><span>待处理</span><strong>{records.filter((item) => item.status === "open").length}</strong><small>需要采取措施</small></SectionCard>
+        <SectionCard><span>已确认</span><strong>{records.filter((item) => item.status === "acknowledged").length}</strong><small>已分配负责人</small></SectionCard>
+        <SectionCard><span>已解决</span><strong>{records.filter((item) => item.status === "resolved").length}</strong><small>生命周期已关闭</small></SectionCard>
+        <SectionCard><span>极高严重度</span><strong>{records.filter((item) => item.severity === "critical").length}</strong><small>影响发布</small></SectionCard>
       </div>
       <SectionCard className="table-card collection-card">
         <div className="case-filter-bar collection-filter-bar">
           <FilterOutlined />
-          <Input.Search placeholder="Alert / Target" allowClear onSearch={setSearch} />
-          <Select value={status} options={["all", "open", "acknowledged", "resolved"].map((value) => ({ value, label: value === "all" ? "全部状态" : value }))} onChange={setStatus} />
-          <Select value={severity} options={["all", "critical", "high", "medium"].map((value) => ({ value, label: value === "all" ? "全部严重度" : value }))} onChange={setSeverity} />
+          <Input.Search placeholder="告警编号 / 关联对象" allowClear onSearch={setSearch} />
+          <Select value={status} options={["all", "open", "acknowledged", "resolved"].map((value) => ({ value, label: value === "all" ? "全部状态" : statusName(value) }))} onChange={setStatus} />
+          <Select value={severity} options={["all", "critical", "high", "medium"].map((value) => ({ value, label: value === "all" ? "全部严重度" : severityName(value) }))} onChange={setSeverity} />
           <Button onClick={() => { setStatus("all"); setSeverity("all"); setSearch(""); }}>清除</Button>
         </div>
         <Table<AlertRecord> rowKey="alertId" columns={columns} dataSource={records} loading={query.isLoading} pagination={false} scroll={{ x: 1180 }} rowClassName={(row) => row.severity === "critical" && row.status !== "resolved" ? "critical-table-row" : ""} />
       </SectionCard>
-      <Drawer title={`Alert Detail · ${selected?.alertId ?? ""}`} width={720} open={Boolean(selected)} onClose={() => setSelectedId(null)} extra={selected && <Space>{selected.status === "open" && <Button onClick={() => transition("acknowledged")}>Acknowledge</Button>}{selected.status !== "resolved" && <Button type="primary" onClick={() => transition("resolved")}>Resolve</Button>}</Space>}>
+      <Drawer title={`告警详情 · ${selected?.alertId ?? ""}`} width={720} open={Boolean(selected)} onClose={() => setSelectedId(null)} extra={selected && <Space>{selected.status === "open" && <Button onClick={() => transition("acknowledged")}>确认告警</Button>}{selected.status !== "resolved" && <Button type="primary" onClick={() => transition("resolved")}>标记为已解决</Button>}</Space>}>
         {selected && <div className="alert-detail">
-          <div className={`alert-detail-hero severity-${selected.severity}`}><AlertOutlined /><div><Tag color={severityColor[selected.severity]}>{selected.severity.toUpperCase()}</Tag><h2>{selected.title}</h2><p>{selected.reason}</p></div></div>
+          <div className={`alert-detail-hero severity-${selected.severity}`}><AlertOutlined /><div><Tag color={severityColor[selected.severity]}>{severityName(selected.severity)}</Tag><h2>{selected.title}</h2><p>{selected.reason}</p></div></div>
           <Descriptions bordered column={2} size="small" items={[
-            { key: "status", label: "Status", children: <Tag color={statusColor[selected.status]}>{selected.status}</Tag> },
-            { key: "source", label: "Source", children: selected.source },
-            { key: "target", label: "Target", children: `${selected.targetType} · ${selected.targetId}` },
-            { key: "owner", label: "Owner", children: selected.owner ?? "Unassigned" },
-            { key: "created", label: "Created", children: selected.createdAt },
-            { key: "updated", label: "Lifecycle", children: selected.resolvedAt ?? selected.acknowledgedAt ?? "Awaiting action" },
+            { key: "status", label: "状态", children: <Tag color={statusColor[selected.status]}>{statusName(selected.status)}</Tag> },
+            { key: "source", label: "来源", children: sourceName(selected.source) },
+            { key: "target", label: "关联对象", children: `${targetTypeName(selected.targetType)} · ${selected.targetId}` },
+            { key: "owner", label: "负责人", children: actorName(selected.owner) },
+            { key: "created", label: "创建时间", children: selected.createdAt },
+            { key: "updated", label: "生命周期更新时间", children: selected.resolvedAt ?? selected.acknowledgedAt ?? "等待处理" },
           ]} />
-          <h3>Lifecycle</h3>
+          <h3>生命周期</h3>
           <Timeline items={[
-            { color: "#ef4444", label: compactTime(selected.createdAt), children: <b>Alert opened by {selected.source}</b> },
-            ...(selected.acknowledgedAt ? [{ color: "#3b82f6", label: compactTime(selected.acknowledgedAt), children: <b>Acknowledged · {selected.owner}</b> }] : []),
-            ...(selected.resolvedAt ? [{ color: "#28c76f", label: compactTime(selected.resolvedAt), children: <b>Resolved · {selected.owner}</b> }] : []),
+            { color: "#ef4444", label: compactTime(selected.createdAt), children: <b>{sourceName(selected.source)}创建告警</b> },
+            ...(selected.acknowledgedAt ? [{ color: "#3b82f6", label: compactTime(selected.acknowledgedAt), children: <b>已确认 · {actorName(selected.owner)}</b> }] : []),
+            ...(selected.resolvedAt ? [{ color: "#28c76f", label: compactTime(selected.resolvedAt), children: <b>已解决 · {actorName(selected.owner)}</b> }] : []),
           ]} />
           <Button block type="primary" onClick={() => openTarget(selected)}>打开关联对象 <ArrowRightOutlined /></Button>
         </div>}

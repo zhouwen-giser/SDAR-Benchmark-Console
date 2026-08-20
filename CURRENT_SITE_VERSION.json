@@ -1,0 +1,21 @@
+{
+  "site_title": "SDAR Benchmark Console",
+  "project_id": "appgprj_6a800d264aa08191a452b5ad6bfab06f",
+  "site_slug": "sdar-benchmark-console",
+  "site_url": "https://sdar-benchmark-console.cwgis2026.chatgpt.site",
+  "production_deployment": {
+    "deployment_id": "appgdep_6a8084cfdfc08191867fea787e178373",
+    "type": "publish",
+    "status": "succeeded",
+    "version_id": "appgprj_6a800d264aa08191a452b5ad6bfab06f~appgver_8cf75899704c8191b4b0e4f9ceedb548",
+    "deployed_at": "2026-08-15T15:25:56.044624+00:00"
+  },
+  "site_version": {
+    "version_number": 6,
+    "version_id": "appgprj_6a800d264aa08191a452b5ad6bfab06f~appgver_8cf75899704c8191b4b0e4f9ceedb548",
+    "source_commit": "86d4b0560cc7443b61d47c13eafeb2d76829b3a5",
+    "deployment_archive_content_hash": "sha256:bdc2ec29d5f82c072f7349def6eb6e73f56833feecf0571c03b2ba8cb0a0bb1b"
+  },
+  "exported_at": "2026-08-20T05:07:31Z",
+  "export_basis": "Exact source commit referenced by the current successful production deployment; no historical delivery ZIP was used."
+}

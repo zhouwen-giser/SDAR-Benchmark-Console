@@ -3,6 +3,7 @@ import ReactECharts from "echarts-for-react";
 import type { EChartsOption } from "echarts";
 import { chartPalette } from "../theme/theme";
 import type { EvidenceDetail, OverviewSnapshot } from "../types";
+import { evidenceLabelName, overviewText, riskName, trackName } from "../utils/format";
 
 const axisStyle = {
   axisLine: { lineStyle: { color: "#294159" } },
@@ -44,7 +45,7 @@ export function QualityTrendChart({
   data: OverviewSnapshot["qualityTrend"];
   onPoint?: (label: string) => void;
 }) {
-  const labels = data.map((item) => item.label);
+  const labels = data.map((item) => item.label === "current" ? "当前版本" : item.label);
   const option: EChartsOption = {
     color: [chartPalette.blue, chartPalette.positive, chartPalette.danger, chartPalette.warning],
     grid: { left: 34, right: 12, top: 32, bottom: 22 },
@@ -60,28 +61,28 @@ export function QualityTrendChart({
     yAxis: { type: "value", min: 40, max: 100, ...axisStyle },
     series: [
       {
-        name: "Mean Score",
+        name: "平均得分",
         type: "line",
         data: data.map((item) => item.meanScore),
         smooth: 0.28,
         symbolSize: 6,
       },
       {
-        name: "Pass Rate",
+        name: "用例通过率",
         type: "line",
         data: data.map((item) => item.passRate),
         smooth: 0.28,
         symbolSize: 5,
       },
       {
-        name: "Critical Pass",
+        name: "极高风险通过率",
         type: "line",
         data: data.map((item) => item.criticalRiskPassRate),
         smooth: 0.28,
         symbolSize: 5,
       },
       {
-        name: "P10",
+        name: "第 10 百分位（P10）",
         type: "line",
         data: data.map((item) => item.p10),
         smooth: 0.28,
@@ -94,8 +95,8 @@ export function QualityTrendChart({
     <Chart
       option={option}
       onClick={(params) => {
-        const name = params.name;
-        if (onPoint && typeof name === "string") onPoint(name);
+        const index = Number(params.dataIndex);
+        if (onPoint && Number.isInteger(index) && data[index]) onPoint(data[index].label);
       }}
     />
   );
@@ -108,7 +109,8 @@ export function RegressionWaterfallChart({
   data: NonNullable<OverviewSnapshot["regressionWaterfall"]>;
   onBar?: (change: string) => void;
 }) {
-  const labels = ["Baseline", "Recovered", "Improved", "Regressed", "New HG", "Not Ready", "Current"];
+  const labels = ["基准得分", "已恢复", "已有改善", "发生回归", "新增硬门槛失败", "未就绪", "当前得分"];
+  const changeCodes = ["BASELINE", "RECOVERED", "IMPROVED", "REGRESSED", "NEW_GATE_FAILURE", "NOT_READY", "CURRENT"];
   const values = [data.baseline, data.recovered, data.improved, data.regressed, data.newHg, data.notReady, data.candidate];
   const colors = [
     chartPalette.blue,
@@ -152,8 +154,8 @@ export function RegressionWaterfallChart({
     <Chart
       option={option}
       onClick={(params) => {
-        const name = params.name;
-        if (onBar && typeof name === "string") onBar(name);
+        const index = Number(params.dataIndex);
+        if (onBar && Number.isInteger(index) && changeCodes[index]) onBar(changeCodes[index]);
       }}
     />
   );
@@ -168,6 +170,8 @@ export function TrackRiskHeatmap({
 }) {
   const tracks = ["core", "skill", "mcp", "node", "cross"];
   const risks = ["critical", "high", "medium", "low"];
+  const trackLabels = tracks.map(trackName);
+  const riskLabels = risks.map(riskName);
   const points = data.map((item) => [tracks.indexOf(item.track), risks.indexOf(item.risk), item.passRate ?? 0]);
   const option: EChartsOption = {
     grid: { left: 48, right: 8, top: 24, bottom: 26 },
@@ -175,11 +179,11 @@ export function TrackRiskHeatmap({
       position: "top",
       formatter: (params: unknown) => {
         const value = (params as { value: [number, number, number] }).value;
-        return `${risks[value[1]]} × ${tracks[value[0]]}<br/><b>${value[2]}%</b>`;
+        return `${riskLabels[value[1]]}风险 × ${trackLabels[value[0]]}<br/><b>通过率 ${value[2]}%</b>`;
       },
     },
-    xAxis: { type: "category", data: tracks, splitArea: { show: true }, ...axisStyle },
-    yAxis: { type: "category", data: risks, splitArea: { show: true }, ...axisStyle },
+    xAxis: { type: "category", data: trackLabels, splitArea: { show: true }, ...axisStyle },
+    yAxis: { type: "category", data: riskLabels, splitArea: { show: true }, ...axisStyle },
     visualMap: {
       min: 60,
       max: 100,
@@ -218,6 +222,7 @@ export function MetricHeatmap({
 }) {
   const metrics = Array.from({ length: 15 }, (_, index) => `M${index + 1}`);
   const tracks = ["Core", "Skill", "MCP", "Node", "Cross"];
+  const trackLabels = tracks.map(trackName);
   const points: Array<[number, number, number]> = data.map((item) => [
     metrics.indexOf(item.metric),
     tracks.indexOf(item.track),
@@ -231,12 +236,12 @@ export function MetricHeatmap({
         const item = data.find(
           (entry) => entry.metric === metrics[value[0]] && entry.track === tracks[value[1]],
         );
-        if (!item) return `${metrics[value[0]]} · ${tracks[value[1]]}<br/><b>${value[2]}</b> / 100`;
-        return `${item.track} · ${item.metric}<br/><b>${item.score}</b> / 100<br/>Formal ${item.formalCount} · Diagnostic ${item.diagnosticCount}<br/>Δ ${item.delta}`;
+        if (!item) return `${metrics[value[0]]} · ${trackLabels[value[1]]}<br/><b>${value[2]}</b> / 100`;
+        return `${trackName(item.track)} · ${item.metric}<br/><b>${item.score}</b> / 100<br/>正式评价 ${item.formalCount} · 诊断评价 ${item.diagnosticCount}<br/>较基准变化 ${item.delta}`;
       },
     },
     xAxis: { type: "category", data: metrics, axisLabel: { color: chartPalette.muted, fontSize: 8 }, axisLine: { lineStyle: { color: "#294159" } } },
-    yAxis: { type: "category", data: tracks, axisLabel: { color: chartPalette.muted, fontSize: 9 }, axisLine: { lineStyle: { color: "#294159" } } },
+    yAxis: { type: "category", data: trackLabels, axisLabel: { color: chartPalette.muted, fontSize: 9 }, axisLine: { lineStyle: { color: "#294159" } } },
     visualMap: {
       min: 40,
       max: 100,
@@ -266,19 +271,25 @@ export function MetricHeatmap({
 
 export function EvidenceFunnelChart({ data }: { data: OverviewSnapshot["evidenceReadinessFunnel"] }) {
   const points: Array<[string, number]> = [
-    ["Case Repetitions", data.caseRepetitions],
-    ["Episode Resolved", data.episodeResolved],
-    ["Manifest Sealed", data.manifestSealed],
-    ["Bundle Complete", data.bundleComplete],
-    ["Evaluation Ready", data.evaluationReady],
-    ["Formal Evaluation", data.formalEvaluation],
+    ["用例重复执行", data.caseRepetitions],
+    ["过程已完成", data.episodeResolved],
+    ["清单已封存", data.manifestSealed],
+    ["证据包完整", data.bundleComplete],
+    ["评价已就绪", data.evaluationReady],
+    ["正式评价", data.formalEvaluation],
   ];
+  const lossReasonNames: Record<string, string> = {
+    manifestMissing: "清单缺失",
+    requiredFamilyMissing: "必需证据族缺失",
+    evidenceConflicts: "证据冲突",
+    semanticEvaluatorPending: "语义评价待完成",
+  };
   const option: EChartsOption = {
     color: ["#315a74", "#2b7365", "#26835e", "#278d58", "#3a9255", "#759847"],
     tooltip: { trigger: "item", formatter: "{b}: {c}" },
     series: [
       {
-        name: "Evidence Readiness",
+        name: "证据就绪情况",
         type: "funnel",
         left: "2%",
         top: 4,
@@ -301,7 +312,7 @@ export function EvidenceFunnelChart({ data }: { data: OverviewSnapshot["evidence
         top: 14,
         style: {
           text: Object.entries(data.lossReasons)
-            .map(([key, value]) => `${key}  ${value}`)
+            .map(([key, value]) => `${lossReasonNames[key] ?? key}  ${value}`)
             .join("\n\n"),
           fill: chartPalette.muted,
           fontSize: 9,
@@ -331,11 +342,11 @@ export function QualityStabilityChart({
     tooltip: {
       formatter: (params: unknown) => {
         const value = (params as { value: [number, number, number, string, string] }).value;
-        return `${value[3]}<br/>Score ${value[0]} · Stability ${value[1]}%<br/>${value[4]} · ${value[2]} repetitions`;
+        return `${value[3]}<br/>质量得分 ${value[0]} · 稳定性 ${value[1]}%<br/>${riskName(value[4])}风险 · 重复执行 ${value[2]} 次`;
       },
     },
-    xAxis: { type: "value", min: 0, max: 100, name: "Quality", nameTextStyle: { color: chartPalette.muted, fontSize: 9 }, ...axisStyle },
-    yAxis: { type: "value", min: 0, max: 100, name: "Stability", nameTextStyle: { color: chartPalette.muted, fontSize: 9 }, ...axisStyle },
+    xAxis: { type: "value", min: 0, max: 100, name: "质量得分", nameTextStyle: { color: chartPalette.muted, fontSize: 9 }, ...axisStyle },
+    yAxis: { type: "value", min: 0, max: 100, name: "稳定性", nameTextStyle: { color: chartPalette.muted, fontSize: 9 }, ...axisStyle },
     series: [
       {
         type: "scatter",
@@ -371,28 +382,39 @@ export function ContributorsChart({
   data: OverviewSnapshot["regressionContributors"];
   onSlice?: (label: string) => void;
 }) {
+  const total = data.reduce((sum, item) => sum + item.impactPercent, 0);
   const option: EChartsOption = {
     color: [chartPalette.danger, chartPalette.orange, chartPalette.warning, "#25a7a5", chartPalette.blue, "#59718b"],
-    tooltip: { trigger: "item", formatter: "{b}<br/><b>{c}%</b> ({d}%)" },
-    legend: { type: "scroll", orient: "vertical", right: 0, top: 4, bottom: 4, width: "52%", textStyle: { color: chartPalette.muted, fontSize: 8 }, itemWidth: 7, itemHeight: 7 },
+    tooltip: { trigger: "item", formatter: "{b}<br/><b>贡献占比 {c}%</b>" },
+    legend: { type: "scroll", orient: "vertical", right: 4, top: "middle", width: "48%", itemGap: 8, textStyle: { color: chartPalette.muted, fontSize: 9 }, itemWidth: 8, itemHeight: 8 },
+    title: {
+      text: `${total}%`,
+      subtext: "贡献占比",
+      left: "29%",
+      top: "middle",
+      textAlign: "center",
+      itemGap: 1,
+      textStyle: { color: chartPalette.text, fontSize: 15, fontWeight: 700 },
+      subtextStyle: { color: chartPalette.muted, fontSize: 9 },
+    },
     series: [
       {
         type: "pie",
-        radius: ["42%", "70%"],
+        radius: [40, 64],
         center: ["29%", "50%"],
         avoidLabelOverlap: true,
         label: { show: false },
         itemStyle: { borderColor: "#0b1824", borderWidth: 2 },
-        data: data.map((item) => ({ value: item.impactPercent, name: item.label })),
+        data: data.map((item) => ({ value: item.impactPercent, name: overviewText(item.label) })),
       },
     ],
-    graphic: [{ type: "text", left: "23%", top: "44%", style: { text: "80\nCases", align: "center", fill: chartPalette.text, fontSize: 10, lineHeight: 13 } }],
   };
   return (
     <Chart
       option={option}
       onClick={(params) => {
-        if (onSlice && typeof params.name === "string") onSlice(params.name);
+        const index = Number(params.dataIndex);
+        if (onSlice && Number.isInteger(index) && data[index]) onSlice(data[index].label);
       }}
     />
   );
@@ -403,7 +425,7 @@ export function ScoreDistributionChart({ data }: { data: NonNullable<OverviewSna
     grid: { left: 18, right: 12, top: 10, bottom: 26 },
     tooltip: { trigger: "item" },
     xAxis: { type: "value", min: 0, max: 100, ...axisStyle },
-    yAxis: { type: "category", data: ["Current"], axisLabel: { show: false }, axisLine: { show: false } },
+    yAxis: { type: "category", data: ["当前版本"], axisLabel: { show: false }, axisLine: { show: false } },
     series: [
       {
         type: "boxplot",
@@ -452,7 +474,7 @@ export function EvidenceGraphChart({ data, onNode }: { data: EvidenceDetail; onN
     };
   }> = data.timeline.map((item, index) => ({
     id: item.id,
-    name: item.label,
+    name: evidenceLabelName(item.label),
     symbolSize: item.label === "Action" || item.label === "Verification" ? 58 : 42,
     x: 70 + (index % 5) * 150,
     y: 70 + Math.floor(index / 5) * 140,
@@ -464,7 +486,7 @@ export function EvidenceGraphChart({ data, onNode }: { data: EvidenceDetail; onN
   }));
   nodes.splice(7, 0, {
     id: "receipt-R1",
-    name: "Receipt\nMISSING",
+    name: "执行回执\n缺失",
     symbolSize: 62,
     x: 500,
     y: 170,

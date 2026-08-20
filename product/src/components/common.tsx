@@ -17,6 +17,7 @@ import {
 } from "@ant-design/icons";
 import { capabilityStatusLabel } from "../api/capability-map";
 import type { CapabilityMeta, UiDataState } from "../types";
+import { overviewText } from "../utils/format";
 
 export function ApiStatusTag({ meta, compact = false }: { meta: CapabilityMeta; compact?: boolean }) {
   const colors = {
@@ -31,7 +32,7 @@ export function ApiStatusTag({ meta, compact = false }: { meta: CapabilityMeta; 
       <Tag color={colors[meta.status]} icon={<ApiOutlined />}>
         {capabilityStatusLabel[meta.status]}
       </Tag>
-      {meta.mocked && <Tag color="purple">MOCK DATA</Tag>}
+      {meta.mocked && <Tag color="purple">演示数据</Tag>}
       {!compact && meta.watermark && (
         <span className="api-watermark">
           <ClockCircleOutlined /> {meta.watermark.slice(11, 19)}
@@ -44,9 +45,9 @@ export function ApiStatusTag({ meta, compact = false }: { meta: CapabilityMeta; 
       placement="bottomRight"
       title={
         <div className="api-tooltip">
-          <b>{meta.endpoint}</b>
-          <div>Source of truth: {meta.sourceOfTruth}</div>
-          <div>Projection lag: {meta.projectionLagMs == null ? "—" : `${(meta.projectionLagMs / 1000).toFixed(1)}s`}</div>
+          <b>接口：{meta.endpoint}</b>
+          <div>数据来源：{meta.sourceOfTruth}</div>
+          <div>投影延迟：{meta.projectionLagMs == null ? "—" : `${(meta.projectionLagMs / 1000).toFixed(1)} 秒`}</div>
           {meta.availabilityReason && <div>{meta.availabilityReason}</div>}
         </div>
       }
@@ -108,7 +109,7 @@ export function DataStatePanel({
 }) {
   if (state === "loading") {
     return (
-      <div className="dashboard-state-grid" aria-label="正在加载 Overview Snapshot">
+      <div className="dashboard-state-grid" aria-label="正在加载总览数据快照">
         {Array.from({ length: 12 }, (_, index) => (
           <SectionCard key={index} className={index < 3 ? "state-wide" : ""}>
             <Skeleton active paragraph={{ rows: index < 3 ? 2 : 4 }} />
@@ -122,8 +123,8 @@ export function DataStatePanel({
       <SectionCard className="state-result-card">
         <Result
           status="error"
-          title="无法加载当前 Snapshot"
-          subTitle="旧数据不会被伪装为实时结果。请重试或切换到 STALE 演示状态查看保留快照语义。"
+          title="无法加载当前数据快照"
+          subTitle="旧数据不会被伪装为实时结果。请重试或切换到“数据已过期”状态查看保留快照的含义。"
           extra={
             <Button type="primary" icon={<ReloadOutlined />} onClick={onRetry}>
               重试
@@ -136,7 +137,7 @@ export function DataStatePanel({
   if (state === "empty") {
     return (
       <SectionCard className="state-result-card">
-        <Empty description="当前 Candidate / Dataset / Track 筛选下没有可评价数据" />
+        <Empty description="当前候选版本、数据集和分轨筛选条件下没有可评价数据" />
       </SectionCard>
     );
   }
@@ -162,11 +163,11 @@ export function SnapshotAlert({
       showIcon
       icon={stale ? <ClockCircleOutlined /> : <CloudSyncOutlined />}
       type={stale ? "warning" : "error"}
-      message={stale ? "STALE SNAPSHOT" : status === "partial" ? "PARTIAL DATA" : "EMPTY SNAPSHOT"}
+      message={stale ? "数据快照已过期" : status === "partial" ? "数据不完整" : "数据快照为空"}
       description={
         <span>
-          Watermark {watermark.slice(11, 19)} · Lag {(lagMs / 1000).toFixed(1)}s
-          {moduleErrors.length > 0 && ` · ${moduleErrors.map((item) => item.module).join(", ")}`}
+          数据水位 {watermark.slice(11, 19)} · 投影延迟 {(lagMs / 1000).toFixed(1)} 秒
+          {moduleErrors.length > 0 && ` · 受影响模块：${moduleErrors.map((item) => overviewText(item.module)).join("、")}`}
         </span>
       }
     />
@@ -200,8 +201,8 @@ export function PageHeader({
 
 export function MockCornerBadge() {
   return (
-    <div className="mock-corner-badge" aria-label="当前页面使用 Mock 数据">
-      MOCK ADAPTER · API GAPS EXPLICIT
+    <div className="mock-corner-badge" aria-label="当前页面使用演示数据">
+      演示数据适配器 · 接口缺口已明确标注
     </div>
   );
 }
