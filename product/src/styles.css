@@ -2935,6 +2935,25 @@ pre {
   gap: 8px 12px;
 }
 
+.diagnostic-outcome-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.diagnostic-outcome-grid {
+  display: grid;
+  grid-template-columns: 120px repeat(5, minmax(0, 1fr));
+  align-items: center;
+  gap: 14px;
+}
+
+.diagnostic-outcome-total {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+}
+
 .typed-resource-toolbar {
   display: flex;
   align-items: center;
@@ -2980,6 +2999,7 @@ pre {
   .run-catalog-fields,
   .run-catalog-case-grid,
   .completeness-summary-grid,
+  .diagnostic-outcome-grid,
   .rerun-case-grid {
     grid-template-columns: 1fr;
   }
