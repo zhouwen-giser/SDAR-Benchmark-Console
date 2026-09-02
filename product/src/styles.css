@@ -2825,6 +2825,59 @@ pre {
   min-width: 120px;
 }
 
+.artifact-content-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.artifact-json-fields code,
+.artifact-content-panel code,
+.artifact-string-value {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.artifact-markdown {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(8, 20, 36, 0.64);
+  line-height: 1.65;
+}
+
+.artifact-markdown h2,
+.artifact-markdown h3,
+.artifact-markdown h4,
+.artifact-markdown p {
+  margin: 0 0 10px;
+}
+
+.artifact-markdown-list-item {
+  padding-left: 10px;
+  color: var(--text-secondary);
+}
+
+.artifact-markdown-spacer {
+  height: 8px;
+}
+
+.artifact-plain-text {
+  margin: 0;
+  padding: 18px;
+  max-height: 560px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(3, 10, 20, 0.72);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.artifact-debug-action {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .typed-resource-toolbar {
   display: flex;
   align-items: center;
