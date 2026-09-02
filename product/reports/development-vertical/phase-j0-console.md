@@ -27,6 +27,9 @@ Goal：`sdar-benchmark-console-development-vertical-v0.1`
 - Drift：无；当前分支与 Goal Package 的 observed commit 一致
 - 初始目标工作树：clean
 - 其他既有 worktree/历史 P10 尝试不合并到本目标分支；其报告与数据库事实保持不变
+- Server 起始本地 HEAD `30a3aa2`，落后 origin 39 commits；仅 fast-forward 到 `f234bf63`，未 reset、rebase 或 force-push。
+- 起始 dataset loader/export/test、dataset assets 与远端提交 `beb04f4` 精确一致，属于远端历史已吸收的既有 materialization；已可恢复保存为 `stash@{0} pre-development-vertical-existing-dataset-materialization-beb04f4`。
+- 旧 P10 qualification worktree 为 `/home/zhouwen/web-download/sdar-benchmark-server-p9a-resume`，不在 Development Vertical 修改范围；没有旧 P10 runner 在后台继续执行。
 
 ## 初始合同与门禁
 
@@ -47,7 +50,11 @@ Goal：`sdar-benchmark-console-development-vertical-v0.1`
 ## 联合会话
 
 - Server 主会话：`01a056ad-8289-7b12-8423-e70e66082174`
-- Server 会话负责 J0-J5 服务端工作，并已通知 SDAR Runtime、SMPP/Provider、Telemetry、Simulator/Referee 既有会话提供只读运行支持。
+- Server 会话负责 J0-J5 服务端工作，并已通知以下既有会话提供只读运行支持：
+  - SDAR Runtime：`019ff38c-d0a9-7e63-bc75-23ccd631383f`
+  - SMPP/Provider：`01a055b1-d62c-7b91-9af4-e2216ea96712`
+  - SDAR/SMPP Telemetry：`01a0568b-dbfc-7551-b424-a73c7ede0513`
+  - Simulator/Referee：`01a021e4-4af6-76a1-8360-4eba21b0b33a`
 - 联调环境继续使用 `192.168.2.63`；在 Console 发起联合 E2E 前，不由支持会话创建 Task、导航或环境 mutation。
 
 ## J0 Exit
