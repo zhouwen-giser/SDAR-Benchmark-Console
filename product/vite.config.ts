@@ -33,6 +33,18 @@ export default defineConfig(({ mode }) => {
       host: "0.0.0.0",
       port: 4173,
       strictPort: true,
+      proxy: {
+        "/benchmark-api": {
+          target: env.VITE_BENCHMARK_API_UPSTREAM || "http://127.0.0.1:18090",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/benchmark-api/, ""),
+        },
+        "/telemetry-api": {
+          target: env.VITE_TELEMETRY_QUERY_UPSTREAM || "http://127.0.0.1:18080",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/telemetry-api/, ""),
+        },
+      },
     },
     build: {
       sourcemap: true,

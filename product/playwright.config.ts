@@ -19,7 +19,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "VITE_API_MODE=http VITE_BENCHMARK_API_BASE_URL=/benchmark-api VITE_BENCHMARK_API_UPSTREAM=http://127.0.0.1:18090 VITE_TELEMETRY_QUERY_BASE_URL=/telemetry-api pnpm dev",
+    command: `VITE_API_MODE=http VITE_BENCHMARK_API_BASE_URL=/benchmark-api VITE_BENCHMARK_API_UPSTREAM=${process.env.VITE_BENCHMARK_API_UPSTREAM ?? "http://127.0.0.1:18090"} VITE_TELEMETRY_QUERY_BASE_URL=/telemetry-api pnpm build && pnpm preview`,
     url: "http://127.0.0.1:4173/overview",
     reuseExistingServer: true,
     timeout: 120_000,
