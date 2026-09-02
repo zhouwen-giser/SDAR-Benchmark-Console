@@ -4,6 +4,7 @@ import { ReloadOutlined } from "@ant-design/icons";
 import { capabilityMeta } from "../api/capability-map";
 import { consoleApi } from "../api/consoleApi";
 import { ApiStatusTag, PageHeader, SectionCard } from "../components/common";
+import { TypedAnalyticsModule } from "../components/TypedAnalyticsModule";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
 
 const modules = [
@@ -56,7 +57,7 @@ export function AnalyticsPage() {
           const rows = resource?.data.rows ?? [];
           return (
             <SectionCard key={key} title={title} extra={resource && <ApiStatusTag compact meta={resource.meta} />} className={key === "metrics" || key === "quality-trend" ? "analytics-span-6" : "analytics-span-4"}>
-              {query.isLoading ? <div className="page-loading">正在加载 {key}…</div> : query.isError ? <div className="unavailable-card"><span>UNAVAILABLE · {query.error instanceof Error ? query.error.message : "请求失败"}</span></div> : rows.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={`${resource?.meta.availability ?? "unavailable"} · ${resource?.meta.reasonCodes.join("、") || "无数据"}`} /> : <pre className="analytics-module-json">{JSON.stringify(rows.slice(0, 8), null, 2)}</pre>}
+              {query.isLoading ? <div className="page-loading">正在加载 {key}…</div> : query.isError ? <div className="unavailable-card"><span>UNAVAILABLE · {query.error instanceof Error ? query.error.message : "请求失败"}</span></div> : rows.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={`${resource?.meta.availability ?? "unavailable"} · ${resource?.meta.reasonCodes.join("、") || "无数据"}`} /> : <TypedAnalyticsModule moduleKey={key} rows={rows} />}
             </SectionCard>
           );
         })}

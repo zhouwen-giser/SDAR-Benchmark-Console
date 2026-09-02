@@ -2803,6 +2803,28 @@ pre {
   overflow-wrap: anywhere;
 }
 
+.typed-analytics-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.typed-analytics-table code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.typed-cell-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  min-width: 120px;
+}
+
 .typed-resource-toolbar {
   display: flex;
   align-items: center;
