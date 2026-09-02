@@ -2891,6 +2891,17 @@ pre {
   padding: 10px;
 }
 
+.rerun-case-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+
+.rerun-case-grid .ant-checkbox-wrapper {
+  align-items: flex-start;
+  margin-inline-start: 0;
+}
+
 .typed-resource-toolbar {
   display: flex;
   align-items: center;
