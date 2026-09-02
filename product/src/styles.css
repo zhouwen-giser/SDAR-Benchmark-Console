@@ -2878,6 +2878,19 @@ pre {
   justify-content: flex-end;
 }
 
+.completeness-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.completeness-summary-grid .section-card:last-child .ant-card-body {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}
+
 .typed-resource-toolbar {
   display: flex;
   align-items: center;

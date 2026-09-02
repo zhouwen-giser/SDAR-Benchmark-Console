@@ -52,6 +52,7 @@ export const apiCapabilityMap = {
   scoreDistribution: { endpoint: "GET /v1/analytics/score-distribution", operationId: "getAnalyticsScoreDistribution", status: "blocked_data", sourceOfTruth: ch, availabilityReason: "缺少正式统计量时保持 partial/null。" },
   operational: { endpoint: "GET /v1/analytics/operational", operationId: "getAnalyticsOperational", status: "blocked_data", sourceOfTruth: ch, availabilityReason: "缺少运行样本时保持 partial/null。" },
   analytics: { endpoint: "GET /v1/analytics/*", operationId: "analyticsModules", status: "existing", sourceOfTruth: ch },
+  dataCompleteness: { endpoint: "GET /v1/data-completeness", operationId: "getDataCompleteness", status: "new", sourceOfTruth: `${pg} + ${ch} + ${artifact}` },
   reports: { endpoint: "GET/POST /v1/reports", operationId: "getReports", status: "existing", sourceOfTruth: `${pg} + ${artifact}` },
   reportDownload: { endpoint: "GET /v1/reports/{reportId}/download", operationId: "getReportsByReportIdDownload", status: "existing", sourceOfTruth: artifact },
   alerts: { endpoint: "GET/PATCH /v1/attention-items", operationId: "getAttentionItems", status: "existing", sourceOfTruth: pg },

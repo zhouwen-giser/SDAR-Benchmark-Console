@@ -38,6 +38,25 @@ export interface ApiResource<T> {
   meta: CapabilityMeta;
 }
 
+export type DataCompletenessStatus = "complete" | "partial" | "unavailable";
+
+export interface DataCompletenessSectionView {
+  sectionId: string;
+  status: DataCompletenessStatus;
+  expectedCount: number;
+  availableCount: number;
+  reasonCodes: string[];
+  watermark?: string | null;
+  details?: Record<string, unknown>;
+}
+
+export interface DataCompletenessView {
+  schemaVersion: "sdar-benchmark.data-completeness/v1";
+  generatedAt: string;
+  overallStatus: DataCompletenessStatus;
+  sections: DataCompletenessSectionView[];
+}
+
 export interface SnapshotMeta {
   snapshotId: string;
   watermark: string | null;

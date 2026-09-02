@@ -39,6 +39,7 @@ import type {
   CaseResult,
   ComparisonDetail,
   ContextOptionsView,
+  DataCompletenessView,
   EvaluationDetail,
   EvaluationDimensionView,
   EvaluationEvidenceGradeView,
@@ -154,6 +155,7 @@ export interface ConsoleApi {
   getEvidenceUsage(bundleId: string, options?: TransportRequestOptions): Promise<ApiResource<Record<string, unknown>>>;
   getAnalytics(input: OverviewInput): Promise<ApiResource<OverviewSnapshot>>;
   getAnalyticsModule(key: string, input: OverviewInput, options?: TransportRequestOptions): Promise<ApiResource<AnalyticsModuleView>>;
+  getDataCompleteness(options?: TransportRequestOptions): Promise<ApiResource<DataCompletenessView>>;
   listReports(): Promise<ApiResource<ReportRecord[]>>;
   createReport(input: { reportType: "snapshot" | "run" | "comparison" | "evaluation"; sourceId: string; format: "json" | "markdown" | "html" }, options?: TransportRequestOptions): Promise<ApiResource<ReportRecord>>;
   getReportContent(reportId: string, options?: TransportRequestOptions): Promise<ApiResource<ReportContentView>>;
@@ -749,6 +751,26 @@ export class MockConsoleApi {
         watermark: data.snapshot.watermark,
         projectionLagMs: data.snapshot.projectionLagMs,
       }),
+    };
+  }
+
+  async getDataCompleteness(): Promise<ApiResource<DataCompletenessView>> {
+    await sleep(45);
+    return {
+      data: {
+        schemaVersion: "sdar-benchmark.data-completeness/v1",
+        generatedAt: "2026-09-03T00:00:00.000Z",
+        overallStatus: "partial",
+        sections: [
+          { sectionId: "registry", status: "complete", expectedCount: 3, availableCount: 3, reasonCodes: [] },
+          { sectionId: "run", status: "complete", expectedCount: 12, availableCount: 12, reasonCodes: [] },
+          { sectionId: "projection", status: "partial", expectedCount: 12, availableCount: 10, reasonCodes: ["PROJECTION_LAG"], watermark: "2026-09-03T00:00:00.000Z" },
+          { sectionId: "identity", status: "partial", expectedCount: 12, availableCount: 8, reasonCodes: ["UNKNOWN_PROVIDER_IDENTITY"] },
+          { sectionId: "artifact", status: "complete", expectedCount: 36, availableCount: 36, reasonCodes: [] },
+          { sectionId: "formal", status: "unavailable", expectedCount: 12, availableCount: 0, reasonCodes: ["NO_FORMAL_SCORES"] },
+        ],
+      },
+      meta: capabilityMeta("dataCompleteness", { mocked: true, availability: "partial", reasonCodes: ["PROJECTION_LAG", "UNKNOWN_PROVIDER_IDENTITY", "NO_FORMAL_SCORES"] }),
     };
   }
 

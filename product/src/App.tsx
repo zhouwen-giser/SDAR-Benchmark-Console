@@ -19,6 +19,7 @@ import { CaseDetailPage } from "./pages/CaseDetailPage";
 import { EvaluationsPage } from "./pages/EvaluationsPage";
 import { EvidenceBundlesPage } from "./pages/EvidenceBundlesPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { DataCompletenessPage } from "./pages/DataCompletenessPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { AlertsPage } from "./pages/AlertsPage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -93,6 +94,7 @@ function ApplicationRoutes() {
         <Route path="/evidence-bundles/:bundleId" element={<EvidencePage />} />
         <Route path="/evidence/:bundleId" element={<LegacyEvidenceRedirect />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/data-completeness" element={<DataCompletenessPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/settings" element={<SettingsPage />} />

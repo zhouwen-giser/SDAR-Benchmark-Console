@@ -62,6 +62,7 @@ import type {
   ApiResource,
   CaseDetail,
   ComparisonDetail,
+  DataCompletenessView,
   EvaluationDetail,
   EvaluationEvidenceLinksView,
   EvidenceDetail,
@@ -149,6 +150,22 @@ export class LiveHttpConsoleApi implements ConsoleApi {
         watermark: view.snapshot.watermark,
         projectionLagMs: view.snapshot.projectionLagMs,
         contracts: data.contracts,
+        generatedAt: data.generatedAt,
+      }),
+    };
+  }
+
+  async getDataCompleteness(options?: TransportRequestOptions): Promise<ApiResource<DataCompletenessView>> {
+    const data = await this.transport.get<DataCompletenessView>("/v1/data-completeness", options);
+    return {
+      data,
+      meta: capabilityMeta("dataCompleteness", {
+        mocked: false,
+        mode: "http",
+        availability: data.overallStatus === "complete" ? "available" : data.overallStatus,
+        reasonCodes: [...new Set(data.sections.flatMap((section) => section.reasonCodes))],
+        unavailableFields: data.sections.filter((section) => section.status === "unavailable").map((section) => section.sectionId),
+        watermark: data.sections.map((section) => section.watermark).find(Boolean) ?? null,
         generatedAt: data.generatedAt,
       }),
     };
