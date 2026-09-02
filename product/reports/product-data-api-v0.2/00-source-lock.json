@@ -1,7 +1,7 @@
 {
   "schemaVersion": "sdar-benchmark.product-data-api-source-lock/v0.2",
   "goalId": "sdar-benchmark-product-data-api-completion-v0.2",
-  "observedAt": "2026-09-03T07:14:28+08:00",
+  "observedAt": "2026-09-03T07:34:08+08:00",
   "goalPackage": {
     "path": "/home/zhouwen/下载/SDAR_Benchmark_Product_Data_API_Completion_Codex_Goal_Package_V0.2.zip",
     "sha256": "cbda05e69be407ba98789aa96a17b5e6f612bf328120c7e2069f13ffa1d86b2c",
@@ -15,6 +15,9 @@
     "parentPullRequest": 4,
     "parentPullRequestState": "open_draft",
     "targetBranch": "feature/benchmark-product-data-api-v0.2",
+    "targetCommit": "98fde66a3772ae7622c8a0613113fae8f602a7c7",
+    "targetPullRequest": 5,
+    "targetPullRequestState": "open_draft",
     "stackedBase": "codex/ugv-four-case-diagnostic-vertical-v0.1"
   },
   "console": {
@@ -32,7 +35,7 @@
     "verifiedOperationCount": 125,
     "verifiedRouteCount": 125,
     "uniqueOperationIdCount": 125,
-    "contractState": "frozen-reproducible-working-tree",
+    "contractState": "frozen-final-commit",
     "targetOperationCount": 125
   },
   "parentRetargetRequired": false,

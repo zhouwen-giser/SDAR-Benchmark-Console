@@ -48,7 +48,29 @@ rerun API. The browser verified parent/child navigation, parent counts remained
 - `pnpm check`: Vitest `38/38` PASS; API generation/verification, strict
   TypeScript, and production Vite build PASS.
 
-Server-owned 36-repetition regression, 72-repetition demo seed, real
-ClickHouse outage/recovery, Dataset 0.1 compatibility, and final Server commit
-remain part of the shared K11/K12 acceptance report and are not reclassified by
-this Console evidence.
+## Shared Server K11/K12 evidence
+
+- Final Server lock:
+  `98fde66a3772ae7622c8a0613113fae8f602a7c7`; OpenAPI SHA-256
+  `0061c26ae29efea41ceee4686cd308fef6e58340beb92bd2ec3991f250fed4b4`,
+  125/125 operations implemented.
+- Regression Run
+  `run_60d914e2507b9973f3227bc082610b4c5cf19cf6d05ebe0cf190738d33db2d4b`
+  reached 36/36 terminal repetitions.
+- Demo executed six Runs across three immutable candidate snapshots and reached
+  72/72 terminal repetitions.
+- The standard projector converged to 1,469 ClickHouse rows with 1,469 distinct
+  Product identities and zero pending Product outbox rows. A controlled
+  ClickHouse outage returned typed 503 only for projection-backed Analytics;
+  PostgreSQL Run details and Artifact endpoints remained available, and
+  recovery introduced no duplicates.
+- Dataset 0.1 remained byte-for-byte unchanged and passed the legacy
+  Server/standard-worker restart E2E. Worker restart also left the v0.2
+  regression Run at exactly 36 repetitions with no duplicate authority rows.
+- Server `pnpm verify` passed 656/656 unit and 65/65 contract tests plus build,
+  14 migrations, generated assets, architecture, and OpenAPI checks. Focused
+  real-PostgreSQL integration passed 11/11; live Skills and Providers responses
+  passed Ajv 2020 validation against the frozen schemas.
+
+All of this evidence remains Development-only: no Formal Score, Baseline,
+Release Gate PASS, or live-native qualification is claimed.
