@@ -23,6 +23,8 @@ export const apiCapabilityMap = {
   runCreate: { endpoint: "POST /v1/benchmark-runs", operationId: "createBenchmarkRun", status: "existing", sourceOfTruth: pg },
   runCancel: { endpoint: "POST /v1/benchmark-runs/{runId}/cancel", operationId: "cancelBenchmarkRun", status: "existing", sourceOfTruth: pg },
   runAuthority: { endpoint: "GET /v1/benchmark-runs/{runId}", operationId: "getBenchmarkRunAuthorityStatus", status: "existing", sourceOfTruth: pg },
+  runRepetitions: { endpoint: "GET /v1/benchmark-runs/{runId}/repetitions", operationId: "listBenchmarkRunRepetitions", status: "existing", sourceOfTruth: pg },
+  runEvents: { endpoint: "GET /v1/benchmark-runs/{runId}/events", operationId: "listBenchmarkRunEvents", status: "existing", sourceOfTruth: pg },
   runDashboard: { endpoint: "GET /v1/benchmark-runs/{runId}/dashboard", operationId: "getBenchmarkRunsByRunIdDashboard", status: "existing", sourceOfTruth: `${pg} + ${ch}` },
   runCases: { endpoint: "GET /v1/benchmark-runs/{runId}/cases", operationId: "listBenchmarkRunCases", status: "existing", sourceOfTruth: ch },
   diagnosticQualification: { endpoint: "GET /v1/benchmark-runs/{runId}/qualification", operationId: "getDiagnosticRunQualification", status: "new", sourceOfTruth: `${pg} + ${artifact}` },

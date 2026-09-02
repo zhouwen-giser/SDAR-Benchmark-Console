@@ -98,6 +98,8 @@ describe("LiveHttpConsoleApi contract adapter", () => {
       http.post(`${base}/v1/benchmark-runs/run-dev-1/cancel`, () => mark("cancel", { ...runStatus, cancellationRequested: true, status: "cancelling" })),
       http.get(`${base}/v1/benchmark-runs/run-dev-1/qualification`, () => mark("qualification", envelope("getDiagnosticRunQualification", { runId: "run-dev-1", formalizationStatus: "diagnostic", overallScore: null, releaseGate: "unavailable", artifact, qualification: {} }))),
       http.get(`${base}/v1/benchmark-runs/run-dev-1/external-capabilities`, () => mark("capabilities", envelope("listDiagnosticExternalCapabilities", [artifact]))),
+      http.get(`${base}/v1/benchmark-runs/run-dev-1/repetitions`, () => mark("run-repetitions", envelope("listBenchmarkRunRepetitions", [{ repetitionId: "rep-1", caseExecutionId: "case-exec-1", caseId: "UGV-NODE-001", state: "completed" }]))),
+      http.get(`${base}/v1/benchmark-runs/run-dev-1/events`, () => mark("run-events", envelope("listBenchmarkRunEvents", [{ scope: "run", revision: 1, eventKind: "run.created", eventHash: `sha256:${"c".repeat(64)}`, createdAt: "2026-09-02T15:00:00Z" }]))),
       http.get(`${base}/v1/benchmark-runs/run-dev-1/repetitions/rep-1`, () => mark("repetition", envelope("getDiagnosticRepetition", { runId: "run-dev-1", repetitionId: "rep-1", caseExecutionId: "case-exec-1", benchmarkCaseVersionId: "UGV-NODE-001/0.1", repeatIndex: 0, state: "completed", candidateTaskId: null, contextId: null, episodeId: null, environmentSnapshotId: null, terminalState: "completed", authorityRevision: 2, failureClass: null, failureCode: null, createdAt: "2026-09-02T15:00:00Z", submittedAt: null, terminalAt: "2026-09-02T15:00:02Z", completedAt: "2026-09-02T15:00:02Z", updatedAt: "2026-09-02T15:00:02Z" }))),
       http.get(`${base}/v1/benchmark-runs/run-dev-1/repetitions/rep-1/artifacts`, () => mark("artifacts", envelope("listDiagnosticRepetitionArtifacts", [artifact]))),
       http.get(`${base}/v1/benchmark-runs/run-dev-1/repetitions/rep-1/execution-trace`, () => mark("trace", envelope("getDiagnosticExecutionTrace", artifact))),
@@ -111,6 +113,8 @@ describe("LiveHttpConsoleApi contract adapter", () => {
     await Promise.all([
       api.getDiagnosticRunQualification("run-dev-1"),
       api.listDiagnosticExternalCapabilities("run-dev-1"),
+      api.listBenchmarkRunRepetitions("run-dev-1"),
+      api.listBenchmarkRunEvents("run-dev-1"),
       api.getDiagnosticRepetition("run-dev-1", "rep-1"),
       api.listDiagnosticRepetitionArtifacts("run-dev-1", "rep-1"),
       api.getDiagnosticExecutionTrace("run-dev-1", "rep-1"),
@@ -118,7 +122,7 @@ describe("LiveHttpConsoleApi contract adapter", () => {
       api.getDiagnosticFaultAttribution("run-dev-1", "rep-1"),
     ]);
     expect(cancelled.data).toMatchObject({ status: "cancelling", cancellationRequested: true });
-    expect(calls).toEqual(expect.arrayContaining(["create", "authority", "cancel", "qualification", "capabilities", "repetition", "artifacts", "trace", "physical", "fault"]));
+    expect(calls).toEqual(expect.arrayContaining(["create", "authority", "cancel", "qualification", "capabilities", "run-repetitions", "run-events", "repetition", "artifacts", "trace", "physical", "fault"]));
   });
 
   it("preserves envelope partial/null semantics instead of manufacturing score zero", async () => {

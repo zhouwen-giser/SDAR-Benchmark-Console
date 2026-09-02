@@ -10,6 +10,8 @@ import type {
   DiagnosticArtifact,
   DiagnosticQualification,
   DiagnosticRepetition,
+  RunEvent,
+  RunRepetition,
 } from "./generated/model";
 import {
   buildOverview,
@@ -113,6 +115,8 @@ export interface ConsoleApi {
   createBenchmarkRun(input: CreateBenchmarkRun, options?: TransportRequestOptions): Promise<ApiResource<BenchmarkRunStatus>>;
   cancelBenchmarkRun(runId: string, reason?: string, options?: TransportRequestOptions): Promise<ApiResource<BenchmarkRunStatus>>;
   getBenchmarkRunAuthorityStatus(runId: string, options?: TransportRequestOptions): Promise<ApiResource<BenchmarkRunStatus>>;
+  listBenchmarkRunRepetitions(runId: string, options?: TransportRequestOptions): Promise<ApiResource<RunRepetition[]>>;
+  listBenchmarkRunEvents(runId: string, options?: TransportRequestOptions): Promise<ApiResource<RunEvent[]>>;
   getDiagnosticRunQualification(runId: string, options?: TransportRequestOptions): Promise<ApiResource<DiagnosticQualification>>;
   listDiagnosticExternalCapabilities(runId: string, options?: TransportRequestOptions): Promise<ApiResource<DiagnosticArtifact[]>>;
   getDiagnosticRepetition(runId: string, repetitionId: string, options?: TransportRequestOptions): Promise<ApiResource<DiagnosticRepetition>>;
@@ -418,6 +422,22 @@ export class MockConsoleApi {
     return {
       data: { ...mockRunAuthority(mockDevelopmentRequest("simulated"), "running"), runId },
       meta: capabilityMeta("runAuthority", { mocked: true }),
+    };
+  }
+
+  async listBenchmarkRunRepetitions(runId: string): Promise<ApiResource<RunRepetition[]>> {
+    const dashboard = await this.getRun(runId);
+    return {
+      data: dashboard.data.repetitions as RunRepetition[],
+      meta: capabilityMeta("runRepetitions", { mocked: true }),
+    };
+  }
+
+  async listBenchmarkRunEvents(runId: string): Promise<ApiResource<RunEvent[]>> {
+    const dashboard = await this.getRun(runId);
+    return {
+      data: dashboard.data.events as RunEvent[],
+      meta: capabilityMeta("runEvents", { mocked: true }),
     };
   }
 

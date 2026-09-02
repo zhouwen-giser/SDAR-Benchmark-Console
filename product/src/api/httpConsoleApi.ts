@@ -220,6 +220,22 @@ export class LiveHttpConsoleApi implements ConsoleApi {
     return { data, meta: capabilityMeta("runAuthority", { mocked: false, mode: "http" }) };
   }
 
+  async listBenchmarkRunRepetitions(runId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<RunRepetitionListEnvelope>(
+      `/v1/benchmark-runs/${part(runId)}/repetitions`,
+      options,
+    );
+    return mapEnvelope("runRepetitions", envelope, (data) => data);
+  }
+
+  async listBenchmarkRunEvents(runId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<RunEventListEnvelope>(
+      `/v1/benchmark-runs/${part(runId)}/events`,
+      options,
+    );
+    return mapEnvelope("runEvents", envelope, (data) => data);
+  }
+
   async getDiagnosticRunQualification(runId: string, options?: TransportRequestOptions) {
     const envelope = await this.transport.get<DiagnosticQualificationEnvelope>(
       `/v1/benchmark-runs/${part(runId)}/qualification`,

@@ -7,7 +7,7 @@ import { consoleApi } from "../api/consoleApi";
 import { capabilityMeta } from "../api/capability-map";
 import { ApiStatusTag, PageHeader, SectionCard } from "../components/common";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
-import type { DiagnosticArtifact, RunRepetition } from "../api/generated/model";
+import type { RunEvent, RunRepetition } from "../api/generated/model";
 import type { CaseResult } from "../types";
 import { displayValue, failureTypeName, riskName, statusName, trackName, verdictName } from "../utils/format";
 
@@ -45,6 +45,18 @@ export function RunDetailPage() {
     retry: false,
     refetchInterval: authority.data && !terminalStates.has(authority.data.data.status) ? 3_000 : false,
   });
+  const runRepetitions = useQuery({
+    queryKey: ["run-repetitions", runId],
+    queryFn: () => consoleApi.listBenchmarkRunRepetitions(runId),
+    retry: false,
+    refetchInterval: (query) => query.state.data && authority.data && terminalStates.has(authority.data.data.status) ? false : 2_500,
+  });
+  const runEvents = useQuery({
+    queryKey: ["run-events", runId],
+    queryFn: () => consoleApi.listBenchmarkRunEvents(runId),
+    retry: false,
+    refetchInterval: (query) => query.state.data && authority.data && terminalStates.has(authority.data.data.status) ? false : 2_500,
+  });
   const capabilities = useQuery({
     queryKey: ["diagnostic-capabilities", runId],
     queryFn: () => consoleApi.listDiagnosticExternalCapabilities(runId),
@@ -53,8 +65,8 @@ export function RunDetailPage() {
   });
 
   const repetitions = useMemo(
-    () => extractRepetitions(dashboard.data?.data.repetitions),
-    [dashboard.data?.data.repetitions],
+    () => extractRepetitions(runRepetitions.data?.data ?? dashboard.data?.data.repetitions),
+    [dashboard.data?.data.repetitions, runRepetitions.data?.data],
   );
   const repetitionId = selectedRepetitionId ?? repetitions[0]?.repetitionId;
   const diagnosticOptions = {
@@ -192,6 +204,7 @@ export function RunDetailPage() {
       {dashboard.data && (
         <DashboardProjection
           data={dashboard.data.data}
+          events={runEvents.data?.data}
           navigateWithContext={navigateWithContext}
         />
       )}
@@ -206,9 +219,11 @@ export function RunDetailPage() {
 
 function DashboardProjection({
   data,
+  events,
   navigateWithContext,
 }: {
   data: Awaited<ReturnType<typeof consoleApi.getRun>>["data"];
+  events?: RunEvent[];
   navigateWithContext: (path: string) => void;
 }) {
   const caseMeta = capabilityMeta("runCases", {
@@ -228,7 +243,7 @@ function DashboardProjection({
   ];
   return (
     <div className="detail-grid">
-      <SectionCard title="真实 Run Events" className="detail-span-6"><pre>{JSON.stringify(data.events, null, 2)}</pre></SectionCard>
+      <SectionCard title="真实 Run Events" className="detail-span-6"><pre>{JSON.stringify(events ?? data.events, null, 2)}</pre></SectionCard>
       <SectionCard title="Evidence Funnel / Release Gate 投影" className="detail-span-6"><pre>{JSON.stringify({ evidenceFunnel: data.evidenceFunnel, releaseGate: data.releaseGateDetail }, null, 2)}</pre></SectionCard>
       <SectionCard title="用例矩阵" extra={<ApiStatusTag compact meta={caseMeta} />} className="detail-span-12 table-card">
         <Table<CaseResult> rowKey="caseId" columns={columns} dataSource={data.cases} pagination={false} scroll={{ x: 980 }} />
