@@ -1,8 +1,8 @@
 {
   "repository": "zhouwen-giser/sdar-benchmark-server",
-  "branch": "feature/v0.1-console-api",
-  "commit": "900ee5f004b3ebb649ad775df8d0015a9575fed0",
-  "openapiSha256": "6d7c46f4f85e9a8ce936bfa71d31dcd6909a6a2481ac490dbfb2623524569910",
-  "operationCount": 105,
-  "syncedAt": "2026-08-20T10:12:58Z"
+  "branch": "codex/ugv-four-case-diagnostic-vertical-v0.1",
+  "commit": "1d91138b56eb70e4edebe4c72fd0a824820ccf87",
+  "openapiSha256": "e6e675aa1245f7f4e530046a4cb03d6e890aabc37f60afb5372119191f32cd00",
+  "operationCount": 114,
+  "syncedAt": "2026-09-02T16:54:48Z"
 }

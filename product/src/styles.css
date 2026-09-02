@@ -2713,6 +2713,83 @@ pre {
   overflow-wrap: anywhere;
 }
 
+/* Development run creation and diagnostics */
+
+.run-create-steps {
+  margin-bottom: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  background: #0d1e2c;
+}
+
+.run-create-grid,
+.preflight-grid,
+.diagnostic-boundary-grid,
+.diagnostic-layer-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.run-create-grid {
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  margin: 10px 0;
+}
+
+.run-mode-selector {
+  display: block;
+  margin-top: 8px;
+}
+
+.preflight-grid,
+.diagnostic-boundary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.preflight-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) auto minmax(180px, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.preflight-row small,
+.diagnostic-muted {
+  color: var(--text-3);
+}
+
+.preflight-warning {
+  margin-top: 10px;
+}
+
+.diagnostic-layer-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.diagnostic-layer {
+  min-height: 126px;
+  padding: 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: 5px;
+  background: #0d1e2c;
+}
+
+.diagnostic-layer h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+@media (max-width: 1100px) {
+  .run-create-grid,
+  .preflight-grid,
+  .diagnostic-boundary-grid,
+  .diagnostic-layer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1540px) {
   .case-identity-grid {
     grid-template-columns: 180px minmax(0, 1fr) 130px 130px;

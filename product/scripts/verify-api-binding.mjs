@@ -10,10 +10,17 @@ const pathsSection = spec.slice(spec.indexOf("\npaths:\n"), spec.indexOf("\ncomp
 const operationCount = [...pathsSection.matchAll(/^\s+operationId:\s+\S+/gmu)].length;
 
 if (sha256 !== lock.openapiSha256) throw new Error(`OpenAPI SHA-256 drift: ${sha256}`);
-if (operationCount !== lock.operationCount || operationCount !== 105) throw new Error(`Expected 105 operations, found ${operationCount}`);
+if (operationCount !== lock.operationCount || operationCount !== 114) throw new Error(`Expected 114 operations, found ${operationCount}`);
 
 const requiredPaths = [
   "/health", "/ready", "/v1/context/options", "/v1/dashboard/overview", "/v1/benchmark-runs",
+  "/v1/benchmark-run-preflights", "/v1/benchmark-run-presets/ugv-diagnostic-development",
+  "/v1/benchmark-runs/{runId}/qualification", "/v1/benchmark-runs/{runId}/external-capabilities",
+  "/v1/benchmark-runs/{runId}/repetitions/{repetitionId}",
+  "/v1/benchmark-runs/{runId}/repetitions/{repetitionId}/artifacts",
+  "/v1/benchmark-runs/{runId}/repetitions/{repetitionId}/execution-trace",
+  "/v1/benchmark-runs/{runId}/repetitions/{repetitionId}/physical-verification",
+  "/v1/benchmark-runs/{runId}/repetitions/{repetitionId}/fault-attribution",
   "/v1/case-results", "/v1/benchmark-cases/{caseId}", "/v1/comparisons/{comparisonId}/dashboard",
   "/v1/evaluations", "/v1/evaluations/{evaluationId}/telemetry-provenance",
   "/v1/evaluation-input-snapshots/{snapshotId}", "/v1/evidence-bundles/{bundleId}/usage",

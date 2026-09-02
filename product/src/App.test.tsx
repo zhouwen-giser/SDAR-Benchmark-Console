@@ -9,6 +9,20 @@ afterEach(() => {
 });
 
 describe("SDAR Benchmark Console integration", () => {
+  it("preflights the four-case Development run before enabling creation", async () => {
+    window.history.replaceState(null, "", "/runs/new");
+    render(<App />);
+    const user = userEvent.setup();
+    expect(await screen.findByRole("heading", { name: "新建 Benchmark Run" })).toBeInTheDocument();
+    expect(screen.getByText(/所有结果均为 NOT FORMAL QUALIFICATION/)).toBeInTheDocument();
+    const create = screen.getByRole("button", { name: /创建四 Case Run/ });
+    expect(create).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: /执行预检/ }));
+    expect(await screen.findByText("ready_with_substitutions")).toBeInTheDocument();
+    expect(create).toBeEnabled();
+    expect(screen.getByText("UGV-XCHAIN-003")).toBeInTheDocument();
+  });
+
   it("shows the blocked decision and explicit API/demo-data provenance", async () => {
     window.history.replaceState(null, "", "/overview?scenario=blocked&dataState=loaded");
     render(<App />);

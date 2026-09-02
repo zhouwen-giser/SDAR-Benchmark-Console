@@ -8,6 +8,7 @@ import zhCN from "antd/locale/zh_CN";
 import { AppShell } from "./layouts/AppShell";
 import { OverviewPage } from "./pages/OverviewPage";
 import { RunsPage } from "./pages/RunsPage";
+import { RunCreatePage } from "./pages/RunCreatePage";
 import { RunDetailPage } from "./pages/RunDetailPage";
 import { ComparePage } from "./pages/ComparePage";
 import { CasesPage } from "./pages/CasesPage";
@@ -79,6 +80,7 @@ function ApplicationRoutes() {
         <Route path="/" element={<RootRedirect />} />
         <Route path="/overview" element={<OverviewPage />} />
         <Route path="/runs" element={<RunsPage />} />
+        <Route path="/runs/new" element={<RunCreatePage />} />
         <Route path="/runs/:runId" element={<RunDetailPage />} />
         <Route path="/benchmark-runs/:runId" element={<RunDetailPage />} />
         <Route path="/compare/:comparisonId" element={<ComparePage />} />

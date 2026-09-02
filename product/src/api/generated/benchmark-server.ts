@@ -57,6 +57,12 @@ import type {
   DashboardOverviewResponse,
   DatasetEnvelope,
   DatasetListEnvelope,
+  DevelopmentRunPreflight,
+  DevelopmentRunPreset,
+  DiagnosticArtifactEnvelope,
+  DiagnosticArtifactListEnvelope,
+  DiagnosticQualificationEnvelope,
+  DiagnosticRepetitionEnvelope,
   EpisodeReadinessQueryEnvelope,
   EvaluationBindingEnvelope,
   EvaluationCatalogEnvelope,
@@ -125,6 +131,8 @@ import type {
   ListBenchmarkRunResultsParams,
   ListCandidateAnalyticsParams,
   ListComparisonCasesParams,
+  ListDiagnosticExternalCapabilitiesParams,
+  ListDiagnosticRepetitionArtifactsParams,
   ListEpisodeEvaluationsParams,
   ListProviderAnalyticsParams,
   ListRiskAnalyticsParams,
@@ -519,6 +527,103 @@ export const getEpisodeReadiness = async (episodeId: string,
 
 
 /**
+ * @summary Resolve a side-effect-free UGV Development execution plan
+ */
+export type preflightBenchmarkRunResponse200 = {
+  data: DevelopmentRunPreflight
+  status: 200
+}
+
+export type preflightBenchmarkRunResponse400 = {
+  data: InvalidRequestResponse
+  status: 400
+}
+
+export type preflightBenchmarkRunResponse503 = {
+  data: UnavailableResponse
+  status: 503
+}
+
+export type preflightBenchmarkRunResponseSuccess = (preflightBenchmarkRunResponse200) & {
+  headers: Headers;
+};
+export type preflightBenchmarkRunResponseError = (preflightBenchmarkRunResponse400 | preflightBenchmarkRunResponse503) & {
+  headers: Headers;
+};
+
+export type preflightBenchmarkRunResponse = (preflightBenchmarkRunResponseSuccess | preflightBenchmarkRunResponseError)
+
+export const getPreflightBenchmarkRunUrl = () => {
+
+
+
+
+  return `/v1/benchmark-run-preflights`
+}
+
+export const preflightBenchmarkRun = async (createBenchmarkRun: CreateBenchmarkRun, options?: RequestInit): Promise<preflightBenchmarkRunResponse> => {
+
+  const res = await fetch(getPreflightBenchmarkRunUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createBenchmarkRun,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: preflightBenchmarkRunResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as preflightBenchmarkRunResponse
+}
+
+
+
+/**
+ * @summary Discover the Server-configured four-case UGV Development request
+ */
+export type getUgvDiagnosticDevelopmentPresetResponse200 = {
+  data: DevelopmentRunPreset
+  status: 200
+}
+
+export type getUgvDiagnosticDevelopmentPresetResponseSuccess = (getUgvDiagnosticDevelopmentPresetResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getUgvDiagnosticDevelopmentPresetResponse = (getUgvDiagnosticDevelopmentPresetResponseSuccess)
+
+export const getGetUgvDiagnosticDevelopmentPresetUrl = () => {
+
+
+
+
+  return `/v1/benchmark-run-presets/ugv-diagnostic-development`
+}
+
+export const getUgvDiagnosticDevelopmentPreset = async ( options?: RequestInit): Promise<getUgvDiagnosticDevelopmentPresetResponse> => {
+
+  const res = await fetch(getGetUgvDiagnosticDevelopmentPresetUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getUgvDiagnosticDevelopmentPresetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getUgvDiagnosticDevelopmentPresetResponse
+}
+
+
+
+/**
  * @summary Create a Benchmark run from exact immutable references
  */
 export type createBenchmarkRunResponse202 = {
@@ -687,6 +792,363 @@ export const getBenchmarkRunAuthorityStatus = async (runId: string, options?: Re
   
   const data: getBenchmarkRunAuthorityStatusResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkRunAuthorityStatusResponse
+}
+
+
+
+/**
+ * @summary Get diagnostic-only run qualification authority
+ */
+export type getDiagnosticRunQualificationResponse200 = {
+  data: DiagnosticQualificationEnvelope
+  status: 200
+}
+
+export type getDiagnosticRunQualificationResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getDiagnosticRunQualificationResponseSuccess = (getDiagnosticRunQualificationResponse200) & {
+  headers: Headers;
+};
+export type getDiagnosticRunQualificationResponseError = (getDiagnosticRunQualificationResponse404) & {
+  headers: Headers;
+};
+
+export type getDiagnosticRunQualificationResponse = (getDiagnosticRunQualificationResponseSuccess | getDiagnosticRunQualificationResponseError)
+
+export const getGetDiagnosticRunQualificationUrl = (runId: string,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/qualification`
+}
+
+export const getDiagnosticRunQualification = async (runId: string, options?: RequestInit): Promise<getDiagnosticRunQualificationResponse> => {
+
+  const res = await fetch(getGetDiagnosticRunQualificationUrl(runId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getDiagnosticRunQualificationResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getDiagnosticRunQualificationResponse
+}
+
+
+
+/**
+ * @summary List immutable external capability probe Artifacts
+ */
+export type listDiagnosticExternalCapabilitiesResponse200 = {
+  data: DiagnosticArtifactListEnvelope
+  status: 200
+}
+
+export type listDiagnosticExternalCapabilitiesResponseSuccess = (listDiagnosticExternalCapabilitiesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listDiagnosticExternalCapabilitiesResponse = (listDiagnosticExternalCapabilitiesResponseSuccess)
+
+export const getListDiagnosticExternalCapabilitiesUrl = (runId: string,
+    params?: ListDiagnosticExternalCapabilitiesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/benchmark-runs/${runId}/external-capabilities?${stringifiedParams}` : `/v1/benchmark-runs/${runId}/external-capabilities`
+}
+
+export const listDiagnosticExternalCapabilities = async (runId: string,
+    params?: ListDiagnosticExternalCapabilitiesParams, options?: RequestInit): Promise<listDiagnosticExternalCapabilitiesResponse> => {
+
+  const res = await fetch(getListDiagnosticExternalCapabilitiesUrl(runId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listDiagnosticExternalCapabilitiesResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listDiagnosticExternalCapabilitiesResponse
+}
+
+
+
+/**
+ * @summary Get a diagnostic repetition authority projection
+ */
+export type getDiagnosticRepetitionResponse200 = {
+  data: DiagnosticRepetitionEnvelope
+  status: 200
+}
+
+export type getDiagnosticRepetitionResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getDiagnosticRepetitionResponseSuccess = (getDiagnosticRepetitionResponse200) & {
+  headers: Headers;
+};
+export type getDiagnosticRepetitionResponseError = (getDiagnosticRepetitionResponse404) & {
+  headers: Headers;
+};
+
+export type getDiagnosticRepetitionResponse = (getDiagnosticRepetitionResponseSuccess | getDiagnosticRepetitionResponseError)
+
+export const getGetDiagnosticRepetitionUrl = (runId: string,
+    repetitionId: string,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/repetitions/${repetitionId}`
+}
+
+export const getDiagnosticRepetition = async (runId: string,
+    repetitionId: string, options?: RequestInit): Promise<getDiagnosticRepetitionResponse> => {
+
+  const res = await fetch(getGetDiagnosticRepetitionUrl(runId,repetitionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getDiagnosticRepetitionResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getDiagnosticRepetitionResponse
+}
+
+
+
+/**
+ * @summary List immutable typed Artifacts for a diagnostic repetition
+ */
+export type listDiagnosticRepetitionArtifactsResponse200 = {
+  data: DiagnosticArtifactListEnvelope
+  status: 200
+}
+
+export type listDiagnosticRepetitionArtifactsResponseSuccess = (listDiagnosticRepetitionArtifactsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listDiagnosticRepetitionArtifactsResponse = (listDiagnosticRepetitionArtifactsResponseSuccess)
+
+export const getListDiagnosticRepetitionArtifactsUrl = (runId: string,
+    repetitionId: string,
+    params?: ListDiagnosticRepetitionArtifactsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/benchmark-runs/${runId}/repetitions/${repetitionId}/artifacts?${stringifiedParams}` : `/v1/benchmark-runs/${runId}/repetitions/${repetitionId}/artifacts`
+}
+
+export const listDiagnosticRepetitionArtifacts = async (runId: string,
+    repetitionId: string,
+    params?: ListDiagnosticRepetitionArtifactsParams, options?: RequestInit): Promise<listDiagnosticRepetitionArtifactsResponse> => {
+
+  const res = await fetch(getListDiagnosticRepetitionArtifactsUrl(runId,repetitionId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listDiagnosticRepetitionArtifactsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listDiagnosticRepetitionArtifactsResponse
+}
+
+
+
+/**
+ * @summary Get the latest immutable execution-trace Artifact
+ */
+export type getDiagnosticExecutionTraceResponse200 = {
+  data: DiagnosticArtifactEnvelope
+  status: 200
+}
+
+export type getDiagnosticExecutionTraceResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getDiagnosticExecutionTraceResponseSuccess = (getDiagnosticExecutionTraceResponse200) & {
+  headers: Headers;
+};
+export type getDiagnosticExecutionTraceResponseError = (getDiagnosticExecutionTraceResponse404) & {
+  headers: Headers;
+};
+
+export type getDiagnosticExecutionTraceResponse = (getDiagnosticExecutionTraceResponseSuccess | getDiagnosticExecutionTraceResponseError)
+
+export const getGetDiagnosticExecutionTraceUrl = (runId: string,
+    repetitionId: string,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/repetitions/${repetitionId}/execution-trace`
+}
+
+export const getDiagnosticExecutionTrace = async (runId: string,
+    repetitionId: string, options?: RequestInit): Promise<getDiagnosticExecutionTraceResponse> => {
+
+  const res = await fetch(getGetDiagnosticExecutionTraceUrl(runId,repetitionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getDiagnosticExecutionTraceResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getDiagnosticExecutionTraceResponse
+}
+
+
+
+/**
+ * @summary Get independent physical-verification Artifact
+ */
+export type getDiagnosticPhysicalVerificationResponse200 = {
+  data: DiagnosticArtifactEnvelope
+  status: 200
+}
+
+export type getDiagnosticPhysicalVerificationResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getDiagnosticPhysicalVerificationResponseSuccess = (getDiagnosticPhysicalVerificationResponse200) & {
+  headers: Headers;
+};
+export type getDiagnosticPhysicalVerificationResponseError = (getDiagnosticPhysicalVerificationResponse404) & {
+  headers: Headers;
+};
+
+export type getDiagnosticPhysicalVerificationResponse = (getDiagnosticPhysicalVerificationResponseSuccess | getDiagnosticPhysicalVerificationResponseError)
+
+export const getGetDiagnosticPhysicalVerificationUrl = (runId: string,
+    repetitionId: string,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/repetitions/${repetitionId}/physical-verification`
+}
+
+export const getDiagnosticPhysicalVerification = async (runId: string,
+    repetitionId: string, options?: RequestInit): Promise<getDiagnosticPhysicalVerificationResponse> => {
+
+  const res = await fetch(getGetDiagnosticPhysicalVerificationUrl(runId,repetitionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getDiagnosticPhysicalVerificationResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getDiagnosticPhysicalVerificationResponse
+}
+
+
+
+/**
+ * @summary Get deterministic fault-attribution Artifact
+ */
+export type getDiagnosticFaultAttributionResponse200 = {
+  data: DiagnosticArtifactEnvelope
+  status: 200
+}
+
+export type getDiagnosticFaultAttributionResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getDiagnosticFaultAttributionResponseSuccess = (getDiagnosticFaultAttributionResponse200) & {
+  headers: Headers;
+};
+export type getDiagnosticFaultAttributionResponseError = (getDiagnosticFaultAttributionResponse404) & {
+  headers: Headers;
+};
+
+export type getDiagnosticFaultAttributionResponse = (getDiagnosticFaultAttributionResponseSuccess | getDiagnosticFaultAttributionResponseError)
+
+export const getGetDiagnosticFaultAttributionUrl = (runId: string,
+    repetitionId: string,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/repetitions/${repetitionId}/fault-attribution`
+}
+
+export const getDiagnosticFaultAttribution = async (runId: string,
+    repetitionId: string, options?: RequestInit): Promise<getDiagnosticFaultAttributionResponse> => {
+
+  const res = await fetch(getGetDiagnosticFaultAttributionUrl(runId,repetitionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getDiagnosticFaultAttributionResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getDiagnosticFaultAttributionResponse
 }
 
 
