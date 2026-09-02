@@ -57,6 +57,20 @@ describe("SDAR Benchmark Console integration", () => {
     expect(screen.queryByText(/设计中/)).not.toBeInTheDocument();
   });
 
+  it("renders Evaluation resources as typed views with raw data behind Debug", async () => {
+    window.history.replaceState(null, "", "/evaluations/eval-mcp17?tab=readiness");
+    render(<App />);
+    const user = userEvent.setup();
+    expect(await screen.findByRole("heading", { name: /评价结果 eval-mcp17/ })).toBeInTheDocument();
+    expect(await screen.findByText("Source Evidence")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "查看原始数据" })).toBeInTheDocument();
+    expect(document.querySelector(".evaluation-tab-json")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("tab", { name: "M1–M15" }));
+    expect(await screen.findByRole("columnheader", { name: "Metric" })).toBeInTheDocument();
+    expect(document.querySelector(".evaluation-tab-json")).not.toBeInTheDocument();
+  });
+
   it("renders Case contract and resource registry detail routes", async () => {
     window.history.replaceState(null, "", "/cases/MCP-RESTART-017");
     render(<App />);

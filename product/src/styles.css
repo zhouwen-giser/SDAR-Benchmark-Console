@@ -2781,6 +2781,43 @@ pre {
   font-size: 12px;
 }
 
+.typed-resource-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.typed-source-table {
+  margin-top: 16px;
+}
+
+.typed-reference-list {
+  display: grid;
+  gap: 4px;
+  max-width: 360px;
+}
+
+.typed-reference-list code,
+.typed-source-table code {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.debug-payload-json {
+  margin-top: 16px;
+  padding: 14px;
+  max-height: calc(100vh - 190px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(3, 10, 20, 0.72);
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 1100px) {
   .run-create-grid,
   .preflight-grid,

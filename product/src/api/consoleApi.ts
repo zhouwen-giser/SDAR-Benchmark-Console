@@ -42,6 +42,7 @@ import type {
   EvaluationDetail,
   EvaluationDimensionView,
   EvaluationEvidenceGradeView,
+  EvaluationEvidenceLinksView,
   EvaluationFatalView,
   EvaluationFindingView,
   EvaluationHardGateView,
@@ -137,7 +138,7 @@ export interface ConsoleApi {
   getEvaluationMetrics(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationMetricView[]>>;
   getEvaluationDimensions(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationDimensionView[]>>;
   getEvaluationFindings(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationFindingView[]>>;
-  getEvaluationEvidenceLinks(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<Record<string, unknown>>>;
+  getEvaluationEvidenceLinks(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationEvidenceLinksView>>;
   getTelemetryProvenance(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<TelemetryProvenanceView>>;
   listInputSnapshots(episodeId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationInputSnapshotView[]>>;
   getLatestInputSnapshot(episodeId: string, identity: { profileVersionId: string; requirementSetId: string; requirementSetVersion: number }, options?: TransportRequestOptions): Promise<ApiResource<EvaluationInputSnapshotView>>;
@@ -575,6 +576,133 @@ export class MockConsoleApi {
         watermark: "2026-08-15T20:31:42Z",
         projectionLagMs: 3200,
       }),
+    };
+  }
+
+  async getEvaluationHeader(evaluationId: string): Promise<ApiResource<EvaluationHeaderView>> {
+    const detail = (await this.getEvaluation(evaluationId)).data;
+    return {
+      data: {
+        evaluationId: detail.evaluationId,
+        caseId: detail.caseId,
+        episodeId: detail.episodeId,
+        origin: detail.origin,
+        profileVersionId: detail.profile,
+        bundleSnapshotId: detail.bundleId,
+        readiness: detail.readiness.evaluation,
+        scoreStatus: detail.scoreStatus,
+        qualityScore: detail.qualityScore,
+        level: detail.level,
+        passed: detail.passed,
+        createdAt: "2026-08-15T20:31:42Z",
+      },
+      meta: capabilityMeta("evaluation", { mocked: true }),
+    };
+  }
+
+  async getEvaluationReadiness(evaluationId: string): Promise<ApiResource<EvaluationReadinessView>> {
+    const detail = (await this.getEvaluation(evaluationId)).data;
+    return {
+      data: {
+        sourceEvidenceReadiness: detail.readiness.source,
+        evaluationReadiness: detail.readiness.evaluation,
+        missingFamilies: detail.readiness.missing,
+        conflictingFamilies: detail.readiness.conflicts,
+        reasonCodes: detail.readiness.missing.length > 0 ? ["EVIDENCE_FAMILY_MISSING"] : [],
+      },
+      meta: capabilityMeta("evaluation", { mocked: true }),
+    };
+  }
+
+  async getEvaluationEvidenceGrades(evaluationId: string): Promise<ApiResource<EvaluationEvidenceGradeView[]>> {
+    const detail = (await this.getEvaluation(evaluationId)).data;
+    const families = ["canonical", "domain", "provider"];
+    return {
+      data: families.map((family) => ({
+        family,
+        grade: detail.readiness.missing.includes(family) ? null : "complete",
+        reasonCodes: detail.readiness.missing.includes(family) ? ["EVIDENCE_FAMILY_MISSING"] : [],
+        evidenceRefs: detail.readiness.missing.includes(family) ? [] : [`artifact://${detail.bundleId}/${family}`],
+      })),
+      meta: capabilityMeta("evaluation", { mocked: true }),
+    };
+  }
+
+  async getEvaluationFatals(evaluationId: string): Promise<ApiResource<EvaluationFatalView[]>> {
+    const detail = (await this.getEvaluation(evaluationId)).data;
+    return {
+      data: detail.fatals.map((item) => ({ ...item, evidenceRefs: [], reasonCodes: [] })),
+      meta: capabilityMeta("evaluation", { mocked: true }),
+    };
+  }
+
+  async getEvaluationHardGates(evaluationId: string): Promise<ApiResource<EvaluationHardGateView[]>> {
+    const detail = (await this.getEvaluation(evaluationId)).data;
+    return {
+      data: detail.gates.map((item) => ({ id: item.id, result: item.result, reason: item.reason ?? null, evidenceRefs: item.evidenceRefs ?? [], reasonCodes: [] })),
+      meta: capabilityMeta("evaluation", { mocked: true }),
+    };
+  }
+
+  async getEvaluationMetrics(evaluationId: string): Promise<ApiResource<EvaluationMetricView[]>> {
+    const detail = (await this.getEvaluation(evaluationId)).data;
+    return {
+      data: detail.metrics.map((item) => ({ ...item, reasonCodes: [] })),
+      meta: capabilityMeta("evaluation", { mocked: true }),
+    };
+  }
+
+  async getEvaluationDimensions(evaluationId: string): Promise<ApiResource<EvaluationDimensionView[]>> {
+    const detail = (await this.getEvaluation(evaluationId)).data;
+    return {
+      data: detail.dimensions.map((item) => ({ ...item, threshold: null, passed: null, applicable: true, metricIds: [] })),
+      meta: capabilityMeta("evaluation", { mocked: true }),
+    };
+  }
+
+  async getEvaluationFindings(evaluationId: string): Promise<ApiResource<EvaluationFindingView[]>> {
+    const detail = (await this.getEvaluation(evaluationId)).data;
+    return {
+      data: detail.findings.map((item, index) => ({ id: `${evaluationId}-finding-${index + 1}`, type: item.title, severity: item.severity, summary: item.summary, evidenceRefs: item.evidenceRefs, priority: null })),
+      meta: capabilityMeta("evaluation", { mocked: true }),
+    };
+  }
+
+  async getEvaluationEvidenceLinks(evaluationId: string): Promise<ApiResource<EvaluationEvidenceLinksView>> {
+    const detail = (await this.getEvaluation(evaluationId)).data;
+    return {
+      data: {
+        evaluationId,
+        bundleSnapshotId: detail.bundleId,
+        bundleArtifactRef: `artifact://${detail.bundleId}`,
+        bundleContentHash: `sha256:${"a".repeat(64)}`,
+        inputSnapshotId: `input-${evaluationId}`,
+        inputSnapshotContentHash: `sha256:${"b".repeat(64)}`,
+        inputSnapshotArtifactUri: `artifact://input-${evaluationId}`,
+        formalInputEligible: detail.scoreStatus === "formal",
+        compositeReadiness: detail.readiness.evaluation,
+        inputSourceWatermark: "2026-08-15T20:31:42Z",
+        inputSourceRefs: [],
+        evidenceRefs: [`artifact://${detail.bundleId}`],
+      },
+      meta: capabilityMeta("evaluation", { mocked: true }),
+    };
+  }
+
+  async getTelemetryProvenance(evaluationId: string): Promise<ApiResource<TelemetryProvenanceView>> {
+    const detail = (await this.getEvaluation(evaluationId)).data;
+    return {
+      data: {
+        evaluationId,
+        origin: detail.origin,
+        inputSnapshotId: `input-${evaluationId}`,
+        inputSnapshotContentHash: `sha256:${"b".repeat(64)}`,
+        overallReadiness: detail.readiness.evaluation,
+        formalInputEligible: detail.scoreStatus === "formal",
+        effectiveWatermark: "2026-08-15T20:31:42Z",
+        sources: [],
+      },
+      meta: capabilityMeta("evaluation", { mocked: true }),
     };
   }
 
