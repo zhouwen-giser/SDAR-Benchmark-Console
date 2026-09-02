@@ -4281,6 +4281,244 @@ paths:
                   type: string
                   minLength: 1
                   maxLength: 256
+  /v1/benchmark-run-presets:
+    get:
+      operationId: listBenchmarkRunPresets
+      summary: List versioned Benchmark Run presets
+      tags:
+        - Product data
+      responses:
+        "200":
+          description: Immutable preset registry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BenchmarkRunPresetListEnvelope"
+      x-query-source: postgres
+      x-capability-id: CAP-116
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-run-presets/{presetId}:
+    get:
+      operationId: getBenchmarkRunPreset
+      summary: Get a versioned Benchmark Run preset
+      tags:
+        - Product data
+      parameters:
+        - name: presetId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/OpaqueId"
+      responses:
+        "200":
+          description: Immutable preset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BenchmarkRunPresetEnvelope"
+      x-query-source: postgres
+      x-capability-id: CAP-117
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/reruns:
+    post:
+      operationId: createBenchmarkRunRerun
+      summary: Create an immutable child Run from an existing Run
+      tags:
+        - Product data
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BenchmarkRunRerunRequest"
+      responses:
+        "202":
+          description: Child Run authority accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BenchmarkRunRerunEnvelope"
+      x-query-source: postgres
+      x-capability-id: CAP-118
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+      x-command-source: postgres
+  /v1/benchmark-runs/{runId}/diagnostic-summary:
+    get:
+      operationId: getBenchmarkRunDiagnosticSummary
+      summary: Get the Run diagnostic outcome summary
+      tags:
+        - Product data
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Diagnostic summary from PostgreSQL authority
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticSummaryEnvelope"
+      x-query-source: postgres
+      x-capability-id: CAP-119
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/substitutions:
+    get:
+      operationId: getBenchmarkRunSubstitutions
+      summary: List immutable Development substitutions for a Run
+      tags:
+        - Product data
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Case and capability substitution inventory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubstitutionListEnvelope"
+      x-query-source: postgres
+      x-capability-id: CAP-120
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/timeline:
+    get:
+      operationId: getBenchmarkRunTimeline
+      summary: Get authority Run and Repetition events in temporal order
+      tags:
+        - Product data
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Run timeline
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunTimelineEnvelope"
+      x-query-source: postgres
+      x-capability-id: CAP-121
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/evaluation:
+    get:
+      operationId: getBenchmarkRunRepetitionEvaluation
+      summary: Get the typed Evaluation for a Run repetition
+      tags:
+        - Product data
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - $ref: "#/components/parameters/RepetitionId"
+      responses:
+        "200":
+          description: Repetition Evaluation authority
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepetitionEvaluationEnvelope"
+      x-query-source: postgres
+      x-capability-id: CAP-122
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/artifacts/{artifactId}:
+    get:
+      operationId: getBenchmarkRunRepetitionArtifact
+      summary: Get immutable artifact metadata with ownership validation
+      tags:
+        - Product data
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - $ref: "#/components/parameters/RepetitionId"
+        - name: artifactId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/OpaqueId"
+      responses:
+        "200":
+          description: Artifact metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductArtifactEnvelope"
+      x-query-source: artifact
+      x-capability-id: CAP-123
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/artifacts/{artifactId}/content:
+    get:
+      operationId: getBenchmarkRunRepetitionArtifactContent
+      summary: Read verified JSON, Markdown, or text artifact content
+      tags:
+        - Product data
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - $ref: "#/components/parameters/RepetitionId"
+        - name: artifactId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/OpaqueId"
+      responses:
+        "200":
+          description: Integrity-verified UTF-8 artifact content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtifactContentEnvelope"
+      x-query-source: artifact
+      x-capability-id: CAP-124
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/data-completeness:
+    get:
+      operationId: getDataCompleteness
+      summary: Get Product data completeness by independent section
+      tags:
+        - Product data
+      responses:
+        "200":
+          description: PostgreSQL and projection completeness
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataCompletenessEnvelope"
+      x-query-source: postgres
+      x-capability-id: CAP-125
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/analytics/diagnostic-outcome-distribution:
+    get:
+      operationId: getDiagnosticOutcomeDistribution
+      summary: Get typed diagnostic terminal outcome counts
+      tags:
+        - Analytics
+      responses:
+        "200":
+          description: Diagnostic outcome distribution
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticOutcomeDistributionEnvelope"
+      x-query-source: postgres
+      x-capability-id: CAP-126
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
 components:
   parameters:
     EvaluationId:
@@ -7825,30 +8063,32 @@ components:
       type: object
       additionalProperties: false
       required:
-        - benchmarkRunId
-        - formalScoreCount
-        - algorithmId
-        - algorithmVersion
-        - diagnosticOnly
-        - releaseAuthority
+        - dataClass
+        - observationCount
+        - p10
+        - p25
+        - median
+        - p75
+        - p90
+        - availability
+        - reasonCodes
       properties:
-        benchmarkRunId: *a2
-        formalScoreCount: *a3
-        p10: *a4
-        p25: *a4
-        median: *a4
-        p75: *a4
-        p90: *a4
-        algorithmId:
-          const: clickhouse.quantileExact
-        algorithmVersion:
-          const: v0.1-ui-only
-        diagnosticOnly:
-          const: 1
-        releaseAuthority:
-          const: 0
-        evaluatedAt: *a6
-        projectedAt: *a6
+        dataClass:
+          const: formal
+        observationCount: *a3
+        p10: *a5
+        p25: *a5
+        median: *a5
+        p75: *a5
+        p90: *a5
+        availability:
+          type: string
+          enum:
+            - available
+            - unavailable
+        reasonCodes:
+          type: array
+          items: *a2
     AnalyticsScoreDistributionEnvelope:
       type: object
       additionalProperties: false
@@ -7905,20 +8145,31 @@ components:
       additionalProperties: false
       required:
         - benchmarkRunId
-        - metricName
+        - metricKey
         - unit
+        - current
+        - baseline
+        - delta
         - sampleCount
+        - dataClass
+        - formalEligible
+        - evaluatedAt
+        - projectedAt
       properties:
         benchmarkRunId: *a2
-        metricName: *a2
+        metricKey: *a2
         unit: *a2
+        current: *a5
+        baseline: *a5
+        delta: *a5
         sampleCount: *a3
-        meanValue: *a4
-        p50Value: *a4
-        p95Value: *a4
-        p99Value: *a4
-        minimumValue: *a4
-        maximumValue: *a4
+        dataClass:
+          type: string
+          enum:
+            - native
+            - development_substitute
+        formalEligible:
+          type: boolean
         evaluatedAt: *a6
         projectedAt: *a6
     AnalyticsOperationalEnvelope:
@@ -12343,22 +12594,57 @@ components:
         - benchmarkRunId
         - skillId
         - skillVersion
-        - executionCount
-        - passRate
-        - degradedRate
-        - failureRate
-        - meanScore
+        - invocationCount
+        - terminalCount
+        - statusCounts
+        - durationStats
+        - caseCoverage
+        - trackCoverage
+        - sourceCompleteness
+        - dataClass
+        - formalEligible
         - evaluatedAt
         - projectedAt
       properties:
         benchmarkRunId: *a10
         skillId: *a10
         skillVersion: *a10
-        executionCount: *a12
-        passRate: *a12
-        degradedRate: *a12
-        failureRate: *a12
-        meanScore: *a12
+        invocationCount: *a11
+        terminalCount: *a11
+        statusCounts:
+          type: object
+          additionalProperties: *a11
+        durationStats:
+          type: object
+          additionalProperties: false
+          required:
+            - minimumMs
+            - meanMs
+            - maximumMs
+          properties:
+            minimumMs: *a12
+            meanMs: *a12
+            maximumMs: *a12
+        caseCoverage:
+          type: array
+          items: *a10
+        trackCoverage:
+          type: array
+          items: *a10
+        sourceCompleteness:
+          type: string
+          enum:
+            - complete
+            - partial
+            - empty
+            - unknown
+        dataClass:
+          type: string
+          enum:
+            - native
+            - development_substitute
+        formalEligible:
+          type: boolean
         evaluatedAt: *a13
         projectedAt: *a13
     ProviderAnalytics:
@@ -12367,25 +12653,39 @@ components:
       required:
         - benchmarkRunId
         - providerId
-        - operationName
+        - providerInstanceId
+        - operation
+        - taskCount
         - executionCount
-        - passRate
-        - averageLatencyMs
-        - availabilityFailureRate
-        - cancellationUncertainRate
-        - providerErrorRate
+        - missionCount
+        - closureStatus
+        - dataClass
+        - formalEligible
         - evaluatedAt
         - projectedAt
       properties:
         benchmarkRunId: *a10
         providerId: *a10
-        operationName: *a10
-        executionCount: *a12
-        passRate: *a12
-        averageLatencyMs: *a12
-        availabilityFailureRate: *a12
-        cancellationUncertainRate: *a12
-        providerErrorRate: *a12
+        providerInstanceId: *a10
+        operation: *a10
+        taskCount: *a11
+        executionCount: *a11
+        missionCount: *a11
+        closureStatus:
+          type: string
+          enum:
+            - complete
+            - partial
+            - unresolved
+            - conflict
+            - unknown
+        dataClass:
+          type: string
+          enum:
+            - native
+            - development_substitute
+        formalEligible:
+          type: boolean
         evaluatedAt: *a13
         projectedAt: *a13
     BenchmarkCaseAggregateListQueryEnvelope:
@@ -13757,3 +14057,628 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/DiagnosticQualification"
+    ProductDataClass:
+      type: string
+      enum:
+        - development_fixture
+        - development_native
+        - development_substituted
+        - formal
+        - unavailable
+    ProductEnvelopeMetadata:
+      type: object
+      required:
+        - operationId
+        - availability
+        - warnings
+        - contracts
+        - generatedAt
+      properties:
+        operationId:
+          type: string
+        availability:
+          $ref: "#/components/schemas/ConsoleAvailability"
+        warnings:
+          type: array
+          items:
+            type: string
+        contracts:
+          type: array
+          items:
+            type: string
+        generatedAt:
+          type: string
+          format: date-time
+    BenchmarkRunPreset:
+      type: object
+      additionalProperties: false
+      required:
+        - presetVersionId
+        - presetId
+        - version
+        - contentHash
+        - label
+        - status
+        - preset
+        - createdAt
+      properties:
+        presetVersionId:
+          $ref: "#/components/schemas/OpaqueId"
+        presetId:
+          $ref: "#/components/schemas/OpaqueId"
+        version:
+          type: string
+        contentHash:
+          $ref: "#/components/schemas/ContentHash"
+        label:
+          type: string
+        status:
+          const: active
+        preset:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+    BenchmarkRunPresetListEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/BenchmarkRunPreset"
+    BenchmarkRunPresetEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/components/schemas/BenchmarkRunPreset"
+    BenchmarkRunRerunRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - selectedCaseIds
+        - repeatCount
+        - reason
+        - idempotencyKey
+      properties:
+        schemaVersion:
+          const: sdar-benchmark.run-rerun-request/v1
+        selectedCaseIds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        repeatCount:
+          type: integer
+          minimum: 1
+          maximum: 20
+        target:
+          type: string
+          enum:
+            - simulated
+            - live
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        idempotencyKey:
+          type: string
+          minLength: 1
+          maxLength: 200
+    BenchmarkRunRerun:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - parentRunId
+        - status
+        - datasetVersionRef
+        - candidateSnapshotId
+        - contractReleaseId
+        - environmentPolicyRef
+        - requestHash
+        - created
+        - formalEligible
+        - createdAt
+      properties:
+        runId:
+          $ref: "#/components/schemas/OpaqueId"
+        parentRunId:
+          $ref: "#/components/schemas/OpaqueId"
+        status:
+          type: string
+        datasetVersionRef:
+          $ref: "#/components/schemas/OpaqueId"
+        candidateSnapshotId:
+          $ref: "#/components/schemas/OpaqueId"
+        contractReleaseId:
+          $ref: "#/components/schemas/OpaqueId"
+        environmentPolicyRef:
+          $ref: "#/components/schemas/OpaqueId"
+        requestHash:
+          $ref: "#/components/schemas/ContentHash"
+        created:
+          type: boolean
+        formalEligible:
+          const: false
+        createdAt:
+          type: string
+          format: date-time
+    BenchmarkRunRerunEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/components/schemas/BenchmarkRunRerun"
+    DiagnosticSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - status
+        - caseCount
+        - repetitionCount
+        - terminalRepetitionCount
+        - artifactCount
+        - substitutionCount
+        - formalEligible
+        - score
+        - releaseGate
+        - terminalStates
+        - createdAt
+        - completedAt
+      properties:
+        runId:
+          type: string
+        status:
+          type: string
+        caseCount:
+          type: integer
+        repetitionCount:
+          type: integer
+        terminalRepetitionCount:
+          type: integer
+        artifactCount:
+          type: integer
+        substitutionCount:
+          type: integer
+        formalEligible:
+          const: false
+        score:
+          type:
+            - number
+            - "null"
+        releaseGate:
+          const: unavailable
+        terminalStates:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+    DiagnosticSummaryEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/components/schemas/DiagnosticSummary"
+    RunSubstitution:
+      type: object
+      additionalProperties: false
+      required:
+        - caseId
+        - track
+        - scenarioFamily
+        - faultType
+        - dataClass
+        - formalEligible
+        - capabilityRequirements
+        - definitionHash
+      properties:
+        caseId:
+          type: string
+        track:
+          type: string
+        scenarioFamily:
+          type:
+            - string
+            - "null"
+        faultType:
+          type:
+            - string
+            - "null"
+        dataClass:
+          $ref: "#/components/schemas/ProductDataClass"
+        formalEligible:
+          const: false
+        capabilityRequirements:
+          type: array
+          items:
+            type: object
+        definitionHash:
+          type:
+            - string
+            - "null"
+    SubstitutionListEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/RunSubstitution"
+    RunTimelineEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - scope
+        - revision
+        - eventKind
+        - event
+        - eventHash
+        - createdAt
+        - repetitionId
+        - caseExecutionId
+      properties:
+        scope:
+          type: string
+          enum:
+            - run
+            - repetition
+        revision:
+          type: integer
+        eventKind:
+          type: string
+        event:
+          type: object
+        eventHash:
+          $ref: "#/components/schemas/ContentHash"
+        createdAt:
+          type: string
+          format: date-time
+        repetitionId:
+          type:
+            - string
+            - "null"
+        caseExecutionId:
+          type:
+            - string
+            - "null"
+    RunTimelineEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/RunTimelineEvent"
+    RepetitionEvaluation:
+      type: object
+      additionalProperties: false
+      required:
+        - evaluationId
+        - runId
+        - repetitionId
+        - caseExecutionId
+        - readiness
+        - scoreStatus
+        - qualityScore
+        - level
+        - passed
+        - reasonCodes
+        - result
+        - resultHash
+        - evaluatedAt
+        - formalEligible
+        - dataClass
+      properties:
+        evaluationId:
+          type: string
+        runId:
+          type: string
+        repetitionId:
+          type: string
+        caseExecutionId:
+          type: string
+        readiness:
+          type: string
+        scoreStatus:
+          type: string
+        qualityScore:
+          type:
+            - number
+            - "null"
+        level:
+          type: string
+        passed:
+          type: boolean
+        reasonCodes:
+          type: array
+          items:
+            type: string
+        result:
+          type: object
+        resultHash:
+          $ref: "#/components/schemas/ContentHash"
+        evaluatedAt:
+          type: string
+          format: date-time
+        formalEligible:
+          const: false
+        dataClass:
+          $ref: "#/components/schemas/ProductDataClass"
+    RepetitionEvaluationEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/components/schemas/RepetitionEvaluation"
+    ProductArtifact:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - repetitionId
+        - artifactKind
+        - artifactIdentity
+        - artifactRevision
+        - artifactSchemaVersion
+        - artifactId
+        - artifactUri
+        - artifactHash
+        - artifactSizeBytes
+        - mediaType
+        - summary
+        - relationHash
+        - createdAt
+        - dataClass
+      properties:
+        runId:
+          type: string
+        repetitionId:
+          type: string
+        artifactKind:
+          type: string
+        artifactIdentity:
+          type: string
+        artifactRevision:
+          type: integer
+        artifactSchemaVersion:
+          type: string
+        artifactId:
+          type: string
+        artifactUri:
+          type: string
+        artifactHash:
+          $ref: "#/components/schemas/ContentHash"
+        artifactSizeBytes:
+          type: integer
+          minimum: 0
+        mediaType:
+          type: string
+          enum:
+            - application/json
+            - text/markdown
+            - text/plain
+        summary:
+          type: object
+        relationHash:
+          $ref: "#/components/schemas/ContentHash"
+        createdAt:
+          type: string
+          format: date-time
+        dataClass:
+          $ref: "#/components/schemas/ProductDataClass"
+    ProductArtifactEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/components/schemas/ProductArtifact"
+    ArtifactContent:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - artifactId
+        - mediaType
+        - sha256
+        - sizeBytes
+        - encoding
+        - content
+        - dataClass
+      properties:
+        schemaVersion:
+          const: sdar-benchmark.artifact-content/v1
+        artifactId:
+          type: string
+        mediaType:
+          type: string
+          enum:
+            - application/json
+            - text/markdown
+            - text/plain
+        sha256:
+          $ref: "#/components/schemas/ContentHash"
+        sizeBytes:
+          type: integer
+          minimum: 0
+        encoding:
+          const: utf-8
+        content:
+          type: string
+        dataClass:
+          $ref: "#/components/schemas/ProductDataClass"
+    ArtifactContentEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/components/schemas/ArtifactContent"
+    DataCompletenessSection:
+      type: object
+      additionalProperties: false
+      required:
+        - sectionId
+        - status
+        - expectedCount
+        - availableCount
+        - reasonCodes
+        - watermark
+        - details
+      properties:
+        sectionId:
+          type: string
+        status:
+          type: string
+          enum:
+            - complete
+            - partial
+            - unavailable
+        expectedCount:
+          type: integer
+          minimum: 0
+        availableCount:
+          type: integer
+          minimum: 0
+        reasonCodes:
+          type: array
+          items:
+            type: string
+        watermark:
+          type:
+            - string
+            - "null"
+          format: date-time
+        details:
+          type: object
+    DataCompleteness:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - generatedAt
+        - overallStatus
+        - sections
+      properties:
+        schemaVersion:
+          const: sdar-benchmark.data-completeness/v1
+        generatedAt:
+          type: string
+          format: date-time
+        overallStatus:
+          type: string
+          enum:
+            - complete
+            - partial
+            - unavailable
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataCompletenessSection"
+    DataCompletenessEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/components/schemas/DataCompleteness"
+    DiagnosticOutcomeDistributionRow:
+      type: object
+      additionalProperties: false
+      required:
+        - outcome
+        - count
+        - substitutedCount
+        - fixtureCount
+        - formalEligible
+        - lastObservedAt
+      properties:
+        outcome:
+          type: string
+        count:
+          type: integer
+          minimum: 0
+        substitutedCount:
+          type: integer
+          minimum: 0
+        fixtureCount:
+          type: integer
+          minimum: 0
+        formalEligible:
+          const: false
+        lastObservedAt:
+          type: string
+          format: date-time
+    DiagnosticOutcomeDistributionEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/ProductEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/DiagnosticOutcomeDistributionRow"

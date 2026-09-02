@@ -21,6 +21,7 @@ import type {
   AnalyticsStabilityEnvelope,
   AnalyticsTrackRiskMatrixEnvelope,
   AnomalyListEnvelope,
+  ArtifactContentEnvelope,
   AttentionItemEnvelope,
   AttentionItemListEnvelope,
   AttentionStateCommand,
@@ -33,6 +34,10 @@ import type {
   BenchmarkCaseListEnvelope,
   BenchmarkReleaseGateQueryEnvelope,
   BenchmarkRunListEnvelope,
+  BenchmarkRunPresetEnvelope,
+  BenchmarkRunPresetListEnvelope,
+  BenchmarkRunRerunEnvelope,
+  BenchmarkRunRerunRequest,
   BenchmarkRunStatus,
   BundleEvaluationRequestEnvelope,
   CancelBenchmarkRunBody,
@@ -55,14 +60,17 @@ import type {
   CreateComparison,
   CreateOperationalEvaluation,
   DashboardOverviewResponse,
+  DataCompletenessEnvelope,
   DatasetEnvelope,
   DatasetListEnvelope,
   DevelopmentRunPreflight,
   DevelopmentRunPreset,
   DiagnosticArtifactEnvelope,
   DiagnosticArtifactListEnvelope,
+  DiagnosticOutcomeDistributionEnvelope,
   DiagnosticQualificationEnvelope,
   DiagnosticRepetitionEnvelope,
+  DiagnosticSummaryEnvelope,
   EpisodeReadinessQueryEnvelope,
   EvaluationBindingEnvelope,
   EvaluationCatalogEnvelope,
@@ -140,13 +148,16 @@ import type {
   ListSkillAnalyticsParams,
   ListTrackAnalyticsParams,
   NotFoundResponse,
+  OpaqueId,
   OperationalSummaryEnvelope,
   PostEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileBody,
   PostEvidenceBundlesByBundleIdEvaluationsBody,
+  ProductArtifactEnvelope,
   ProjectedCaseExecutionListQueryEnvelope,
   PromoteBaseline,
   ProviderAnalyticsListQueryEnvelope,
   Ready,
+  RepetitionEvaluationEnvelope,
   ReportCommand,
   ReportContentEnvelope,
   ReportDownloadEnvelope,
@@ -156,8 +167,10 @@ import type {
   RunDashboardEnvelope,
   RunEventListEnvelope,
   RunRepetitionListEnvelope,
+  RunTimelineEnvelope,
   ScenarioFamilyAnalyticsListQueryEnvelope,
   SkillAnalyticsListQueryEnvelope,
+  SubstitutionListEnvelope,
   SystemContractsEnvelope,
   SystemProjectionsEnvelope,
   SystemStatusEnvelope,
@@ -173,7 +186,7 @@ export type getHealthResponse200 = {
   data: Health
   status: 200
 }
-    
+
 export type getHealthResponseSuccess = (getHealthResponse200) & {
   headers: Headers;
 };
@@ -184,24 +197,24 @@ export type getHealthResponse = (getHealthResponseSuccess)
 export const getGetHealthUrl = () => {
 
 
-  
+
 
   return `/health`
 }
 
 export const getHealth = async ( options?: RequestInit): Promise<getHealthResponse> => {
-  
+
   const res = await fetch(getGetHealthUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getHealthResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getHealthResponse
 }
@@ -220,7 +233,7 @@ export type getReadinessResponse503 = {
   data: Ready
   status: 503
 }
-    
+
 export type getReadinessResponseSuccess = (getReadinessResponse200) & {
   headers: Headers;
 };
@@ -233,24 +246,24 @@ export type getReadinessResponse = (getReadinessResponseSuccess | getReadinessRe
 export const getGetReadinessUrl = () => {
 
 
-  
+
 
   return `/ready`
 }
 
 export const getReadiness = async ( options?: RequestInit): Promise<getReadinessResponse> => {
-  
+
   const res = await fetch(getGetReadinessUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getReadinessResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getReadinessResponse
 }
@@ -284,7 +297,7 @@ export type createOperationalEvaluationResponse503 = {
   data: UnavailableResponse
   status: 503
 }
-    
+
 export type createOperationalEvaluationResponseSuccess = (createOperationalEvaluationResponse202) & {
   headers: Headers;
 };
@@ -297,15 +310,15 @@ export type createOperationalEvaluationResponse = (createOperationalEvaluationRe
 export const getCreateOperationalEvaluationUrl = () => {
 
 
-  
+
 
   return `/v1/operational-evaluations`
 }
 
 export const createOperationalEvaluation = async (createOperationalEvaluation: CreateOperationalEvaluation, options?: RequestInit): Promise<createOperationalEvaluationResponse> => {
-  
+
   const res = await fetch(getCreateOperationalEvaluationUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -315,7 +328,7 @@ export const createOperationalEvaluation = async (createOperationalEvaluation: C
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: createOperationalEvaluationResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as createOperationalEvaluationResponse
 }
@@ -329,7 +342,7 @@ export type getEvaluationResponse200 = {
   data: EvaluationSummaryQueryEnvelope
   status: 200
 }
-    
+
 export type getEvaluationResponseSuccess = (getEvaluationResponse200) & {
   headers: Headers;
 };
@@ -342,7 +355,7 @@ export const getGetEvaluationUrl = (evaluationId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -355,18 +368,18 @@ export const getGetEvaluationUrl = (evaluationId: string,
 
 export const getEvaluation = async (evaluationId: string,
     params?: GetEvaluationParams, options?: RequestInit): Promise<getEvaluationResponse> => {
-  
+
   const res = await fetch(getGetEvaluationUrl(evaluationId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationResponse
 }
@@ -380,7 +393,7 @@ export type listEpisodeEvaluationsResponse200 = {
   data: EvaluationSummaryListQueryEnvelope
   status: 200
 }
-    
+
 export type listEpisodeEvaluationsResponseSuccess = (listEpisodeEvaluationsResponse200) & {
   headers: Headers;
 };
@@ -393,7 +406,7 @@ export const getListEpisodeEvaluationsUrl = (episodeId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -406,18 +419,18 @@ export const getListEpisodeEvaluationsUrl = (episodeId: string,
 
 export const listEpisodeEvaluations = async (episodeId: string,
     params?: ListEpisodeEvaluationsParams, options?: RequestInit): Promise<listEpisodeEvaluationsResponse> => {
-  
+
   const res = await fetch(getListEpisodeEvaluationsUrl(episodeId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listEpisodeEvaluationsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listEpisodeEvaluationsResponse
 }
@@ -431,7 +444,7 @@ export type getLatestEpisodeEvaluationResponse200 = {
   data: EvaluationSummaryQueryEnvelope
   status: 200
 }
-    
+
 export type getLatestEpisodeEvaluationResponseSuccess = (getLatestEpisodeEvaluationResponse200) & {
   headers: Headers;
 };
@@ -444,7 +457,7 @@ export const getGetLatestEpisodeEvaluationUrl = (episodeId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -457,18 +470,18 @@ export const getGetLatestEpisodeEvaluationUrl = (episodeId: string,
 
 export const getLatestEpisodeEvaluation = async (episodeId: string,
     params?: GetLatestEpisodeEvaluationParams, options?: RequestInit): Promise<getLatestEpisodeEvaluationResponse> => {
-  
+
   const res = await fetch(getGetLatestEpisodeEvaluationUrl(episodeId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getLatestEpisodeEvaluationResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getLatestEpisodeEvaluationResponse
 }
@@ -482,7 +495,7 @@ export type getEpisodeReadinessResponse200 = {
   data: EpisodeReadinessQueryEnvelope
   status: 200
 }
-    
+
 export type getEpisodeReadinessResponseSuccess = (getEpisodeReadinessResponse200) & {
   headers: Headers;
 };
@@ -495,7 +508,7 @@ export const getGetEpisodeReadinessUrl = (episodeId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -508,18 +521,18 @@ export const getGetEpisodeReadinessUrl = (episodeId: string,
 
 export const getEpisodeReadiness = async (episodeId: string,
     params?: GetEpisodeReadinessParams, options?: RequestInit): Promise<getEpisodeReadinessResponse> => {
-  
+
   const res = await fetch(getGetEpisodeReadinessUrl(episodeId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEpisodeReadinessResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEpisodeReadinessResponse
 }
@@ -650,7 +663,7 @@ export type createBenchmarkRunResponse503 = {
   data: UnavailableResponse
   status: 503
 }
-    
+
 export type createBenchmarkRunResponseSuccess = (createBenchmarkRunResponse202) & {
   headers: Headers;
 };
@@ -663,15 +676,15 @@ export type createBenchmarkRunResponse = (createBenchmarkRunResponseSuccess | cr
 export const getCreateBenchmarkRunUrl = () => {
 
 
-  
+
 
   return `/v1/benchmark-runs`
 }
 
 export const createBenchmarkRun = async (createBenchmarkRun: CreateBenchmarkRun, options?: RequestInit): Promise<createBenchmarkRunResponse> => {
-  
+
   const res = await fetch(getCreateBenchmarkRunUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -681,7 +694,7 @@ export const createBenchmarkRun = async (createBenchmarkRun: CreateBenchmarkRun,
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: createBenchmarkRunResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as createBenchmarkRunResponse
 }
@@ -695,7 +708,7 @@ export type getBenchmarkRunsResponse200 = {
   data: BenchmarkRunListEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkRunsResponseSuccess = (getBenchmarkRunsResponse200) & {
   headers: Headers;
 };
@@ -707,7 +720,7 @@ export const getGetBenchmarkRunsUrl = (params?: GetBenchmarkRunsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -719,18 +732,18 @@ export const getGetBenchmarkRunsUrl = (params?: GetBenchmarkRunsParams,) => {
 }
 
 export const getBenchmarkRuns = async (params?: GetBenchmarkRunsParams, options?: RequestInit): Promise<getBenchmarkRunsResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkRunsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkRunsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkRunsResponse
 }
@@ -759,7 +772,7 @@ export type getBenchmarkRunAuthorityStatusResponse503 = {
   data: UnavailableResponse
   status: 503
 }
-    
+
 export type getBenchmarkRunAuthorityStatusResponseSuccess = (getBenchmarkRunAuthorityStatusResponse200) & {
   headers: Headers;
 };
@@ -772,24 +785,24 @@ export type getBenchmarkRunAuthorityStatusResponse = (getBenchmarkRunAuthoritySt
 export const getGetBenchmarkRunAuthorityStatusUrl = (runId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-runs/${runId}`
 }
 
 export const getBenchmarkRunAuthorityStatus = async (runId: string, options?: RequestInit): Promise<getBenchmarkRunAuthorityStatusResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkRunAuthorityStatusUrl(runId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkRunAuthorityStatusResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkRunAuthorityStatusResponse
 }
@@ -1180,7 +1193,7 @@ export type cancelBenchmarkRunResponse503 = {
   data: UnavailableResponse
   status: 503
 }
-    
+
 export type cancelBenchmarkRunResponseSuccess = (cancelBenchmarkRunResponse202) & {
   headers: Headers;
 };
@@ -1193,16 +1206,16 @@ export type cancelBenchmarkRunResponse = (cancelBenchmarkRunResponseSuccess | ca
 export const getCancelBenchmarkRunUrl = (runId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-runs/${runId}/cancel`
 }
 
 export const cancelBenchmarkRun = async (runId: string,
     cancelBenchmarkRunBody?: CancelBenchmarkRunBody, options?: RequestInit): Promise<cancelBenchmarkRunResponse> => {
-  
+
   const res = await fetch(getCancelBenchmarkRunUrl(runId),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -1212,7 +1225,7 @@ export const cancelBenchmarkRun = async (runId: string,
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: cancelBenchmarkRunResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as cancelBenchmarkRunResponse
 }
@@ -1246,7 +1259,7 @@ export type promoteBaselineResponse503 = {
   data: UnavailableResponse
   status: 503
 }
-    
+
 export type promoteBaselineResponseSuccess = (promoteBaselineResponse201) & {
   headers: Headers;
 };
@@ -1259,15 +1272,15 @@ export type promoteBaselineResponse = (promoteBaselineResponseSuccess | promoteB
 export const getPromoteBaselineUrl = () => {
 
 
-  
+
 
   return `/v1/baselines`
 }
 
 export const promoteBaseline = async (promoteBaseline: PromoteBaseline, options?: RequestInit): Promise<promoteBaselineResponse> => {
-  
+
   const res = await fetch(getPromoteBaselineUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -1277,7 +1290,7 @@ export const promoteBaseline = async (promoteBaseline: PromoteBaseline, options?
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: promoteBaselineResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as promoteBaselineResponse
 }
@@ -1291,7 +1304,7 @@ export type getBaselinesResponse200 = {
   data: BaselineListEnvelope
   status: 200
 }
-    
+
 export type getBaselinesResponseSuccess = (getBaselinesResponse200) & {
   headers: Headers;
 };
@@ -1302,24 +1315,24 @@ export type getBaselinesResponse = (getBaselinesResponseSuccess)
 export const getGetBaselinesUrl = () => {
 
 
-  
+
 
   return `/v1/baselines`
 }
 
 export const getBaselines = async ( options?: RequestInit): Promise<getBaselinesResponse> => {
-  
+
   const res = await fetch(getGetBaselinesUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBaselinesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBaselinesResponse
 }
@@ -1358,7 +1371,7 @@ export type createComparisonResponse503 = {
   data: UnavailableResponse
   status: 503
 }
-    
+
 export type createComparisonResponseSuccess = (createComparisonResponse200 | createComparisonResponse201) & {
   headers: Headers;
 };
@@ -1371,15 +1384,15 @@ export type createComparisonResponse = (createComparisonResponseSuccess | create
 export const getCreateComparisonUrl = () => {
 
 
-  
+
 
   return `/v1/comparisons`
 }
 
 export const createComparison = async (createComparison: CreateComparison, options?: RequestInit): Promise<createComparisonResponse> => {
-  
+
   const res = await fetch(getCreateComparisonUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -1389,7 +1402,7 @@ export const createComparison = async (createComparison: CreateComparison, optio
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: createComparisonResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as createComparisonResponse
 }
@@ -1403,7 +1416,7 @@ export type getComparisonsResponse200 = {
   data: ComparisonListEnvelope
   status: 200
 }
-    
+
 export type getComparisonsResponseSuccess = (getComparisonsResponse200) & {
   headers: Headers;
 };
@@ -1415,7 +1428,7 @@ export const getGetComparisonsUrl = (params?: GetComparisonsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1427,18 +1440,18 @@ export const getGetComparisonsUrl = (params?: GetComparisonsParams,) => {
 }
 
 export const getComparisons = async (params?: GetComparisonsParams, options?: RequestInit): Promise<getComparisonsResponse> => {
-  
+
   const res = await fetch(getGetComparisonsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getComparisonsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getComparisonsResponse
 }
@@ -1452,7 +1465,7 @@ export type listBenchmarkRunResultsResponse200 = {
   data: BenchmarkCaseAggregateListQueryEnvelope
   status: 200
 }
-    
+
 export type listBenchmarkRunResultsResponseSuccess = (listBenchmarkRunResultsResponse200) & {
   headers: Headers;
 };
@@ -1465,7 +1478,7 @@ export const getListBenchmarkRunResultsUrl = (runId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1478,18 +1491,18 @@ export const getListBenchmarkRunResultsUrl = (runId: string,
 
 export const listBenchmarkRunResults = async (runId: string,
     params?: ListBenchmarkRunResultsParams, options?: RequestInit): Promise<listBenchmarkRunResultsResponse> => {
-  
+
   const res = await fetch(getListBenchmarkRunResultsUrl(runId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listBenchmarkRunResultsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listBenchmarkRunResultsResponse
 }
@@ -1503,7 +1516,7 @@ export type listBenchmarkRunCasesResponse200 = {
   data: ProjectedCaseExecutionListQueryEnvelope
   status: 200
 }
-    
+
 export type listBenchmarkRunCasesResponseSuccess = (listBenchmarkRunCasesResponse200) & {
   headers: Headers;
 };
@@ -1516,7 +1529,7 @@ export const getListBenchmarkRunCasesUrl = (runId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1529,18 +1542,18 @@ export const getListBenchmarkRunCasesUrl = (runId: string,
 
 export const listBenchmarkRunCases = async (runId: string,
     params?: ListBenchmarkRunCasesParams, options?: RequestInit): Promise<listBenchmarkRunCasesResponse> => {
-  
+
   const res = await fetch(getListBenchmarkRunCasesUrl(runId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listBenchmarkRunCasesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listBenchmarkRunCasesResponse
 }
@@ -1554,7 +1567,7 @@ export type listBenchmarkRunFailuresResponse200 = {
   data: ProjectedCaseExecutionListQueryEnvelope
   status: 200
 }
-    
+
 export type listBenchmarkRunFailuresResponseSuccess = (listBenchmarkRunFailuresResponse200) & {
   headers: Headers;
 };
@@ -1567,7 +1580,7 @@ export const getListBenchmarkRunFailuresUrl = (runId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1580,18 +1593,18 @@ export const getListBenchmarkRunFailuresUrl = (runId: string,
 
 export const listBenchmarkRunFailures = async (runId: string,
     params?: ListBenchmarkRunFailuresParams, options?: RequestInit): Promise<listBenchmarkRunFailuresResponse> => {
-  
+
   const res = await fetch(getListBenchmarkRunFailuresUrl(runId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listBenchmarkRunFailuresResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listBenchmarkRunFailuresResponse
 }
@@ -1605,7 +1618,7 @@ export type getBenchmarkRunReleaseGateResponse200 = {
   data: BenchmarkReleaseGateQueryEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkRunReleaseGateResponseSuccess = (getBenchmarkRunReleaseGateResponse200) & {
   headers: Headers;
 };
@@ -1618,7 +1631,7 @@ export const getGetBenchmarkRunReleaseGateUrl = (runId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1631,18 +1644,18 @@ export const getGetBenchmarkRunReleaseGateUrl = (runId: string,
 
 export const getBenchmarkRunReleaseGate = async (runId: string,
     params?: GetBenchmarkRunReleaseGateParams, options?: RequestInit): Promise<getBenchmarkRunReleaseGateResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkRunReleaseGateUrl(runId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkRunReleaseGateResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkRunReleaseGateResponse
 }
@@ -1656,7 +1669,7 @@ export type listBenchmarkCaseHistoryResponse200 = {
   data: BenchmarkCaseAggregateListQueryEnvelope
   status: 200
 }
-    
+
 export type listBenchmarkCaseHistoryResponseSuccess = (listBenchmarkCaseHistoryResponse200) & {
   headers: Headers;
 };
@@ -1669,7 +1682,7 @@ export const getListBenchmarkCaseHistoryUrl = (caseId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1682,18 +1695,18 @@ export const getListBenchmarkCaseHistoryUrl = (caseId: string,
 
 export const listBenchmarkCaseHistory = async (caseId: string,
     params?: ListBenchmarkCaseHistoryParams, options?: RequestInit): Promise<listBenchmarkCaseHistoryResponse> => {
-  
+
   const res = await fetch(getListBenchmarkCaseHistoryUrl(caseId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listBenchmarkCaseHistoryResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listBenchmarkCaseHistoryResponse
 }
@@ -1707,7 +1720,7 @@ export type getComparisonResponse200 = {
   data: ComparisonProjectionQueryEnvelope
   status: 200
 }
-    
+
 export type getComparisonResponseSuccess = (getComparisonResponse200) & {
   headers: Headers;
 };
@@ -1720,7 +1733,7 @@ export const getGetComparisonUrl = (comparisonId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1733,18 +1746,18 @@ export const getGetComparisonUrl = (comparisonId: string,
 
 export const getComparison = async (comparisonId: string,
     params?: GetComparisonParams, options?: RequestInit): Promise<getComparisonResponse> => {
-  
+
   const res = await fetch(getGetComparisonUrl(comparisonId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getComparisonResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getComparisonResponse
 }
@@ -1758,7 +1771,7 @@ export type listComparisonCasesResponse200 = {
   data: ComparisonCaseProjectionListQueryEnvelope
   status: 200
 }
-    
+
 export type listComparisonCasesResponseSuccess = (listComparisonCasesResponse200) & {
   headers: Headers;
 };
@@ -1771,7 +1784,7 @@ export const getListComparisonCasesUrl = (comparisonId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1784,18 +1797,18 @@ export const getListComparisonCasesUrl = (comparisonId: string,
 
 export const listComparisonCases = async (comparisonId: string,
     params?: ListComparisonCasesParams, options?: RequestInit): Promise<listComparisonCasesResponse> => {
-  
+
   const res = await fetch(getListComparisonCasesUrl(comparisonId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listComparisonCasesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listComparisonCasesResponse
 }
@@ -1809,7 +1822,7 @@ export type listCandidateAnalyticsResponse200 = {
   data: CandidateAnalyticsListQueryEnvelope
   status: 200
 }
-    
+
 export type listCandidateAnalyticsResponseSuccess = (listCandidateAnalyticsResponse200) & {
   headers: Headers;
 };
@@ -1821,7 +1834,7 @@ export const getListCandidateAnalyticsUrl = (params?: ListCandidateAnalyticsPara
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1833,18 +1846,18 @@ export const getListCandidateAnalyticsUrl = (params?: ListCandidateAnalyticsPara
 }
 
 export const listCandidateAnalytics = async (params?: ListCandidateAnalyticsParams, options?: RequestInit): Promise<listCandidateAnalyticsResponse> => {
-  
+
   const res = await fetch(getListCandidateAnalyticsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listCandidateAnalyticsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listCandidateAnalyticsResponse
 }
@@ -1858,7 +1871,7 @@ export type listTrackAnalyticsResponse200 = {
   data: TrackAnalyticsListQueryEnvelope
   status: 200
 }
-    
+
 export type listTrackAnalyticsResponseSuccess = (listTrackAnalyticsResponse200) & {
   headers: Headers;
 };
@@ -1870,7 +1883,7 @@ export const getListTrackAnalyticsUrl = (params?: ListTrackAnalyticsParams,) => 
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1882,18 +1895,18 @@ export const getListTrackAnalyticsUrl = (params?: ListTrackAnalyticsParams,) => 
 }
 
 export const listTrackAnalytics = async (params?: ListTrackAnalyticsParams, options?: RequestInit): Promise<listTrackAnalyticsResponse> => {
-  
+
   const res = await fetch(getListTrackAnalyticsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listTrackAnalyticsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listTrackAnalyticsResponse
 }
@@ -1907,7 +1920,7 @@ export type listScenarioFamilyAnalyticsResponse200 = {
   data: ScenarioFamilyAnalyticsListQueryEnvelope
   status: 200
 }
-    
+
 export type listScenarioFamilyAnalyticsResponseSuccess = (listScenarioFamilyAnalyticsResponse200) & {
   headers: Headers;
 };
@@ -1919,7 +1932,7 @@ export const getListScenarioFamilyAnalyticsUrl = (params?: ListScenarioFamilyAna
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1931,18 +1944,18 @@ export const getListScenarioFamilyAnalyticsUrl = (params?: ListScenarioFamilyAna
 }
 
 export const listScenarioFamilyAnalytics = async (params?: ListScenarioFamilyAnalyticsParams, options?: RequestInit): Promise<listScenarioFamilyAnalyticsResponse> => {
-  
+
   const res = await fetch(getListScenarioFamilyAnalyticsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listScenarioFamilyAnalyticsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listScenarioFamilyAnalyticsResponse
 }
@@ -1956,7 +1969,7 @@ export type listRiskAnalyticsResponse200 = {
   data: RiskAnalyticsListQueryEnvelope
   status: 200
 }
-    
+
 export type listRiskAnalyticsResponseSuccess = (listRiskAnalyticsResponse200) & {
   headers: Headers;
 };
@@ -1968,7 +1981,7 @@ export const getListRiskAnalyticsUrl = (params?: ListRiskAnalyticsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1980,18 +1993,18 @@ export const getListRiskAnalyticsUrl = (params?: ListRiskAnalyticsParams,) => {
 }
 
 export const listRiskAnalytics = async (params?: ListRiskAnalyticsParams, options?: RequestInit): Promise<listRiskAnalyticsResponse> => {
-  
+
   const res = await fetch(getListRiskAnalyticsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listRiskAnalyticsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listRiskAnalyticsResponse
 }
@@ -2005,7 +2018,7 @@ export type listSkillAnalyticsResponse200 = {
   data: SkillAnalyticsListQueryEnvelope
   status: 200
 }
-    
+
 export type listSkillAnalyticsResponseSuccess = (listSkillAnalyticsResponse200) & {
   headers: Headers;
 };
@@ -2017,7 +2030,7 @@ export const getListSkillAnalyticsUrl = (params?: ListSkillAnalyticsParams,) => 
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -2029,18 +2042,18 @@ export const getListSkillAnalyticsUrl = (params?: ListSkillAnalyticsParams,) => 
 }
 
 export const listSkillAnalytics = async (params?: ListSkillAnalyticsParams, options?: RequestInit): Promise<listSkillAnalyticsResponse> => {
-  
+
   const res = await fetch(getListSkillAnalyticsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listSkillAnalyticsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listSkillAnalyticsResponse
 }
@@ -2054,7 +2067,7 @@ export type listProviderAnalyticsResponse200 = {
   data: ProviderAnalyticsListQueryEnvelope
   status: 200
 }
-    
+
 export type listProviderAnalyticsResponseSuccess = (listProviderAnalyticsResponse200) & {
   headers: Headers;
 };
@@ -2066,7 +2079,7 @@ export const getListProviderAnalyticsUrl = (params?: ListProviderAnalyticsParams
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -2078,18 +2091,18 @@ export const getListProviderAnalyticsUrl = (params?: ListProviderAnalyticsParams
 }
 
 export const listProviderAnalytics = async (params?: ListProviderAnalyticsParams, options?: RequestInit): Promise<listProviderAnalyticsResponse> => {
-  
+
   const res = await fetch(getListProviderAnalyticsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: listProviderAnalyticsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as listProviderAnalyticsResponse
 }
@@ -2103,7 +2116,7 @@ export type getContextOptionsResponse200 = {
   data: ContextOptionsEnvelope
   status: 200
 }
-    
+
 export type getContextOptionsResponseSuccess = (getContextOptionsResponse200) & {
   headers: Headers;
 };
@@ -2114,24 +2127,24 @@ export type getContextOptionsResponse = (getContextOptionsResponseSuccess)
 export const getGetContextOptionsUrl = () => {
 
 
-  
+
 
   return `/v1/context/options`
 }
 
 export const getContextOptions = async ( options?: RequestInit): Promise<getContextOptionsResponse> => {
-  
+
   const res = await fetch(getGetContextOptionsUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getContextOptionsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getContextOptionsResponse
 }
@@ -2145,7 +2158,7 @@ export type getCatalogsEvaluationResponse200 = {
   data: EvaluationCatalogEnvelope
   status: 200
 }
-    
+
 export type getCatalogsEvaluationResponseSuccess = (getCatalogsEvaluationResponse200) & {
   headers: Headers;
 };
@@ -2156,24 +2169,24 @@ export type getCatalogsEvaluationResponse = (getCatalogsEvaluationResponseSucces
 export const getGetCatalogsEvaluationUrl = () => {
 
 
-  
+
 
   return `/v1/catalogs/evaluation`
 }
 
 export const getCatalogsEvaluation = async ( options?: RequestInit): Promise<getCatalogsEvaluationResponse> => {
-  
+
   const res = await fetch(getGetCatalogsEvaluationUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getCatalogsEvaluationResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getCatalogsEvaluationResponse
 }
@@ -2187,7 +2200,7 @@ export type getCandidatesResponse200 = {
   data: CandidateOverviewEnvelope
   status: 200
 }
-    
+
 export type getCandidatesResponseSuccess = (getCandidatesResponse200) & {
   headers: Headers;
 };
@@ -2198,24 +2211,24 @@ export type getCandidatesResponse = (getCandidatesResponseSuccess)
 export const getGetCandidatesUrl = () => {
 
 
-  
+
 
   return `/v1/candidates`
 }
 
 export const getCandidates = async ( options?: RequestInit): Promise<getCandidatesResponse> => {
-  
+
   const res = await fetch(getGetCandidatesUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getCandidatesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getCandidatesResponse
 }
@@ -2229,7 +2242,7 @@ export type getCandidatesByCandidateSnapshotIdResponse200 = {
   data: CandidateEnvelope
   status: 200
 }
-    
+
 export type getCandidatesByCandidateSnapshotIdResponseSuccess = (getCandidatesByCandidateSnapshotIdResponse200) & {
   headers: Headers;
 };
@@ -2240,24 +2253,24 @@ export type getCandidatesByCandidateSnapshotIdResponse = (getCandidatesByCandida
 export const getGetCandidatesByCandidateSnapshotIdUrl = (candidateSnapshotId: string,) => {
 
 
-  
+
 
   return `/v1/candidates/${candidateSnapshotId}`
 }
 
 export const getCandidatesByCandidateSnapshotId = async (candidateSnapshotId: string, options?: RequestInit): Promise<getCandidatesByCandidateSnapshotIdResponse> => {
-  
+
   const res = await fetch(getGetCandidatesByCandidateSnapshotIdUrl(candidateSnapshotId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getCandidatesByCandidateSnapshotIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getCandidatesByCandidateSnapshotIdResponse
 }
@@ -2271,7 +2284,7 @@ export type getDatasetsResponse200 = {
   data: DatasetListEnvelope
   status: 200
 }
-    
+
 export type getDatasetsResponseSuccess = (getDatasetsResponse200) & {
   headers: Headers;
 };
@@ -2282,24 +2295,24 @@ export type getDatasetsResponse = (getDatasetsResponseSuccess)
 export const getGetDatasetsUrl = () => {
 
 
-  
+
 
   return `/v1/datasets`
 }
 
 export const getDatasets = async ( options?: RequestInit): Promise<getDatasetsResponse> => {
-  
+
   const res = await fetch(getGetDatasetsUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getDatasetsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getDatasetsResponse
 }
@@ -2313,7 +2326,7 @@ export type getDatasetsByDatasetVersionRefResponse200 = {
   data: DatasetEnvelope
   status: 200
 }
-    
+
 export type getDatasetsByDatasetVersionRefResponseSuccess = (getDatasetsByDatasetVersionRefResponse200) & {
   headers: Headers;
 };
@@ -2324,24 +2337,24 @@ export type getDatasetsByDatasetVersionRefResponse = (getDatasetsByDatasetVersio
 export const getGetDatasetsByDatasetVersionRefUrl = (datasetVersionRef: string,) => {
 
 
-  
+
 
   return `/v1/datasets/${datasetVersionRef}`
 }
 
 export const getDatasetsByDatasetVersionRef = async (datasetVersionRef: string, options?: RequestInit): Promise<getDatasetsByDatasetVersionRefResponse> => {
-  
+
   const res = await fetch(getGetDatasetsByDatasetVersionRefUrl(datasetVersionRef),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getDatasetsByDatasetVersionRefResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getDatasetsByDatasetVersionRefResponse
 }
@@ -2355,7 +2368,7 @@ export type getEvaluationProfilesResponse200 = {
   data: EvaluationProfileListEnvelope
   status: 200
 }
-    
+
 export type getEvaluationProfilesResponseSuccess = (getEvaluationProfilesResponse200) & {
   headers: Headers;
 };
@@ -2366,24 +2379,24 @@ export type getEvaluationProfilesResponse = (getEvaluationProfilesResponseSucces
 export const getGetEvaluationProfilesUrl = () => {
 
 
-  
+
 
   return `/v1/evaluation-profiles`
 }
 
 export const getEvaluationProfiles = async ( options?: RequestInit): Promise<getEvaluationProfilesResponse> => {
-  
+
   const res = await fetch(getGetEvaluationProfilesUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationProfilesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationProfilesResponse
 }
@@ -2397,7 +2410,7 @@ export type getEvaluationProfilesByProfileVersionIdResponse200 = {
   data: EvaluationProfileEnvelope
   status: 200
 }
-    
+
 export type getEvaluationProfilesByProfileVersionIdResponseSuccess = (getEvaluationProfilesByProfileVersionIdResponse200) & {
   headers: Headers;
 };
@@ -2408,24 +2421,24 @@ export type getEvaluationProfilesByProfileVersionIdResponse = (getEvaluationProf
 export const getGetEvaluationProfilesByProfileVersionIdUrl = (profileVersionId: string,) => {
 
 
-  
+
 
   return `/v1/evaluation-profiles/${profileVersionId}`
 }
 
 export const getEvaluationProfilesByProfileVersionId = async (profileVersionId: string, options?: RequestInit): Promise<getEvaluationProfilesByProfileVersionIdResponse> => {
-  
+
   const res = await fetch(getGetEvaluationProfilesByProfileVersionIdUrl(profileVersionId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationProfilesByProfileVersionIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationProfilesByProfileVersionIdResponse
 }
@@ -2439,7 +2452,7 @@ export type getSystemStatusResponse200 = {
   data: SystemStatusEnvelope
   status: 200
 }
-    
+
 export type getSystemStatusResponseSuccess = (getSystemStatusResponse200) & {
   headers: Headers;
 };
@@ -2450,24 +2463,24 @@ export type getSystemStatusResponse = (getSystemStatusResponseSuccess)
 export const getGetSystemStatusUrl = () => {
 
 
-  
+
 
   return `/v1/system/status`
 }
 
 export const getSystemStatus = async ( options?: RequestInit): Promise<getSystemStatusResponse> => {
-  
+
   const res = await fetch(getGetSystemStatusUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getSystemStatusResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getSystemStatusResponse
 }
@@ -2481,7 +2494,7 @@ export type getSystemContractsResponse200 = {
   data: SystemContractsEnvelope
   status: 200
 }
-    
+
 export type getSystemContractsResponseSuccess = (getSystemContractsResponse200) & {
   headers: Headers;
 };
@@ -2492,24 +2505,24 @@ export type getSystemContractsResponse = (getSystemContractsResponseSuccess)
 export const getGetSystemContractsUrl = () => {
 
 
-  
+
 
   return `/v1/system/contracts`
 }
 
 export const getSystemContracts = async ( options?: RequestInit): Promise<getSystemContractsResponse> => {
-  
+
   const res = await fetch(getGetSystemContractsUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getSystemContractsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getSystemContractsResponse
 }
@@ -2523,7 +2536,7 @@ export type getSystemProjectionsResponse200 = {
   data: SystemProjectionsEnvelope
   status: 200
 }
-    
+
 export type getSystemProjectionsResponseSuccess = (getSystemProjectionsResponse200) & {
   headers: Headers;
 };
@@ -2534,24 +2547,24 @@ export type getSystemProjectionsResponse = (getSystemProjectionsResponseSuccess)
 export const getGetSystemProjectionsUrl = () => {
 
 
-  
+
 
   return `/v1/system/projections`
 }
 
 export const getSystemProjections = async ( options?: RequestInit): Promise<getSystemProjectionsResponse> => {
-  
+
   const res = await fetch(getGetSystemProjectionsUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getSystemProjectionsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getSystemProjectionsResponse
 }
@@ -2565,7 +2578,7 @@ export type getDashboardOverviewResponse200 = {
   data: DashboardOverviewResponse
   status: 200
 }
-    
+
 export type getDashboardOverviewResponseSuccess = (getDashboardOverviewResponse200) & {
   headers: Headers;
 };
@@ -2577,7 +2590,7 @@ export const getGetDashboardOverviewUrl = (params?: GetDashboardOverviewParams,)
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -2589,18 +2602,18 @@ export const getGetDashboardOverviewUrl = (params?: GetDashboardOverviewParams,)
 }
 
 export const getDashboardOverview = async (params?: GetDashboardOverviewParams, options?: RequestInit): Promise<getDashboardOverviewResponse> => {
-  
+
   const res = await fetch(getGetDashboardOverviewUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getDashboardOverviewResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getDashboardOverviewResponse
 }
@@ -2614,7 +2627,7 @@ export type getAnalysisConclusionsResponse200 = {
   data: AnalysisConclusionListEnvelope
   status: 200
 }
-    
+
 export type getAnalysisConclusionsResponseSuccess = (getAnalysisConclusionsResponse200) & {
   headers: Headers;
 };
@@ -2626,7 +2639,7 @@ export const getGetAnalysisConclusionsUrl = (params?: GetAnalysisConclusionsPara
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -2638,18 +2651,18 @@ export const getGetAnalysisConclusionsUrl = (params?: GetAnalysisConclusionsPara
 }
 
 export const getAnalysisConclusions = async (params?: GetAnalysisConclusionsParams, options?: RequestInit): Promise<getAnalysisConclusionsResponse> => {
-  
+
   const res = await fetch(getGetAnalysisConclusionsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalysisConclusionsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalysisConclusionsResponse
 }
@@ -2663,7 +2676,7 @@ export type getAnalysisConclusionsByConclusionIdResponse200 = {
   data: AnalysisConclusionEnvelope
   status: 200
 }
-    
+
 export type getAnalysisConclusionsByConclusionIdResponseSuccess = (getAnalysisConclusionsByConclusionIdResponse200) & {
   headers: Headers;
 };
@@ -2674,24 +2687,24 @@ export type getAnalysisConclusionsByConclusionIdResponse = (getAnalysisConclusio
 export const getGetAnalysisConclusionsByConclusionIdUrl = (conclusionId: string,) => {
 
 
-  
+
 
   return `/v1/analysis-conclusions/${conclusionId}`
 }
 
 export const getAnalysisConclusionsByConclusionId = async (conclusionId: string, options?: RequestInit): Promise<getAnalysisConclusionsByConclusionIdResponse> => {
-  
+
   const res = await fetch(getGetAnalysisConclusionsByConclusionIdUrl(conclusionId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalysisConclusionsByConclusionIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalysisConclusionsByConclusionIdResponse
 }
@@ -2705,7 +2718,7 @@ export type getAttentionItemsResponse200 = {
   data: AttentionItemListEnvelope
   status: 200
 }
-    
+
 export type getAttentionItemsResponseSuccess = (getAttentionItemsResponse200) & {
   headers: Headers;
 };
@@ -2717,7 +2730,7 @@ export const getGetAttentionItemsUrl = (params?: GetAttentionItemsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -2729,18 +2742,18 @@ export const getGetAttentionItemsUrl = (params?: GetAttentionItemsParams,) => {
 }
 
 export const getAttentionItems = async (params?: GetAttentionItemsParams, options?: RequestInit): Promise<getAttentionItemsResponse> => {
-  
+
   const res = await fetch(getGetAttentionItemsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAttentionItemsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAttentionItemsResponse
 }
@@ -2754,7 +2767,7 @@ export type getAttentionItemsByAttentionIdResponse200 = {
   data: AttentionItemEnvelope
   status: 200
 }
-    
+
 export type getAttentionItemsByAttentionIdResponseSuccess = (getAttentionItemsByAttentionIdResponse200) & {
   headers: Headers;
 };
@@ -2765,24 +2778,24 @@ export type getAttentionItemsByAttentionIdResponse = (getAttentionItemsByAttenti
 export const getGetAttentionItemsByAttentionIdUrl = (attentionId: string,) => {
 
 
-  
+
 
   return `/v1/attention-items/${attentionId}`
 }
 
 export const getAttentionItemsByAttentionId = async (attentionId: string, options?: RequestInit): Promise<getAttentionItemsByAttentionIdResponse> => {
-  
+
   const res = await fetch(getGetAttentionItemsByAttentionIdUrl(attentionId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAttentionItemsByAttentionIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAttentionItemsByAttentionIdResponse
 }
@@ -2796,7 +2809,7 @@ export type patchAttentionItemsByAttentionIdResponse200 = {
   data: AttentionStateEnvelope
   status: 200
 }
-    
+
 export type patchAttentionItemsByAttentionIdResponseSuccess = (patchAttentionItemsByAttentionIdResponse200) & {
   headers: Headers;
 };
@@ -2807,16 +2820,16 @@ export type patchAttentionItemsByAttentionIdResponse = (patchAttentionItemsByAtt
 export const getPatchAttentionItemsByAttentionIdUrl = (attentionId: string,) => {
 
 
-  
+
 
   return `/v1/attention-items/${attentionId}`
 }
 
 export const patchAttentionItemsByAttentionId = async (attentionId: string,
     attentionStateCommand: AttentionStateCommand, options?: RequestInit): Promise<patchAttentionItemsByAttentionIdResponse> => {
-  
+
   const res = await fetch(getPatchAttentionItemsByAttentionIdUrl(attentionId),
-  {      
+  {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -2826,7 +2839,7 @@ export const patchAttentionItemsByAttentionId = async (attentionId: string,
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: patchAttentionItemsByAttentionIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as patchAttentionItemsByAttentionIdResponse
 }
@@ -2840,7 +2853,7 @@ export type getAnomaliesResponse200 = {
   data: AnomalyListEnvelope
   status: 200
 }
-    
+
 export type getAnomaliesResponseSuccess = (getAnomaliesResponse200) & {
   headers: Headers;
 };
@@ -2852,7 +2865,7 @@ export const getGetAnomaliesUrl = (params?: GetAnomaliesParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -2864,18 +2877,18 @@ export const getGetAnomaliesUrl = (params?: GetAnomaliesParams,) => {
 }
 
 export const getAnomalies = async (params?: GetAnomaliesParams, options?: RequestInit): Promise<getAnomaliesResponse> => {
-  
+
   const res = await fetch(getGetAnomaliesUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnomaliesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnomaliesResponse
 }
@@ -2889,7 +2902,7 @@ export type getCaseResultsResponse200 = {
   data: CaseResultExplorerEnvelope
   status: 200
 }
-    
+
 export type getCaseResultsResponseSuccess = (getCaseResultsResponse200) & {
   headers: Headers;
 };
@@ -2901,7 +2914,7 @@ export const getGetCaseResultsUrl = (params?: GetCaseResultsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -2913,18 +2926,18 @@ export const getGetCaseResultsUrl = (params?: GetCaseResultsParams,) => {
 }
 
 export const getCaseResults = async (params?: GetCaseResultsParams, options?: RequestInit): Promise<getCaseResultsResponse> => {
-  
+
   const res = await fetch(getGetCaseResultsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getCaseResultsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getCaseResultsResponse
 }
@@ -2938,7 +2951,7 @@ export type getBenchmarkRunsByRunIdDashboardResponse200 = {
   data: RunDashboardEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkRunsByRunIdDashboardResponseSuccess = (getBenchmarkRunsByRunIdDashboardResponse200) & {
   headers: Headers;
 };
@@ -2949,24 +2962,24 @@ export type getBenchmarkRunsByRunIdDashboardResponse = (getBenchmarkRunsByRunIdD
 export const getGetBenchmarkRunsByRunIdDashboardUrl = (runId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-runs/${runId}/dashboard`
 }
 
 export const getBenchmarkRunsByRunIdDashboard = async (runId: string, options?: RequestInit): Promise<getBenchmarkRunsByRunIdDashboardResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkRunsByRunIdDashboardUrl(runId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkRunsByRunIdDashboardResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkRunsByRunIdDashboardResponse
 }
@@ -2980,7 +2993,7 @@ export type getBenchmarkRunsByRunIdRepetitionsResponse200 = {
   data: RunRepetitionListEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkRunsByRunIdRepetitionsResponseSuccess = (getBenchmarkRunsByRunIdRepetitionsResponse200) & {
   headers: Headers;
 };
@@ -2991,24 +3004,24 @@ export type getBenchmarkRunsByRunIdRepetitionsResponse = (getBenchmarkRunsByRunI
 export const getGetBenchmarkRunsByRunIdRepetitionsUrl = (runId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-runs/${runId}/repetitions`
 }
 
 export const getBenchmarkRunsByRunIdRepetitions = async (runId: string, options?: RequestInit): Promise<getBenchmarkRunsByRunIdRepetitionsResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkRunsByRunIdRepetitionsUrl(runId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkRunsByRunIdRepetitionsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkRunsByRunIdRepetitionsResponse
 }
@@ -3022,7 +3035,7 @@ export type getBenchmarkRunsByRunIdEventsResponse200 = {
   data: RunEventListEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkRunsByRunIdEventsResponseSuccess = (getBenchmarkRunsByRunIdEventsResponse200) & {
   headers: Headers;
 };
@@ -3033,24 +3046,24 @@ export type getBenchmarkRunsByRunIdEventsResponse = (getBenchmarkRunsByRunIdEven
 export const getGetBenchmarkRunsByRunIdEventsUrl = (runId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-runs/${runId}/events`
 }
 
 export const getBenchmarkRunsByRunIdEvents = async (runId: string, options?: RequestInit): Promise<getBenchmarkRunsByRunIdEventsResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkRunsByRunIdEventsUrl(runId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkRunsByRunIdEventsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkRunsByRunIdEventsResponse
 }
@@ -3064,7 +3077,7 @@ export type getBenchmarkRunsByRunIdEvidenceFunnelResponse200 = {
   data: EvidenceFunnelEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkRunsByRunIdEvidenceFunnelResponseSuccess = (getBenchmarkRunsByRunIdEvidenceFunnelResponse200) & {
   headers: Headers;
 };
@@ -3075,24 +3088,24 @@ export type getBenchmarkRunsByRunIdEvidenceFunnelResponse = (getBenchmarkRunsByR
 export const getGetBenchmarkRunsByRunIdEvidenceFunnelUrl = (runId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-runs/${runId}/evidence-funnel`
 }
 
 export const getBenchmarkRunsByRunIdEvidenceFunnel = async (runId: string, options?: RequestInit): Promise<getBenchmarkRunsByRunIdEvidenceFunnelResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkRunsByRunIdEvidenceFunnelUrl(runId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkRunsByRunIdEvidenceFunnelResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkRunsByRunIdEvidenceFunnelResponse
 }
@@ -3106,7 +3119,7 @@ export type getBenchmarkRunsByRunIdOperationalSummaryResponse200 = {
   data: OperationalSummaryEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkRunsByRunIdOperationalSummaryResponseSuccess = (getBenchmarkRunsByRunIdOperationalSummaryResponse200) & {
   headers: Headers;
 };
@@ -3117,24 +3130,24 @@ export type getBenchmarkRunsByRunIdOperationalSummaryResponse = (getBenchmarkRun
 export const getGetBenchmarkRunsByRunIdOperationalSummaryUrl = (runId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-runs/${runId}/operational-summary`
 }
 
 export const getBenchmarkRunsByRunIdOperationalSummary = async (runId: string, options?: RequestInit): Promise<getBenchmarkRunsByRunIdOperationalSummaryResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkRunsByRunIdOperationalSummaryUrl(runId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkRunsByRunIdOperationalSummaryResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkRunsByRunIdOperationalSummaryResponse
 }
@@ -3148,7 +3161,7 @@ export type getBaselinesByBaselineIdResponse200 = {
   data: BaselineEnvelope
   status: 200
 }
-    
+
 export type getBaselinesByBaselineIdResponseSuccess = (getBaselinesByBaselineIdResponse200) & {
   headers: Headers;
 };
@@ -3159,24 +3172,24 @@ export type getBaselinesByBaselineIdResponse = (getBaselinesByBaselineIdResponse
 export const getGetBaselinesByBaselineIdUrl = (baselineId: string,) => {
 
 
-  
+
 
   return `/v1/baselines/${baselineId}`
 }
 
 export const getBaselinesByBaselineId = async (baselineId: string, options?: RequestInit): Promise<getBaselinesByBaselineIdResponse> => {
-  
+
   const res = await fetch(getGetBaselinesByBaselineIdUrl(baselineId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBaselinesByBaselineIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBaselinesByBaselineIdResponse
 }
@@ -3190,7 +3203,7 @@ export type getComparisonsByComparisonIdDashboardResponse200 = {
   data: ComparisonDashboardEnvelope
   status: 200
 }
-    
+
 export type getComparisonsByComparisonIdDashboardResponseSuccess = (getComparisonsByComparisonIdDashboardResponse200) & {
   headers: Headers;
 };
@@ -3201,24 +3214,24 @@ export type getComparisonsByComparisonIdDashboardResponse = (getComparisonsByCom
 export const getGetComparisonsByComparisonIdDashboardUrl = (comparisonId: string,) => {
 
 
-  
+
 
   return `/v1/comparisons/${comparisonId}/dashboard`
 }
 
 export const getComparisonsByComparisonIdDashboard = async (comparisonId: string, options?: RequestInit): Promise<getComparisonsByComparisonIdDashboardResponse> => {
-  
+
   const res = await fetch(getGetComparisonsByComparisonIdDashboardUrl(comparisonId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getComparisonsByComparisonIdDashboardResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getComparisonsByComparisonIdDashboardResponse
 }
@@ -3232,7 +3245,7 @@ export type getComparisonsByComparisonIdEvidenceDiffsResponse200 = {
   data: ComparisonEvidenceDiffListEnvelope
   status: 200
 }
-    
+
 export type getComparisonsByComparisonIdEvidenceDiffsResponseSuccess = (getComparisonsByComparisonIdEvidenceDiffsResponse200) & {
   headers: Headers;
 };
@@ -3243,24 +3256,24 @@ export type getComparisonsByComparisonIdEvidenceDiffsResponse = (getComparisonsB
 export const getGetComparisonsByComparisonIdEvidenceDiffsUrl = (comparisonId: string,) => {
 
 
-  
+
 
   return `/v1/comparisons/${comparisonId}/evidence-diffs`
 }
 
 export const getComparisonsByComparisonIdEvidenceDiffs = async (comparisonId: string, options?: RequestInit): Promise<getComparisonsByComparisonIdEvidenceDiffsResponse> => {
-  
+
   const res = await fetch(getGetComparisonsByComparisonIdEvidenceDiffsUrl(comparisonId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getComparisonsByComparisonIdEvidenceDiffsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getComparisonsByComparisonIdEvidenceDiffsResponse
 }
@@ -3274,7 +3287,7 @@ export type getBenchmarkCasesResponse200 = {
   data: BenchmarkCaseListEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkCasesResponseSuccess = (getBenchmarkCasesResponse200) & {
   headers: Headers;
 };
@@ -3286,7 +3299,7 @@ export const getGetBenchmarkCasesUrl = (params?: GetBenchmarkCasesParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -3298,18 +3311,18 @@ export const getGetBenchmarkCasesUrl = (params?: GetBenchmarkCasesParams,) => {
 }
 
 export const getBenchmarkCases = async (params?: GetBenchmarkCasesParams, options?: RequestInit): Promise<getBenchmarkCasesResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkCasesUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkCasesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkCasesResponse
 }
@@ -3323,7 +3336,7 @@ export type getBenchmarkCasesByCaseIdResponse200 = {
   data: BenchmarkCaseEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkCasesByCaseIdResponseSuccess = (getBenchmarkCasesByCaseIdResponse200) & {
   headers: Headers;
 };
@@ -3334,24 +3347,24 @@ export type getBenchmarkCasesByCaseIdResponse = (getBenchmarkCasesByCaseIdRespon
 export const getGetBenchmarkCasesByCaseIdUrl = (caseId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-cases/${caseId}`
 }
 
 export const getBenchmarkCasesByCaseId = async (caseId: string, options?: RequestInit): Promise<getBenchmarkCasesByCaseIdResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkCasesByCaseIdUrl(caseId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkCasesByCaseIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkCasesByCaseIdResponse
 }
@@ -3365,7 +3378,7 @@ export type getBenchmarkCasesByCaseIdExecutionsResponse200 = {
   data: CaseExecutionListEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkCasesByCaseIdExecutionsResponseSuccess = (getBenchmarkCasesByCaseIdExecutionsResponse200) & {
   headers: Headers;
 };
@@ -3376,24 +3389,24 @@ export type getBenchmarkCasesByCaseIdExecutionsResponse = (getBenchmarkCasesByCa
 export const getGetBenchmarkCasesByCaseIdExecutionsUrl = (caseId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-cases/${caseId}/executions`
 }
 
 export const getBenchmarkCasesByCaseIdExecutions = async (caseId: string, options?: RequestInit): Promise<getBenchmarkCasesByCaseIdExecutionsResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkCasesByCaseIdExecutionsUrl(caseId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkCasesByCaseIdExecutionsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkCasesByCaseIdExecutionsResponse
 }
@@ -3407,7 +3420,7 @@ export type getBenchmarkCasesByCaseIdRepetitionsResponse200 = {
   data: CaseRepetitionListEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkCasesByCaseIdRepetitionsResponseSuccess = (getBenchmarkCasesByCaseIdRepetitionsResponse200) & {
   headers: Headers;
 };
@@ -3418,24 +3431,24 @@ export type getBenchmarkCasesByCaseIdRepetitionsResponse = (getBenchmarkCasesByC
 export const getGetBenchmarkCasesByCaseIdRepetitionsUrl = (caseId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-cases/${caseId}/repetitions`
 }
 
 export const getBenchmarkCasesByCaseIdRepetitions = async (caseId: string, options?: RequestInit): Promise<getBenchmarkCasesByCaseIdRepetitionsResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkCasesByCaseIdRepetitionsUrl(caseId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkCasesByCaseIdRepetitionsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkCasesByCaseIdRepetitionsResponse
 }
@@ -3449,7 +3462,7 @@ export type getBenchmarkCasesByCaseIdExpectedContractResponse200 = {
   data: ExpectedContractEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkCasesByCaseIdExpectedContractResponseSuccess = (getBenchmarkCasesByCaseIdExpectedContractResponse200) & {
   headers: Headers;
 };
@@ -3460,24 +3473,24 @@ export type getBenchmarkCasesByCaseIdExpectedContractResponse = (getBenchmarkCas
 export const getGetBenchmarkCasesByCaseIdExpectedContractUrl = (caseId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-cases/${caseId}/expected-contract`
 }
 
 export const getBenchmarkCasesByCaseIdExpectedContract = async (caseId: string, options?: RequestInit): Promise<getBenchmarkCasesByCaseIdExpectedContractResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkCasesByCaseIdExpectedContractUrl(caseId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkCasesByCaseIdExpectedContractResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkCasesByCaseIdExpectedContractResponse
 }
@@ -3491,7 +3504,7 @@ export type getBenchmarkCasesByCaseIdEvaluationBindingResponse200 = {
   data: EvaluationBindingEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkCasesByCaseIdEvaluationBindingResponseSuccess = (getBenchmarkCasesByCaseIdEvaluationBindingResponse200) & {
   headers: Headers;
 };
@@ -3502,24 +3515,24 @@ export type getBenchmarkCasesByCaseIdEvaluationBindingResponse = (getBenchmarkCa
 export const getGetBenchmarkCasesByCaseIdEvaluationBindingUrl = (caseId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-cases/${caseId}/evaluation-binding`
 }
 
 export const getBenchmarkCasesByCaseIdEvaluationBinding = async (caseId: string, options?: RequestInit): Promise<getBenchmarkCasesByCaseIdEvaluationBindingResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkCasesByCaseIdEvaluationBindingUrl(caseId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkCasesByCaseIdEvaluationBindingResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkCasesByCaseIdEvaluationBindingResponse
 }
@@ -3533,7 +3546,7 @@ export type getBenchmarkCasesByCaseIdStabilityResponse200 = {
   data: CaseStabilityEnvelope
   status: 200
 }
-    
+
 export type getBenchmarkCasesByCaseIdStabilityResponseSuccess = (getBenchmarkCasesByCaseIdStabilityResponse200) & {
   headers: Headers;
 };
@@ -3544,24 +3557,24 @@ export type getBenchmarkCasesByCaseIdStabilityResponse = (getBenchmarkCasesByCas
 export const getGetBenchmarkCasesByCaseIdStabilityUrl = (caseId: string,) => {
 
 
-  
+
 
   return `/v1/benchmark-cases/${caseId}/stability`
 }
 
 export const getBenchmarkCasesByCaseIdStability = async (caseId: string, options?: RequestInit): Promise<getBenchmarkCasesByCaseIdStabilityResponse> => {
-  
+
   const res = await fetch(getGetBenchmarkCasesByCaseIdStabilityUrl(caseId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getBenchmarkCasesByCaseIdStabilityResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getBenchmarkCasesByCaseIdStabilityResponse
 }
@@ -3575,7 +3588,7 @@ export type getEvaluationsResponse200 = {
   data: EvaluationSummaryListEnvelope
   status: 200
 }
-    
+
 export type getEvaluationsResponseSuccess = (getEvaluationsResponse200) & {
   headers: Headers;
 };
@@ -3586,24 +3599,24 @@ export type getEvaluationsResponse = (getEvaluationsResponseSuccess)
 export const getGetEvaluationsUrl = () => {
 
 
-  
+
 
   return `/v1/evaluations`
 }
 
 export const getEvaluations = async ( options?: RequestInit): Promise<getEvaluationsResponse> => {
-  
+
   const res = await fetch(getGetEvaluationsUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationsResponse
 }
@@ -3617,7 +3630,7 @@ export type getEvaluationsByEvaluationIdReadinessResponse200 = {
   data: EvaluationReadinessEnvelope
   status: 200
 }
-    
+
 export type getEvaluationsByEvaluationIdReadinessResponseSuccess = (getEvaluationsByEvaluationIdReadinessResponse200) & {
   headers: Headers;
 };
@@ -3628,24 +3641,24 @@ export type getEvaluationsByEvaluationIdReadinessResponse = (getEvaluationsByEva
 export const getGetEvaluationsByEvaluationIdReadinessUrl = (evaluationId: string,) => {
 
 
-  
+
 
   return `/v1/evaluations/${evaluationId}/readiness`
 }
 
 export const getEvaluationsByEvaluationIdReadiness = async (evaluationId: string, options?: RequestInit): Promise<getEvaluationsByEvaluationIdReadinessResponse> => {
-  
+
   const res = await fetch(getGetEvaluationsByEvaluationIdReadinessUrl(evaluationId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationsByEvaluationIdReadinessResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationsByEvaluationIdReadinessResponse
 }
@@ -3659,7 +3672,7 @@ export type getEvaluationsByEvaluationIdEvidenceGradesResponse200 = {
   data: EvaluationEvidenceGradeListEnvelope
   status: 200
 }
-    
+
 export type getEvaluationsByEvaluationIdEvidenceGradesResponseSuccess = (getEvaluationsByEvaluationIdEvidenceGradesResponse200) & {
   headers: Headers;
 };
@@ -3670,24 +3683,24 @@ export type getEvaluationsByEvaluationIdEvidenceGradesResponse = (getEvaluations
 export const getGetEvaluationsByEvaluationIdEvidenceGradesUrl = (evaluationId: string,) => {
 
 
-  
+
 
   return `/v1/evaluations/${evaluationId}/evidence-grades`
 }
 
 export const getEvaluationsByEvaluationIdEvidenceGrades = async (evaluationId: string, options?: RequestInit): Promise<getEvaluationsByEvaluationIdEvidenceGradesResponse> => {
-  
+
   const res = await fetch(getGetEvaluationsByEvaluationIdEvidenceGradesUrl(evaluationId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationsByEvaluationIdEvidenceGradesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationsByEvaluationIdEvidenceGradesResponse
 }
@@ -3701,7 +3714,7 @@ export type getEvaluationsByEvaluationIdFatalsResponse200 = {
   data: EvaluationFatalListEnvelope
   status: 200
 }
-    
+
 export type getEvaluationsByEvaluationIdFatalsResponseSuccess = (getEvaluationsByEvaluationIdFatalsResponse200) & {
   headers: Headers;
 };
@@ -3712,24 +3725,24 @@ export type getEvaluationsByEvaluationIdFatalsResponse = (getEvaluationsByEvalua
 export const getGetEvaluationsByEvaluationIdFatalsUrl = (evaluationId: string,) => {
 
 
-  
+
 
   return `/v1/evaluations/${evaluationId}/fatals`
 }
 
 export const getEvaluationsByEvaluationIdFatals = async (evaluationId: string, options?: RequestInit): Promise<getEvaluationsByEvaluationIdFatalsResponse> => {
-  
+
   const res = await fetch(getGetEvaluationsByEvaluationIdFatalsUrl(evaluationId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationsByEvaluationIdFatalsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationsByEvaluationIdFatalsResponse
 }
@@ -3743,7 +3756,7 @@ export type getEvaluationsByEvaluationIdHardGatesResponse200 = {
   data: EvaluationHardGateListEnvelope
   status: 200
 }
-    
+
 export type getEvaluationsByEvaluationIdHardGatesResponseSuccess = (getEvaluationsByEvaluationIdHardGatesResponse200) & {
   headers: Headers;
 };
@@ -3754,24 +3767,24 @@ export type getEvaluationsByEvaluationIdHardGatesResponse = (getEvaluationsByEva
 export const getGetEvaluationsByEvaluationIdHardGatesUrl = (evaluationId: string,) => {
 
 
-  
+
 
   return `/v1/evaluations/${evaluationId}/hard-gates`
 }
 
 export const getEvaluationsByEvaluationIdHardGates = async (evaluationId: string, options?: RequestInit): Promise<getEvaluationsByEvaluationIdHardGatesResponse> => {
-  
+
   const res = await fetch(getGetEvaluationsByEvaluationIdHardGatesUrl(evaluationId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationsByEvaluationIdHardGatesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationsByEvaluationIdHardGatesResponse
 }
@@ -3785,7 +3798,7 @@ export type getEvaluationsByEvaluationIdMetricsResponse200 = {
   data: EvaluationMetricListEnvelope
   status: 200
 }
-    
+
 export type getEvaluationsByEvaluationIdMetricsResponseSuccess = (getEvaluationsByEvaluationIdMetricsResponse200) & {
   headers: Headers;
 };
@@ -3796,24 +3809,24 @@ export type getEvaluationsByEvaluationIdMetricsResponse = (getEvaluationsByEvalu
 export const getGetEvaluationsByEvaluationIdMetricsUrl = (evaluationId: string,) => {
 
 
-  
+
 
   return `/v1/evaluations/${evaluationId}/metrics`
 }
 
 export const getEvaluationsByEvaluationIdMetrics = async (evaluationId: string, options?: RequestInit): Promise<getEvaluationsByEvaluationIdMetricsResponse> => {
-  
+
   const res = await fetch(getGetEvaluationsByEvaluationIdMetricsUrl(evaluationId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationsByEvaluationIdMetricsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationsByEvaluationIdMetricsResponse
 }
@@ -3827,7 +3840,7 @@ export type getEvaluationsByEvaluationIdDimensionsResponse200 = {
   data: EvaluationDimensionListEnvelope
   status: 200
 }
-    
+
 export type getEvaluationsByEvaluationIdDimensionsResponseSuccess = (getEvaluationsByEvaluationIdDimensionsResponse200) & {
   headers: Headers;
 };
@@ -3838,24 +3851,24 @@ export type getEvaluationsByEvaluationIdDimensionsResponse = (getEvaluationsByEv
 export const getGetEvaluationsByEvaluationIdDimensionsUrl = (evaluationId: string,) => {
 
 
-  
+
 
   return `/v1/evaluations/${evaluationId}/dimensions`
 }
 
 export const getEvaluationsByEvaluationIdDimensions = async (evaluationId: string, options?: RequestInit): Promise<getEvaluationsByEvaluationIdDimensionsResponse> => {
-  
+
   const res = await fetch(getGetEvaluationsByEvaluationIdDimensionsUrl(evaluationId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationsByEvaluationIdDimensionsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationsByEvaluationIdDimensionsResponse
 }
@@ -3869,7 +3882,7 @@ export type getEvaluationsByEvaluationIdFindingsResponse200 = {
   data: EvaluationFindingListEnvelope
   status: 200
 }
-    
+
 export type getEvaluationsByEvaluationIdFindingsResponseSuccess = (getEvaluationsByEvaluationIdFindingsResponse200) & {
   headers: Headers;
 };
@@ -3880,24 +3893,24 @@ export type getEvaluationsByEvaluationIdFindingsResponse = (getEvaluationsByEval
 export const getGetEvaluationsByEvaluationIdFindingsUrl = (evaluationId: string,) => {
 
 
-  
+
 
   return `/v1/evaluations/${evaluationId}/findings`
 }
 
 export const getEvaluationsByEvaluationIdFindings = async (evaluationId: string, options?: RequestInit): Promise<getEvaluationsByEvaluationIdFindingsResponse> => {
-  
+
   const res = await fetch(getGetEvaluationsByEvaluationIdFindingsUrl(evaluationId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationsByEvaluationIdFindingsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationsByEvaluationIdFindingsResponse
 }
@@ -3911,7 +3924,7 @@ export type getEvaluationsByEvaluationIdEvidenceLinksResponse200 = {
   data: EvaluationEvidenceLinksEnvelope
   status: 200
 }
-    
+
 export type getEvaluationsByEvaluationIdEvidenceLinksResponseSuccess = (getEvaluationsByEvaluationIdEvidenceLinksResponse200) & {
   headers: Headers;
 };
@@ -3922,24 +3935,24 @@ export type getEvaluationsByEvaluationIdEvidenceLinksResponse = (getEvaluationsB
 export const getGetEvaluationsByEvaluationIdEvidenceLinksUrl = (evaluationId: string,) => {
 
 
-  
+
 
   return `/v1/evaluations/${evaluationId}/evidence-links`
 }
 
 export const getEvaluationsByEvaluationIdEvidenceLinks = async (evaluationId: string, options?: RequestInit): Promise<getEvaluationsByEvaluationIdEvidenceLinksResponse> => {
-  
+
   const res = await fetch(getGetEvaluationsByEvaluationIdEvidenceLinksUrl(evaluationId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationsByEvaluationIdEvidenceLinksResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationsByEvaluationIdEvidenceLinksResponse
 }
@@ -3953,7 +3966,7 @@ export type getEpisodesByEpisodeIdEvidenceBundlesResponse200 = {
   data: EvidenceBundleIndexListEnvelope
   status: 200
 }
-    
+
 export type getEpisodesByEpisodeIdEvidenceBundlesResponseSuccess = (getEpisodesByEpisodeIdEvidenceBundlesResponse200) & {
   headers: Headers;
 };
@@ -3964,24 +3977,24 @@ export type getEpisodesByEpisodeIdEvidenceBundlesResponse = (getEpisodesByEpisod
 export const getGetEpisodesByEpisodeIdEvidenceBundlesUrl = (episodeId: string,) => {
 
 
-  
+
 
   return `/v1/episodes/${episodeId}/evidence-bundles`
 }
 
 export const getEpisodesByEpisodeIdEvidenceBundles = async (episodeId: string, options?: RequestInit): Promise<getEpisodesByEpisodeIdEvidenceBundlesResponse> => {
-  
+
   const res = await fetch(getGetEpisodesByEpisodeIdEvidenceBundlesUrl(episodeId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEpisodesByEpisodeIdEvidenceBundlesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEpisodesByEpisodeIdEvidenceBundlesResponse
 }
@@ -3995,7 +4008,7 @@ export type postEvidenceBundlesByBundleIdEvaluationsResponse202 = {
   data: BundleEvaluationRequestEnvelope
   status: 202
 }
-    
+
 export type postEvidenceBundlesByBundleIdEvaluationsResponseSuccess = (postEvidenceBundlesByBundleIdEvaluationsResponse202) & {
   headers: Headers;
 };
@@ -4006,16 +4019,16 @@ export type postEvidenceBundlesByBundleIdEvaluationsResponse = (postEvidenceBund
 export const getPostEvidenceBundlesByBundleIdEvaluationsUrl = (bundleId: string,) => {
 
 
-  
+
 
   return `/v1/evidence-bundles/${bundleId}/evaluations`
 }
 
 export const postEvidenceBundlesByBundleIdEvaluations = async (bundleId: string,
     postEvidenceBundlesByBundleIdEvaluationsBody: PostEvidenceBundlesByBundleIdEvaluationsBody, options?: RequestInit): Promise<postEvidenceBundlesByBundleIdEvaluationsResponse> => {
-  
+
   const res = await fetch(getPostEvidenceBundlesByBundleIdEvaluationsUrl(bundleId),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -4025,7 +4038,7 @@ export const postEvidenceBundlesByBundleIdEvaluations = async (bundleId: string,
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: postEvidenceBundlesByBundleIdEvaluationsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as postEvidenceBundlesByBundleIdEvaluationsResponse
 }
@@ -4039,7 +4052,7 @@ export type getEvidenceBundlesResponse200 = {
   data: EvidenceBundleListEnvelope
   status: 200
 }
-    
+
 export type getEvidenceBundlesResponseSuccess = (getEvidenceBundlesResponse200) & {
   headers: Headers;
 };
@@ -4050,24 +4063,24 @@ export type getEvidenceBundlesResponse = (getEvidenceBundlesResponseSuccess)
 export const getGetEvidenceBundlesUrl = () => {
 
 
-  
+
 
   return `/v1/evidence-bundles`
 }
 
 export const getEvidenceBundles = async ( options?: RequestInit): Promise<getEvidenceBundlesResponse> => {
-  
+
   const res = await fetch(getGetEvidenceBundlesUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvidenceBundlesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvidenceBundlesResponse
 }
@@ -4081,7 +4094,7 @@ export type getEvidenceBundlesByBundleIdResponse200 = {
   data: EvidenceBundleEnvelope
   status: 200
 }
-    
+
 export type getEvidenceBundlesByBundleIdResponseSuccess = (getEvidenceBundlesByBundleIdResponse200) & {
   headers: Headers;
 };
@@ -4092,24 +4105,24 @@ export type getEvidenceBundlesByBundleIdResponse = (getEvidenceBundlesByBundleId
 export const getGetEvidenceBundlesByBundleIdUrl = (bundleId: string,) => {
 
 
-  
+
 
   return `/v1/evidence-bundles/${bundleId}`
 }
 
 export const getEvidenceBundlesByBundleId = async (bundleId: string, options?: RequestInit): Promise<getEvidenceBundlesByBundleIdResponse> => {
-  
+
   const res = await fetch(getGetEvidenceBundlesByBundleIdUrl(bundleId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvidenceBundlesByBundleIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvidenceBundlesByBundleIdResponse
 }
@@ -4123,7 +4136,7 @@ export type getEvidenceBundlesByBundleIdRecordsResponse200 = {
   data: EvidenceRecordListEnvelope
   status: 200
 }
-    
+
 export type getEvidenceBundlesByBundleIdRecordsResponseSuccess = (getEvidenceBundlesByBundleIdRecordsResponse200) & {
   headers: Headers;
 };
@@ -4136,7 +4149,7 @@ export const getGetEvidenceBundlesByBundleIdRecordsUrl = (bundleId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4149,18 +4162,18 @@ export const getGetEvidenceBundlesByBundleIdRecordsUrl = (bundleId: string,
 
 export const getEvidenceBundlesByBundleIdRecords = async (bundleId: string,
     params?: GetEvidenceBundlesByBundleIdRecordsParams, options?: RequestInit): Promise<getEvidenceBundlesByBundleIdRecordsResponse> => {
-  
+
   const res = await fetch(getGetEvidenceBundlesByBundleIdRecordsUrl(bundleId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvidenceBundlesByBundleIdRecordsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvidenceBundlesByBundleIdRecordsResponse
 }
@@ -4174,7 +4187,7 @@ export type getEvidenceBundlesByBundleIdTimelineResponse200 = {
   data: EvidenceRecordListEnvelope
   status: 200
 }
-    
+
 export type getEvidenceBundlesByBundleIdTimelineResponseSuccess = (getEvidenceBundlesByBundleIdTimelineResponse200) & {
   headers: Headers;
 };
@@ -4187,7 +4200,7 @@ export const getGetEvidenceBundlesByBundleIdTimelineUrl = (bundleId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4200,18 +4213,18 @@ export const getGetEvidenceBundlesByBundleIdTimelineUrl = (bundleId: string,
 
 export const getEvidenceBundlesByBundleIdTimeline = async (bundleId: string,
     params?: GetEvidenceBundlesByBundleIdTimelineParams, options?: RequestInit): Promise<getEvidenceBundlesByBundleIdTimelineResponse> => {
-  
+
   const res = await fetch(getGetEvidenceBundlesByBundleIdTimelineUrl(bundleId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvidenceBundlesByBundleIdTimelineResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvidenceBundlesByBundleIdTimelineResponse
 }
@@ -4225,7 +4238,7 @@ export type getEvidenceBundlesByBundleIdGraphResponse200 = {
   data: EvidenceGraphEnvelope
   status: 200
 }
-    
+
 export type getEvidenceBundlesByBundleIdGraphResponseSuccess = (getEvidenceBundlesByBundleIdGraphResponse200) & {
   headers: Headers;
 };
@@ -4236,24 +4249,24 @@ export type getEvidenceBundlesByBundleIdGraphResponse = (getEvidenceBundlesByBun
 export const getGetEvidenceBundlesByBundleIdGraphUrl = (bundleId: string,) => {
 
 
-  
+
 
   return `/v1/evidence-bundles/${bundleId}/graph`
 }
 
 export const getEvidenceBundlesByBundleIdGraph = async (bundleId: string, options?: RequestInit): Promise<getEvidenceBundlesByBundleIdGraphResponse> => {
-  
+
   const res = await fetch(getGetEvidenceBundlesByBundleIdGraphUrl(bundleId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvidenceBundlesByBundleIdGraphResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvidenceBundlesByBundleIdGraphResponse
 }
@@ -4267,7 +4280,7 @@ export type getEvidenceBundlesByBundleIdDiffResponse200 = {
   data: EvidenceDiffEnvelope
   status: 200
 }
-    
+
 export type getEvidenceBundlesByBundleIdDiffResponseSuccess = (getEvidenceBundlesByBundleIdDiffResponse200) & {
   headers: Headers;
 };
@@ -4280,7 +4293,7 @@ export const getGetEvidenceBundlesByBundleIdDiffUrl = (bundleId: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4293,18 +4306,18 @@ export const getGetEvidenceBundlesByBundleIdDiffUrl = (bundleId: string,
 
 export const getEvidenceBundlesByBundleIdDiff = async (bundleId: string,
     params: GetEvidenceBundlesByBundleIdDiffParams, options?: RequestInit): Promise<getEvidenceBundlesByBundleIdDiffResponse> => {
-  
+
   const res = await fetch(getGetEvidenceBundlesByBundleIdDiffUrl(bundleId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvidenceBundlesByBundleIdDiffResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvidenceBundlesByBundleIdDiffResponse
 }
@@ -4318,7 +4331,7 @@ export type getEvidenceBundlesByBundleIdUsageResponse200 = {
   data: EvidenceUsageEnvelope
   status: 200
 }
-    
+
 export type getEvidenceBundlesByBundleIdUsageResponseSuccess = (getEvidenceBundlesByBundleIdUsageResponse200) & {
   headers: Headers;
 };
@@ -4329,24 +4342,24 @@ export type getEvidenceBundlesByBundleIdUsageResponse = (getEvidenceBundlesByBun
 export const getGetEvidenceBundlesByBundleIdUsageUrl = (bundleId: string,) => {
 
 
-  
+
 
   return `/v1/evidence-bundles/${bundleId}/usage`
 }
 
 export const getEvidenceBundlesByBundleIdUsage = async (bundleId: string, options?: RequestInit): Promise<getEvidenceBundlesByBundleIdUsageResponse> => {
-  
+
   const res = await fetch(getGetEvidenceBundlesByBundleIdUsageUrl(bundleId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvidenceBundlesByBundleIdUsageResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvidenceBundlesByBundleIdUsageResponse
 }
@@ -4360,7 +4373,7 @@ export type getEvidenceBundlesByBundleIdRecordsByRecordIdResponse200 = {
   data: EvidenceRecordEnvelope
   status: 200
 }
-    
+
 export type getEvidenceBundlesByBundleIdRecordsByRecordIdResponseSuccess = (getEvidenceBundlesByBundleIdRecordsByRecordIdResponse200) & {
   headers: Headers;
 };
@@ -4372,25 +4385,25 @@ export const getGetEvidenceBundlesByBundleIdRecordsByRecordIdUrl = (bundleId: st
     recordId: string,) => {
 
 
-  
+
 
   return `/v1/evidence-bundles/${bundleId}/records/${recordId}`
 }
 
 export const getEvidenceBundlesByBundleIdRecordsByRecordId = async (bundleId: string,
     recordId: string, options?: RequestInit): Promise<getEvidenceBundlesByBundleIdRecordsByRecordIdResponse> => {
-  
+
   const res = await fetch(getGetEvidenceBundlesByBundleIdRecordsByRecordIdUrl(bundleId,recordId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvidenceBundlesByBundleIdRecordsByRecordIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvidenceBundlesByBundleIdRecordsByRecordIdResponse
 }
@@ -4404,7 +4417,7 @@ export type getAnalyticsQualityTrendResponse200 = {
   data: AnalyticsQualityTrendEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsQualityTrendResponseSuccess = (getAnalyticsQualityTrendResponse200) & {
   headers: Headers;
 };
@@ -4416,7 +4429,7 @@ export const getGetAnalyticsQualityTrendUrl = (params?: GetAnalyticsQualityTrend
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4428,18 +4441,18 @@ export const getGetAnalyticsQualityTrendUrl = (params?: GetAnalyticsQualityTrend
 }
 
 export const getAnalyticsQualityTrend = async (params?: GetAnalyticsQualityTrendParams, options?: RequestInit): Promise<getAnalyticsQualityTrendResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsQualityTrendUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsQualityTrendResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsQualityTrendResponse
 }
@@ -4453,7 +4466,7 @@ export type getAnalyticsChangeSummaryResponse200 = {
   data: AnalyticsChangeSummaryEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsChangeSummaryResponseSuccess = (getAnalyticsChangeSummaryResponse200) & {
   headers: Headers;
 };
@@ -4465,7 +4478,7 @@ export const getGetAnalyticsChangeSummaryUrl = (params?: GetAnalyticsChangeSumma
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4477,18 +4490,18 @@ export const getGetAnalyticsChangeSummaryUrl = (params?: GetAnalyticsChangeSumma
 }
 
 export const getAnalyticsChangeSummary = async (params?: GetAnalyticsChangeSummaryParams, options?: RequestInit): Promise<getAnalyticsChangeSummaryResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsChangeSummaryUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsChangeSummaryResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsChangeSummaryResponse
 }
@@ -4502,7 +4515,7 @@ export type getAnalyticsTrackRiskMatrixResponse200 = {
   data: AnalyticsTrackRiskMatrixEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsTrackRiskMatrixResponseSuccess = (getAnalyticsTrackRiskMatrixResponse200) & {
   headers: Headers;
 };
@@ -4514,7 +4527,7 @@ export const getGetAnalyticsTrackRiskMatrixUrl = (params?: GetAnalyticsTrackRisk
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4526,18 +4539,18 @@ export const getGetAnalyticsTrackRiskMatrixUrl = (params?: GetAnalyticsTrackRisk
 }
 
 export const getAnalyticsTrackRiskMatrix = async (params?: GetAnalyticsTrackRiskMatrixParams, options?: RequestInit): Promise<getAnalyticsTrackRiskMatrixResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsTrackRiskMatrixUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsTrackRiskMatrixResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsTrackRiskMatrixResponse
 }
@@ -4551,7 +4564,7 @@ export type getAnalyticsMetricsResponse200 = {
   data: AnalyticsMetricEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsMetricsResponseSuccess = (getAnalyticsMetricsResponse200) & {
   headers: Headers;
 };
@@ -4563,7 +4576,7 @@ export const getGetAnalyticsMetricsUrl = (params?: GetAnalyticsMetricsParams,) =
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4575,18 +4588,18 @@ export const getGetAnalyticsMetricsUrl = (params?: GetAnalyticsMetricsParams,) =
 }
 
 export const getAnalyticsMetrics = async (params?: GetAnalyticsMetricsParams, options?: RequestInit): Promise<getAnalyticsMetricsResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsMetricsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsMetricsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsMetricsResponse
 }
@@ -4600,7 +4613,7 @@ export type getAnalyticsDimensionsResponse200 = {
   data: AnalyticsDimensionEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsDimensionsResponseSuccess = (getAnalyticsDimensionsResponse200) & {
   headers: Headers;
 };
@@ -4612,7 +4625,7 @@ export const getGetAnalyticsDimensionsUrl = (params?: GetAnalyticsDimensionsPara
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4624,18 +4637,18 @@ export const getGetAnalyticsDimensionsUrl = (params?: GetAnalyticsDimensionsPara
 }
 
 export const getAnalyticsDimensions = async (params?: GetAnalyticsDimensionsParams, options?: RequestInit): Promise<getAnalyticsDimensionsResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsDimensionsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsDimensionsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsDimensionsResponse
 }
@@ -4649,7 +4662,7 @@ export type getAnalyticsReadinessFunnelResponse200 = {
   data: AnalyticsReadinessFunnelEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsReadinessFunnelResponseSuccess = (getAnalyticsReadinessFunnelResponse200) & {
   headers: Headers;
 };
@@ -4661,7 +4674,7 @@ export const getGetAnalyticsReadinessFunnelUrl = (params?: GetAnalyticsReadiness
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4673,18 +4686,18 @@ export const getGetAnalyticsReadinessFunnelUrl = (params?: GetAnalyticsReadiness
 }
 
 export const getAnalyticsReadinessFunnel = async (params?: GetAnalyticsReadinessFunnelParams, options?: RequestInit): Promise<getAnalyticsReadinessFunnelResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsReadinessFunnelUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsReadinessFunnelResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsReadinessFunnelResponse
 }
@@ -4698,7 +4711,7 @@ export type getAnalyticsStabilityResponse200 = {
   data: AnalyticsStabilityEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsStabilityResponseSuccess = (getAnalyticsStabilityResponse200) & {
   headers: Headers;
 };
@@ -4710,7 +4723,7 @@ export const getGetAnalyticsStabilityUrl = (params?: GetAnalyticsStabilityParams
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4722,18 +4735,18 @@ export const getGetAnalyticsStabilityUrl = (params?: GetAnalyticsStabilityParams
 }
 
 export const getAnalyticsStability = async (params?: GetAnalyticsStabilityParams, options?: RequestInit): Promise<getAnalyticsStabilityResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsStabilityUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsStabilityResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsStabilityResponse
 }
@@ -4747,7 +4760,7 @@ export type getAnalyticsRegressionContributorsResponse200 = {
   data: AnalyticsRegressionContributorEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsRegressionContributorsResponseSuccess = (getAnalyticsRegressionContributorsResponse200) & {
   headers: Headers;
 };
@@ -4759,7 +4772,7 @@ export const getGetAnalyticsRegressionContributorsUrl = (params?: GetAnalyticsRe
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4771,18 +4784,18 @@ export const getGetAnalyticsRegressionContributorsUrl = (params?: GetAnalyticsRe
 }
 
 export const getAnalyticsRegressionContributors = async (params?: GetAnalyticsRegressionContributorsParams, options?: RequestInit): Promise<getAnalyticsRegressionContributorsResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsRegressionContributorsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsRegressionContributorsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsRegressionContributorsResponse
 }
@@ -4796,7 +4809,7 @@ export type getAnalyticsScoreDistributionResponse200 = {
   data: AnalyticsScoreDistributionEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsScoreDistributionResponseSuccess = (getAnalyticsScoreDistributionResponse200) & {
   headers: Headers;
 };
@@ -4808,7 +4821,7 @@ export const getGetAnalyticsScoreDistributionUrl = (params?: GetAnalyticsScoreDi
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4820,18 +4833,18 @@ export const getGetAnalyticsScoreDistributionUrl = (params?: GetAnalyticsScoreDi
 }
 
 export const getAnalyticsScoreDistribution = async (params?: GetAnalyticsScoreDistributionParams, options?: RequestInit): Promise<getAnalyticsScoreDistributionResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsScoreDistributionUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsScoreDistributionResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsScoreDistributionResponse
 }
@@ -4845,7 +4858,7 @@ export type getAnalyticsOperationalResponse200 = {
   data: AnalyticsOperationalEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsOperationalResponseSuccess = (getAnalyticsOperationalResponse200) & {
   headers: Headers;
 };
@@ -4857,7 +4870,7 @@ export const getGetAnalyticsOperationalUrl = (params?: GetAnalyticsOperationalPa
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4869,18 +4882,18 @@ export const getGetAnalyticsOperationalUrl = (params?: GetAnalyticsOperationalPa
 }
 
 export const getAnalyticsOperational = async (params?: GetAnalyticsOperationalParams, options?: RequestInit): Promise<getAnalyticsOperationalResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsOperationalUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsOperationalResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsOperationalResponse
 }
@@ -4894,7 +4907,7 @@ export type getAnalyticsGatesResponse200 = {
   data: AnalyticsGateEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsGatesResponseSuccess = (getAnalyticsGatesResponse200) & {
   headers: Headers;
 };
@@ -4906,7 +4919,7 @@ export const getGetAnalyticsGatesUrl = (params?: GetAnalyticsGatesParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4918,18 +4931,18 @@ export const getGetAnalyticsGatesUrl = (params?: GetAnalyticsGatesParams,) => {
 }
 
 export const getAnalyticsGates = async (params?: GetAnalyticsGatesParams, options?: RequestInit): Promise<getAnalyticsGatesResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsGatesUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsGatesResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsGatesResponse
 }
@@ -4943,7 +4956,7 @@ export type getAnalyticsFatalsResponse200 = {
   data: AnalyticsFatalEnvelope
   status: 200
 }
-    
+
 export type getAnalyticsFatalsResponseSuccess = (getAnalyticsFatalsResponse200) & {
   headers: Headers;
 };
@@ -4955,7 +4968,7 @@ export const getGetAnalyticsFatalsUrl = (params?: GetAnalyticsFatalsParams,) => 
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4967,18 +4980,18 @@ export const getGetAnalyticsFatalsUrl = (params?: GetAnalyticsFatalsParams,) => 
 }
 
 export const getAnalyticsFatals = async (params?: GetAnalyticsFatalsParams, options?: RequestInit): Promise<getAnalyticsFatalsResponse> => {
-  
+
   const res = await fetch(getGetAnalyticsFatalsUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getAnalyticsFatalsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getAnalyticsFatalsResponse
 }
@@ -4992,7 +5005,7 @@ export type postReportsResponse202 = {
   data: ReportEnvelope
   status: 202
 }
-    
+
 export type postReportsResponseSuccess = (postReportsResponse202) & {
   headers: Headers;
 };
@@ -5003,15 +5016,15 @@ export type postReportsResponse = (postReportsResponseSuccess)
 export const getPostReportsUrl = () => {
 
 
-  
+
 
   return `/v1/reports`
 }
 
 export const postReports = async (reportCommand: ReportCommand, options?: RequestInit): Promise<postReportsResponse> => {
-  
+
   const res = await fetch(getPostReportsUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -5021,7 +5034,7 @@ export const postReports = async (reportCommand: ReportCommand, options?: Reques
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: postReportsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as postReportsResponse
 }
@@ -5035,7 +5048,7 @@ export type getReportsResponse200 = {
   data: ReportListEnvelope
   status: 200
 }
-    
+
 export type getReportsResponseSuccess = (getReportsResponse200) & {
   headers: Headers;
 };
@@ -5046,24 +5059,24 @@ export type getReportsResponse = (getReportsResponseSuccess)
 export const getGetReportsUrl = () => {
 
 
-  
+
 
   return `/v1/reports`
 }
 
 export const getReports = async ( options?: RequestInit): Promise<getReportsResponse> => {
-  
+
   const res = await fetch(getGetReportsUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getReportsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getReportsResponse
 }
@@ -5077,7 +5090,7 @@ export type getReportsByReportIdResponse200 = {
   data: ReportEnvelope
   status: 200
 }
-    
+
 export type getReportsByReportIdResponseSuccess = (getReportsByReportIdResponse200) & {
   headers: Headers;
 };
@@ -5088,24 +5101,24 @@ export type getReportsByReportIdResponse = (getReportsByReportIdResponseSuccess)
 export const getGetReportsByReportIdUrl = (reportId: string,) => {
 
 
-  
+
 
   return `/v1/reports/${reportId}`
 }
 
 export const getReportsByReportId = async (reportId: string, options?: RequestInit): Promise<getReportsByReportIdResponse> => {
-  
+
   const res = await fetch(getGetReportsByReportIdUrl(reportId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getReportsByReportIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getReportsByReportIdResponse
 }
@@ -5119,7 +5132,7 @@ export type getReportsByReportIdContentResponse200 = {
   data: ReportContentEnvelope
   status: 200
 }
-    
+
 export type getReportsByReportIdContentResponseSuccess = (getReportsByReportIdContentResponse200) & {
   headers: Headers;
 };
@@ -5130,24 +5143,24 @@ export type getReportsByReportIdContentResponse = (getReportsByReportIdContentRe
 export const getGetReportsByReportIdContentUrl = (reportId: string,) => {
 
 
-  
+
 
   return `/v1/reports/${reportId}/content`
 }
 
 export const getReportsByReportIdContent = async (reportId: string, options?: RequestInit): Promise<getReportsByReportIdContentResponse> => {
-  
+
   const res = await fetch(getGetReportsByReportIdContentUrl(reportId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getReportsByReportIdContentResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getReportsByReportIdContentResponse
 }
@@ -5161,7 +5174,7 @@ export type getReportsByReportIdDownloadResponse200 = {
   data: ReportDownloadEnvelope
   status: 200
 }
-    
+
 export type getReportsByReportIdDownloadResponseSuccess = (getReportsByReportIdDownloadResponse200) & {
   headers: Headers;
 };
@@ -5172,24 +5185,24 @@ export type getReportsByReportIdDownloadResponse = (getReportsByReportIdDownload
 export const getGetReportsByReportIdDownloadUrl = (reportId: string,) => {
 
 
-  
+
 
   return `/v1/reports/${reportId}/download`
 }
 
 export const getReportsByReportIdDownload = async (reportId: string, options?: RequestInit): Promise<getReportsByReportIdDownloadResponse> => {
-  
+
   const res = await fetch(getGetReportsByReportIdDownloadUrl(reportId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getReportsByReportIdDownloadResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getReportsByReportIdDownloadResponse
 }
@@ -5203,7 +5216,7 @@ export type getEpisodesByEpisodeIdEvaluationInputSnapshotsResponse200 = {
   data: EvaluationInputSnapshotListEnvelope
   status: 200
 }
-    
+
 export type getEpisodesByEpisodeIdEvaluationInputSnapshotsResponseSuccess = (getEpisodesByEpisodeIdEvaluationInputSnapshotsResponse200) & {
   headers: Headers;
 };
@@ -5214,24 +5227,24 @@ export type getEpisodesByEpisodeIdEvaluationInputSnapshotsResponse = (getEpisode
 export const getGetEpisodesByEpisodeIdEvaluationInputSnapshotsUrl = (episodeId: string,) => {
 
 
-  
+
 
   return `/v1/episodes/${episodeId}/evaluation-input-snapshots`
 }
 
 export const getEpisodesByEpisodeIdEvaluationInputSnapshots = async (episodeId: string, options?: RequestInit): Promise<getEpisodesByEpisodeIdEvaluationInputSnapshotsResponse> => {
-  
+
   const res = await fetch(getGetEpisodesByEpisodeIdEvaluationInputSnapshotsUrl(episodeId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEpisodesByEpisodeIdEvaluationInputSnapshotsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEpisodesByEpisodeIdEvaluationInputSnapshotsResponse
 }
@@ -5245,7 +5258,7 @@ export type getEpisodesByEpisodeIdEvaluationInputSnapshotsLatestResponse200 = {
   data: EvaluationInputSnapshotEnvelope
   status: 200
 }
-    
+
 export type getEpisodesByEpisodeIdEvaluationInputSnapshotsLatestResponseSuccess = (getEpisodesByEpisodeIdEvaluationInputSnapshotsLatestResponse200) & {
   headers: Headers;
 };
@@ -5258,7 +5271,7 @@ export const getGetEpisodesByEpisodeIdEvaluationInputSnapshotsLatestUrl = (episo
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -5271,18 +5284,18 @@ export const getGetEpisodesByEpisodeIdEvaluationInputSnapshotsLatestUrl = (episo
 
 export const getEpisodesByEpisodeIdEvaluationInputSnapshotsLatest = async (episodeId: string,
     params: GetEpisodesByEpisodeIdEvaluationInputSnapshotsLatestParams, options?: RequestInit): Promise<getEpisodesByEpisodeIdEvaluationInputSnapshotsLatestResponse> => {
-  
+
   const res = await fetch(getGetEpisodesByEpisodeIdEvaluationInputSnapshotsLatestUrl(episodeId,params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEpisodesByEpisodeIdEvaluationInputSnapshotsLatestResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEpisodesByEpisodeIdEvaluationInputSnapshotsLatestResponse
 }
@@ -5296,7 +5309,7 @@ export type getEvaluationInputSnapshotsBySnapshotIdResponse200 = {
   data: EvaluationInputSnapshotEnvelope
   status: 200
 }
-    
+
 export type getEvaluationInputSnapshotsBySnapshotIdResponseSuccess = (getEvaluationInputSnapshotsBySnapshotIdResponse200) & {
   headers: Headers;
 };
@@ -5307,24 +5320,24 @@ export type getEvaluationInputSnapshotsBySnapshotIdResponse = (getEvaluationInpu
 export const getGetEvaluationInputSnapshotsBySnapshotIdUrl = (snapshotId: string,) => {
 
 
-  
+
 
   return `/v1/evaluation-input-snapshots/${snapshotId}`
 }
 
 export const getEvaluationInputSnapshotsBySnapshotId = async (snapshotId: string, options?: RequestInit): Promise<getEvaluationInputSnapshotsBySnapshotIdResponse> => {
-  
+
   const res = await fetch(getGetEvaluationInputSnapshotsBySnapshotIdUrl(snapshotId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationInputSnapshotsBySnapshotIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationInputSnapshotsBySnapshotIdResponse
 }
@@ -5338,7 +5351,7 @@ export type getEvaluationInputSnapshotsBySnapshotIdDomainResponse200 = {
   data: EvaluationInputMaterialEnvelope
   status: 200
 }
-    
+
 export type getEvaluationInputSnapshotsBySnapshotIdDomainResponseSuccess = (getEvaluationInputSnapshotsBySnapshotIdDomainResponse200) & {
   headers: Headers;
 };
@@ -5349,24 +5362,24 @@ export type getEvaluationInputSnapshotsBySnapshotIdDomainResponse = (getEvaluati
 export const getGetEvaluationInputSnapshotsBySnapshotIdDomainUrl = (snapshotId: string,) => {
 
 
-  
+
 
   return `/v1/evaluation-input-snapshots/${snapshotId}/domain`
 }
 
 export const getEvaluationInputSnapshotsBySnapshotIdDomain = async (snapshotId: string, options?: RequestInit): Promise<getEvaluationInputSnapshotsBySnapshotIdDomainResponse> => {
-  
+
   const res = await fetch(getGetEvaluationInputSnapshotsBySnapshotIdDomainUrl(snapshotId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationInputSnapshotsBySnapshotIdDomainResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationInputSnapshotsBySnapshotIdDomainResponse
 }
@@ -5380,7 +5393,7 @@ export type getEvaluationInputSnapshotsBySnapshotIdProviderResponse200 = {
   data: EvaluationInputMaterialEnvelope
   status: 200
 }
-    
+
 export type getEvaluationInputSnapshotsBySnapshotIdProviderResponseSuccess = (getEvaluationInputSnapshotsBySnapshotIdProviderResponse200) & {
   headers: Headers;
 };
@@ -5391,24 +5404,24 @@ export type getEvaluationInputSnapshotsBySnapshotIdProviderResponse = (getEvalua
 export const getGetEvaluationInputSnapshotsBySnapshotIdProviderUrl = (snapshotId: string,) => {
 
 
-  
+
 
   return `/v1/evaluation-input-snapshots/${snapshotId}/provider`
 }
 
 export const getEvaluationInputSnapshotsBySnapshotIdProvider = async (snapshotId: string, options?: RequestInit): Promise<getEvaluationInputSnapshotsBySnapshotIdProviderResponse> => {
-  
+
   const res = await fetch(getGetEvaluationInputSnapshotsBySnapshotIdProviderUrl(snapshotId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationInputSnapshotsBySnapshotIdProviderResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationInputSnapshotsBySnapshotIdProviderResponse
 }
@@ -5422,7 +5435,7 @@ export type getEvaluationsByEvaluationIdTelemetryProvenanceResponse200 = {
   data: TelemetryProvenanceEnvelope
   status: 200
 }
-    
+
 export type getEvaluationsByEvaluationIdTelemetryProvenanceResponseSuccess = (getEvaluationsByEvaluationIdTelemetryProvenanceResponse200) & {
   headers: Headers;
 };
@@ -5433,24 +5446,24 @@ export type getEvaluationsByEvaluationIdTelemetryProvenanceResponse = (getEvalua
 export const getGetEvaluationsByEvaluationIdTelemetryProvenanceUrl = (evaluationId: string,) => {
 
 
-  
+
 
   return `/v1/evaluations/${evaluationId}/telemetry-provenance`
 }
 
 export const getEvaluationsByEvaluationIdTelemetryProvenance = async (evaluationId: string, options?: RequestInit): Promise<getEvaluationsByEvaluationIdTelemetryProvenanceResponse> => {
-  
+
   const res = await fetch(getGetEvaluationsByEvaluationIdTelemetryProvenanceUrl(evaluationId),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: getEvaluationsByEvaluationIdTelemetryProvenanceResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getEvaluationsByEvaluationIdTelemetryProvenanceResponse
 }
@@ -5464,7 +5477,7 @@ export type postEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileResponse202 
   data: EvaluationInputReconcileEnvelope
   status: 202
 }
-    
+
 export type postEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileResponseSuccess = (postEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileResponse202) & {
   headers: Headers;
 };
@@ -5475,16 +5488,16 @@ export type postEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileResponse = (
 export const getPostEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileUrl = (episodeId: string,) => {
 
 
-  
+
 
   return `/v1/episodes/${episodeId}/evaluation-input-snapshots/reconcile`
 }
 
 export const postEpisodesByEpisodeIdEvaluationInputSnapshotsReconcile = async (episodeId: string,
     postEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileBody: PostEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileBody, options?: RequestInit): Promise<postEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileResponse> => {
-  
+
   const res = await fetch(getPostEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileUrl(episodeId),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -5494,7 +5507,481 @@ export const postEpisodesByEpisodeIdEvaluationInputSnapshotsReconcile = async (e
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
+
   const data: postEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as postEpisodesByEpisodeIdEvaluationInputSnapshotsReconcileResponse
+}
+
+
+
+/**
+ * @summary List versioned Benchmark Run presets
+ */
+export type listBenchmarkRunPresetsResponse200 = {
+  data: BenchmarkRunPresetListEnvelope
+  status: 200
+}
+
+export type listBenchmarkRunPresetsResponseSuccess = (listBenchmarkRunPresetsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listBenchmarkRunPresetsResponse = (listBenchmarkRunPresetsResponseSuccess)
+
+export const getListBenchmarkRunPresetsUrl = () => {
+
+
+
+
+  return `/v1/benchmark-run-presets`
+}
+
+export const listBenchmarkRunPresets = async ( options?: RequestInit): Promise<listBenchmarkRunPresetsResponse> => {
+
+  const res = await fetch(getListBenchmarkRunPresetsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listBenchmarkRunPresetsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listBenchmarkRunPresetsResponse
+}
+
+
+
+/**
+ * @summary Get a versioned Benchmark Run preset
+ */
+export type getBenchmarkRunPresetResponse200 = {
+  data: BenchmarkRunPresetEnvelope
+  status: 200
+}
+
+export type getBenchmarkRunPresetResponseSuccess = (getBenchmarkRunPresetResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getBenchmarkRunPresetResponse = (getBenchmarkRunPresetResponseSuccess)
+
+export const getGetBenchmarkRunPresetUrl = (presetId: OpaqueId,) => {
+
+
+
+
+  return `/v1/benchmark-run-presets/${presetId}`
+}
+
+export const getBenchmarkRunPreset = async (presetId: OpaqueId, options?: RequestInit): Promise<getBenchmarkRunPresetResponse> => {
+
+  const res = await fetch(getGetBenchmarkRunPresetUrl(presetId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getBenchmarkRunPresetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getBenchmarkRunPresetResponse
+}
+
+
+
+/**
+ * @summary Create an immutable child Run from an existing Run
+ */
+export type createBenchmarkRunRerunResponse202 = {
+  data: BenchmarkRunRerunEnvelope
+  status: 202
+}
+
+export type createBenchmarkRunRerunResponseSuccess = (createBenchmarkRunRerunResponse202) & {
+  headers: Headers;
+};
+;
+
+export type createBenchmarkRunRerunResponse = (createBenchmarkRunRerunResponseSuccess)
+
+export const getCreateBenchmarkRunRerunUrl = (runId: string,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/reruns`
+}
+
+export const createBenchmarkRunRerun = async (runId: string,
+    benchmarkRunRerunRequest: BenchmarkRunRerunRequest, options?: RequestInit): Promise<createBenchmarkRunRerunResponse> => {
+
+  const res = await fetch(getCreateBenchmarkRunRerunUrl(runId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      benchmarkRunRerunRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: createBenchmarkRunRerunResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as createBenchmarkRunRerunResponse
+}
+
+
+
+/**
+ * @summary Get the Run diagnostic outcome summary
+ */
+export type getBenchmarkRunDiagnosticSummaryResponse200 = {
+  data: DiagnosticSummaryEnvelope
+  status: 200
+}
+
+export type getBenchmarkRunDiagnosticSummaryResponseSuccess = (getBenchmarkRunDiagnosticSummaryResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getBenchmarkRunDiagnosticSummaryResponse = (getBenchmarkRunDiagnosticSummaryResponseSuccess)
+
+export const getGetBenchmarkRunDiagnosticSummaryUrl = (runId: string,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/diagnostic-summary`
+}
+
+export const getBenchmarkRunDiagnosticSummary = async (runId: string, options?: RequestInit): Promise<getBenchmarkRunDiagnosticSummaryResponse> => {
+
+  const res = await fetch(getGetBenchmarkRunDiagnosticSummaryUrl(runId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getBenchmarkRunDiagnosticSummaryResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getBenchmarkRunDiagnosticSummaryResponse
+}
+
+
+
+/**
+ * @summary List immutable Development substitutions for a Run
+ */
+export type getBenchmarkRunSubstitutionsResponse200 = {
+  data: SubstitutionListEnvelope
+  status: 200
+}
+
+export type getBenchmarkRunSubstitutionsResponseSuccess = (getBenchmarkRunSubstitutionsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getBenchmarkRunSubstitutionsResponse = (getBenchmarkRunSubstitutionsResponseSuccess)
+
+export const getGetBenchmarkRunSubstitutionsUrl = (runId: string,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/substitutions`
+}
+
+export const getBenchmarkRunSubstitutions = async (runId: string, options?: RequestInit): Promise<getBenchmarkRunSubstitutionsResponse> => {
+
+  const res = await fetch(getGetBenchmarkRunSubstitutionsUrl(runId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getBenchmarkRunSubstitutionsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getBenchmarkRunSubstitutionsResponse
+}
+
+
+
+/**
+ * @summary Get authority Run and Repetition events in temporal order
+ */
+export type getBenchmarkRunTimelineResponse200 = {
+  data: RunTimelineEnvelope
+  status: 200
+}
+
+export type getBenchmarkRunTimelineResponseSuccess = (getBenchmarkRunTimelineResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getBenchmarkRunTimelineResponse = (getBenchmarkRunTimelineResponseSuccess)
+
+export const getGetBenchmarkRunTimelineUrl = (runId: string,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/timeline`
+}
+
+export const getBenchmarkRunTimeline = async (runId: string, options?: RequestInit): Promise<getBenchmarkRunTimelineResponse> => {
+
+  const res = await fetch(getGetBenchmarkRunTimelineUrl(runId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getBenchmarkRunTimelineResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getBenchmarkRunTimelineResponse
+}
+
+
+
+/**
+ * @summary Get the typed Evaluation for a Run repetition
+ */
+export type getBenchmarkRunRepetitionEvaluationResponse200 = {
+  data: RepetitionEvaluationEnvelope
+  status: 200
+}
+
+export type getBenchmarkRunRepetitionEvaluationResponseSuccess = (getBenchmarkRunRepetitionEvaluationResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getBenchmarkRunRepetitionEvaluationResponse = (getBenchmarkRunRepetitionEvaluationResponseSuccess)
+
+export const getGetBenchmarkRunRepetitionEvaluationUrl = (runId: string,
+    repetitionId: string,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/repetitions/${repetitionId}/evaluation`
+}
+
+export const getBenchmarkRunRepetitionEvaluation = async (runId: string,
+    repetitionId: string, options?: RequestInit): Promise<getBenchmarkRunRepetitionEvaluationResponse> => {
+
+  const res = await fetch(getGetBenchmarkRunRepetitionEvaluationUrl(runId,repetitionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getBenchmarkRunRepetitionEvaluationResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getBenchmarkRunRepetitionEvaluationResponse
+}
+
+
+
+/**
+ * @summary Get immutable artifact metadata with ownership validation
+ */
+export type getBenchmarkRunRepetitionArtifactResponse200 = {
+  data: ProductArtifactEnvelope
+  status: 200
+}
+
+export type getBenchmarkRunRepetitionArtifactResponseSuccess = (getBenchmarkRunRepetitionArtifactResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getBenchmarkRunRepetitionArtifactResponse = (getBenchmarkRunRepetitionArtifactResponseSuccess)
+
+export const getGetBenchmarkRunRepetitionArtifactUrl = (runId: string,
+    repetitionId: string,
+    artifactId: OpaqueId,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/repetitions/${repetitionId}/artifacts/${artifactId}`
+}
+
+export const getBenchmarkRunRepetitionArtifact = async (runId: string,
+    repetitionId: string,
+    artifactId: OpaqueId, options?: RequestInit): Promise<getBenchmarkRunRepetitionArtifactResponse> => {
+
+  const res = await fetch(getGetBenchmarkRunRepetitionArtifactUrl(runId,repetitionId,artifactId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getBenchmarkRunRepetitionArtifactResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getBenchmarkRunRepetitionArtifactResponse
+}
+
+
+
+/**
+ * @summary Read verified JSON, Markdown, or text artifact content
+ */
+export type getBenchmarkRunRepetitionArtifactContentResponse200 = {
+  data: ArtifactContentEnvelope
+  status: 200
+}
+
+export type getBenchmarkRunRepetitionArtifactContentResponseSuccess = (getBenchmarkRunRepetitionArtifactContentResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getBenchmarkRunRepetitionArtifactContentResponse = (getBenchmarkRunRepetitionArtifactContentResponseSuccess)
+
+export const getGetBenchmarkRunRepetitionArtifactContentUrl = (runId: string,
+    repetitionId: string,
+    artifactId: OpaqueId,) => {
+
+
+
+
+  return `/v1/benchmark-runs/${runId}/repetitions/${repetitionId}/artifacts/${artifactId}/content`
+}
+
+export const getBenchmarkRunRepetitionArtifactContent = async (runId: string,
+    repetitionId: string,
+    artifactId: OpaqueId, options?: RequestInit): Promise<getBenchmarkRunRepetitionArtifactContentResponse> => {
+
+  const res = await fetch(getGetBenchmarkRunRepetitionArtifactContentUrl(runId,repetitionId,artifactId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getBenchmarkRunRepetitionArtifactContentResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getBenchmarkRunRepetitionArtifactContentResponse
+}
+
+
+
+/**
+ * @summary Get Product data completeness by independent section
+ */
+export type getDataCompletenessResponse200 = {
+  data: DataCompletenessEnvelope
+  status: 200
+}
+
+export type getDataCompletenessResponseSuccess = (getDataCompletenessResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getDataCompletenessResponse = (getDataCompletenessResponseSuccess)
+
+export const getGetDataCompletenessUrl = () => {
+
+
+
+
+  return `/v1/data-completeness`
+}
+
+export const getDataCompleteness = async ( options?: RequestInit): Promise<getDataCompletenessResponse> => {
+
+  const res = await fetch(getGetDataCompletenessUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getDataCompletenessResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getDataCompletenessResponse
+}
+
+
+
+/**
+ * @summary Get typed diagnostic terminal outcome counts
+ */
+export type getDiagnosticOutcomeDistributionResponse200 = {
+  data: DiagnosticOutcomeDistributionEnvelope
+  status: 200
+}
+
+export type getDiagnosticOutcomeDistributionResponseSuccess = (getDiagnosticOutcomeDistributionResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getDiagnosticOutcomeDistributionResponse = (getDiagnosticOutcomeDistributionResponseSuccess)
+
+export const getGetDiagnosticOutcomeDistributionUrl = () => {
+
+
+
+
+  return `/v1/analytics/diagnostic-outcome-distribution`
+}
+
+export const getDiagnosticOutcomeDistribution = async ( options?: RequestInit): Promise<getDiagnosticOutcomeDistributionResponse> => {
+
+  const res = await fetch(getGetDiagnosticOutcomeDistributionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getDiagnosticOutcomeDistributionResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getDiagnosticOutcomeDistributionResponse
 }

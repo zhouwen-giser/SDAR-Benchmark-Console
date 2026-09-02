@@ -6,4 +6,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ProviderAnalyticsCancellationUncertainRate = number | null;
+export type RunSubstitutionCapabilityRequirementsItem = { [key: string]: unknown };

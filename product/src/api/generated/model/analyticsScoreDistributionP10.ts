@@ -6,4 +6,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type SkillAnalyticsExecutionCount = number | null;
+export type AnalyticsScoreDistributionP10 = number | null;

@@ -6,4 +6,12 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ProviderAnalyticsAvailabilityFailureRate = number | null;
+export type DataCompletenessSectionStatus = typeof DataCompletenessSectionStatus[keyof typeof DataCompletenessSectionStatus];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const DataCompletenessSectionStatus = {
+  complete: 'complete',
+  partial: 'partial',
+  unavailable: 'unavailable',
+} as const;

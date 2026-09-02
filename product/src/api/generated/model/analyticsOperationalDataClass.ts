@@ -6,4 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type SkillAnalyticsFailureRate = number | null;
+export type AnalyticsOperationalDataClass = typeof AnalyticsOperationalDataClass[keyof typeof AnalyticsOperationalDataClass];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const AnalyticsOperationalDataClass = {
+  native: 'native',
+  development_substitute: 'development_substitute',
+} as const;

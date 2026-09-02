@@ -6,4 +6,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type SkillAnalyticsDegradedRate = number | null;
+export type AnalyticsScoreDistributionP25 = number | null;

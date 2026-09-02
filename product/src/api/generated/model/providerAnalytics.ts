@@ -5,23 +5,23 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
-import type { ProviderAnalyticsExecutionCount } from './providerAnalyticsExecutionCount';
-import type { ProviderAnalyticsPassRate } from './providerAnalyticsPassRate';
-import type { ProviderAnalyticsAverageLatencyMs } from './providerAnalyticsAverageLatencyMs';
-import type { ProviderAnalyticsAvailabilityFailureRate } from './providerAnalyticsAvailabilityFailureRate';
-import type { ProviderAnalyticsCancellationUncertainRate } from './providerAnalyticsCancellationUncertainRate';
-import type { ProviderAnalyticsProviderErrorRate } from './providerAnalyticsProviderErrorRate';
+import type { ProviderAnalyticsClosureStatus } from './providerAnalyticsClosureStatus';
+import type { ProviderAnalyticsDataClass } from './providerAnalyticsDataClass';
 
 export interface ProviderAnalytics {
   benchmarkRunId: string;
   providerId: string;
-  operationName: string;
-  executionCount: ProviderAnalyticsExecutionCount;
-  passRate: ProviderAnalyticsPassRate;
-  averageLatencyMs: ProviderAnalyticsAverageLatencyMs;
-  availabilityFailureRate: ProviderAnalyticsAvailabilityFailureRate;
-  cancellationUncertainRate: ProviderAnalyticsCancellationUncertainRate;
-  providerErrorRate: ProviderAnalyticsProviderErrorRate;
+  providerInstanceId: string;
+  operation: string;
+  /** @minimum 0 */
+  taskCount: number;
+  /** @minimum 0 */
+  executionCount: number;
+  /** @minimum 0 */
+  missionCount: number;
+  closureStatus: ProviderAnalyticsClosureStatus;
+  dataClass: ProviderAnalyticsDataClass;
+  formalEligible: boolean;
   evaluatedAt: string;
   projectedAt: string;
 }

@@ -6,4 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ProviderAnalyticsExecutionCount = number | null;
+export type AnalyticsScoreDistributionAvailability = typeof AnalyticsScoreDistributionAvailability[keyof typeof AnalyticsScoreDistributionAvailability];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const AnalyticsScoreDistributionAvailability = {
+  available: 'available',
+  unavailable: 'unavailable',
+} as const;
