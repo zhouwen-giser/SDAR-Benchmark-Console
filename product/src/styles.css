@@ -2781,6 +2781,28 @@ pre {
   font-size: 12px;
 }
 
+.diagnostic-layer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.diagnostic-artifact-table {
+  margin-top: 12px;
+}
+
+.typed-summary-fields {
+  display: grid;
+  gap: 3px;
+  min-width: 190px;
+}
+
+.typed-summary-fields span {
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
 .typed-resource-toolbar {
   display: flex;
   align-items: center;

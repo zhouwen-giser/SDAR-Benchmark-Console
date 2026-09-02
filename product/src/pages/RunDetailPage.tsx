@@ -5,9 +5,9 @@ import { ArrowRightOutlined, StopOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import { consoleApi } from "../api/consoleApi";
 import { capabilityMeta } from "../api/capability-map";
-import { ApiStatusTag, PageHeader, SectionCard } from "../components/common";
+import { ApiStatusTag, DebugPayloadDrawer, PageHeader, SectionCard } from "../components/common";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
-import type { RunEvent, RunRepetition } from "../api/generated/model";
+import type { DiagnosticArtifact, DiagnosticRepetition, RunEvent, RunRepetition } from "../api/generated/model";
 import type { CaseResult } from "../types";
 import { displayValue, failureTypeName, riskName, statusName, trackName, verdictName } from "../utils/format";
 
@@ -183,28 +183,27 @@ export function RunDetailPage() {
           />
         ) : <Alert type="info" showIcon message="Repetition 尚未投影" description="Run Authority 仍可独立观察；生成 repetition 后会显示七项诊断资源。" />}
         <div className="diagnostic-layer-grid">
-          <DiagnosticLayer
-            title="Agent 层"
-            values={[repetition.data?.data, executionTrace.data?.data]}
-            unavailable={repetition.isError || executionTrace.isError}
-          />
-          <DiagnosticLayer
-            title="SMPP Provider 层"
-            values={[capabilities.data?.data, artifacts.data?.data]}
-            unavailable={capabilities.isError || artifacts.isError}
-          />
-          <DiagnosticLayer
-            title="Physical 层"
-            values={[physicalVerification.data?.data, faultAttribution.data?.data]}
-            unavailable={physicalVerification.isError || faultAttribution.isError}
-          />
+          <article className="diagnostic-layer">
+            <DiagnosticHeader title="Agent 层" payload={[repetition.data?.data, executionTrace.data?.data]} />
+            <RepetitionSummary value={repetition.data?.data} unavailable={repetition.isError} />
+            <ArtifactInventory values={compactArtifacts([executionTrace.data?.data])} unavailable={executionTrace.isError} />
+          </article>
+          <article className="diagnostic-layer">
+            <DiagnosticHeader title="SMPP Provider 层" payload={[capabilities.data?.data, artifacts.data?.data]} />
+            <ArtifactInventory values={compactArtifacts([...(capabilities.data?.data ?? []), ...(artifacts.data?.data ?? [])])} unavailable={capabilities.isError || artifacts.isError} />
+          </article>
+          <article className="diagnostic-layer">
+            <DiagnosticHeader title="Physical 层" payload={[physicalVerification.data?.data, faultAttribution.data?.data]} />
+            <ArtifactInventory values={compactArtifacts([physicalVerification.data?.data, faultAttribution.data?.data])} unavailable={physicalVerification.isError || faultAttribution.isError} />
+          </article>
         </div>
       </SectionCard>
+
+      {runEvents.data && <SectionCard title="Run / Repetition Timeline" extra={<DebugPayloadDrawer payload={runEvents.data.data} />}><RunTimeline values={runEvents.data.data} /></SectionCard>}
 
       {dashboard.data && (
         <DashboardProjection
           data={dashboard.data.data}
-          events={runEvents.data?.data}
           navigateWithContext={navigateWithContext}
         />
       )}
@@ -219,11 +218,9 @@ export function RunDetailPage() {
 
 function DashboardProjection({
   data,
-  events,
   navigateWithContext,
 }: {
   data: Awaited<ReturnType<typeof consoleApi.getRun>>["data"];
-  events?: RunEvent[];
   navigateWithContext: (path: string) => void;
 }) {
   const caseMeta = capabilityMeta("runCases", {
@@ -243,8 +240,9 @@ function DashboardProjection({
   ];
   return (
     <div className="detail-grid">
-      <SectionCard title="真实 Run Events" className="detail-span-6"><pre>{JSON.stringify(events ?? data.events, null, 2)}</pre></SectionCard>
-      <SectionCard title="Evidence Funnel / Release Gate 投影" className="detail-span-6"><pre>{JSON.stringify({ evidenceFunnel: data.evidenceFunnel, releaseGate: data.releaseGateDetail }, null, 2)}</pre></SectionCard>
+      <SectionCard title="Evidence Funnel / Release Gate 投影" className="detail-span-12" extra={<DebugPayloadDrawer payload={{ evidenceFunnel: data.evidenceFunnel, releaseGate: data.releaseGateDetail }} />}>
+        <ProjectionSummary evidenceFunnel={data.evidenceFunnel} releaseGate={data.releaseGateDetail} />
+      </SectionCard>
       <SectionCard title="用例矩阵" extra={<ApiStatusTag compact meta={caseMeta} />} className="detail-span-12 table-card">
         <Table<CaseResult> rowKey="caseId" columns={columns} dataSource={data.cases} pagination={false} scroll={{ x: 980 }} />
       </SectionCard>
@@ -252,14 +250,107 @@ function DashboardProjection({
   );
 }
 
-function DiagnosticLayer({ title, values, unavailable }: { title: string; values: unknown[]; unavailable: boolean }) {
-  const available = values.filter((value) => value !== undefined);
+function DiagnosticHeader({ title, payload }: { title: string; payload: unknown }) {
   return (
-    <article className="diagnostic-layer">
+    <header className="diagnostic-layer-header">
       <h3>{title}</h3>
-      {available.length > 0 ? <pre>{JSON.stringify(available, null, 2)}</pre> : <span className="diagnostic-muted">{unavailable ? "unavailable / artifact not present" : "pending"}</span>}
-    </article>
+      <DebugPayloadDrawer payload={payload} label="Debug" />
+    </header>
   );
+}
+
+function RepetitionSummary({ value, unavailable }: { value?: DiagnosticRepetition; unavailable: boolean }) {
+  if (!value) return <span className="diagnostic-muted">{unavailable ? "unavailable" : "pending"}</span>;
+  return <Descriptions size="small" column={1} items={[
+    { key: "case", label: "Case Version", children: <code>{value.benchmarkCaseVersionId}</code> },
+    { key: "state", label: "Authority State", children: <Tag color={value.terminalState ? "green" : "blue"}>{value.state}</Tag> },
+    { key: "terminal", label: "Terminal State", children: value.terminalState ?? "—" },
+    { key: "candidate", label: "Candidate Task", children: value.candidateTaskId ?? "—" },
+    { key: "episode", label: "Episode", children: value.episodeId ?? "—" },
+    { key: "revision", label: "Authority Revision", children: value.authorityRevision },
+    { key: "failure", label: "Failure", children: value.failureCode ?? value.failureClass ?? "—" },
+  ]} />;
+}
+
+function ArtifactInventory({ values, unavailable }: { values: DiagnosticArtifact[]; unavailable: boolean }) {
+  if (values.length === 0) return <span className="diagnostic-muted">{unavailable ? "unavailable / artifact not present" : "pending"}</span>;
+  return <Table<DiagnosticArtifact>
+    className="diagnostic-artifact-table"
+    rowKey="relationId"
+    size="small"
+    pagination={false}
+    dataSource={values}
+    columns={[
+      { title: "Kind", dataIndex: "artifactKind", render: (value: string) => <Tag>{value}</Tag> },
+      { title: "Revision", dataIndex: "artifactRevision" },
+      { title: "Media", render: (_, row) => row.artifactRef.mediaType },
+      { title: "Size", render: (_, row) => `${row.artifactRef.sizeBytes} B` },
+      { title: "Summary", dataIndex: "summary", render: (value: Record<string, unknown>) => <SummaryFields value={value} /> },
+    ]}
+  />;
+}
+
+function SummaryFields({ value }: { value: Record<string, unknown> }) {
+  const entries = Object.entries(value).slice(0, 5);
+  if (entries.length === 0) return <span>—</span>;
+  return <div className="typed-summary-fields">{entries.map(([key, item]) => <span key={key}><b>{key}</b> {displayField(item)}</span>)}</div>;
+}
+
+function RunTimeline({ values }: { values: RunEvent[] }) {
+  return <Table<RunEvent>
+    rowKey={(row) => `${row.scope}:${row.revision}:${row.eventHash}`}
+    size="small"
+    pagination={values.length > 20 ? { pageSize: 20 } : false}
+    dataSource={values}
+    columns={[
+      { title: "Time", dataIndex: "createdAt" },
+      { title: "Scope", dataIndex: "scope", render: (value: string) => <Tag>{value}</Tag> },
+      { title: "Revision", dataIndex: "revision" },
+      { title: "Event", dataIndex: "eventKind" },
+      { title: "Repetition", dataIndex: "repetitionId", render: (value: string | null | undefined) => value ?? "—" },
+      { title: "Case Execution", dataIndex: "caseExecutionId", render: (value: string | null | undefined) => value ?? "—" },
+    ]}
+  />;
+}
+
+function ProjectionSummary({ evidenceFunnel, releaseGate }: { evidenceFunnel: unknown; releaseGate: unknown }) {
+  const rows = [
+    ...flattenSummary("Evidence", evidenceFunnel),
+    ...flattenSummary("Release Gate", releaseGate),
+  ];
+  if (rows.length === 0) return <Alert type="info" showIcon message="Projection 尚无可读字段" />;
+  return <Table
+    rowKey={(row) => `${row.group}:${row.field}`}
+    size="small"
+    pagination={false}
+    dataSource={rows}
+    columns={[
+      { title: "Group", dataIndex: "group", render: (value: string) => <Tag>{value}</Tag> },
+      { title: "Field", dataIndex: "field" },
+      { title: "Value", dataIndex: "value" },
+    ]}
+  />;
+}
+
+function flattenSummary(group: string, input: unknown) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return [];
+  return Object.entries(input as Record<string, unknown>).slice(0, 24).map(([field, value]) => ({ group, field, value: displayField(value) }));
+}
+
+function compactArtifacts(values: Array<DiagnosticArtifact | undefined>): DiagnosticArtifact[] {
+  const seen = new Set<string>();
+  return values.flatMap((value) => {
+    if (!value || seen.has(value.relationId)) return [];
+    seen.add(value.relationId);
+    return [value];
+  });
+}
+
+function displayField(value: unknown): string {
+  if (value == null) return "—";
+  if (["string", "number", "boolean"].includes(typeof value)) return String(value);
+  if (Array.isArray(value)) return value.map(displayField).join(" · ");
+  return "typed object";
 }
 
 function extractRepetitions(input: unknown[] | undefined): Array<Pick<RunRepetition, "repetitionId" | "caseId">> {
