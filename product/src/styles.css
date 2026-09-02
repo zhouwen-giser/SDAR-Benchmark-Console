@@ -2902,6 +2902,39 @@ pre {
   margin-inline-start: 0;
 }
 
+.run-catalog-configurator {
+  display: grid;
+  gap: 18px;
+}
+
+.run-catalog-fields {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.run-catalog-fields label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
+.run-catalog-fields .ant-select,
+.run-catalog-fields .ant-input-number {
+  width: 100%;
+}
+
+.run-catalog-case-selector {
+  display: grid;
+  gap: 10px;
+}
+
+.run-catalog-case-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
 .typed-resource-toolbar {
   display: flex;
   align-items: center;
@@ -2943,7 +2976,11 @@ pre {
   .run-create-grid,
   .preflight-grid,
   .diagnostic-boundary-grid,
-  .diagnostic-layer-grid {
+  .diagnostic-layer-grid,
+  .run-catalog-fields,
+  .run-catalog-case-grid,
+  .completeness-summary-grid,
+  .rerun-case-grid {
     grid-template-columns: 1fr;
   }
 }
