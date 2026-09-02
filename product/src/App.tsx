@@ -20,6 +20,7 @@ import { EvaluationsPage } from "./pages/EvaluationsPage";
 import { EvidenceBundlesPage } from "./pages/EvidenceBundlesPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { DataCompletenessPage } from "./pages/DataCompletenessPage";
+import { ArtifactViewerPage } from "./pages/ArtifactViewerPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { AlertsPage } from "./pages/AlertsPage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -83,6 +84,7 @@ function ApplicationRoutes() {
         <Route path="/runs" element={<RunsPage />} />
         <Route path="/runs/new" element={<RunCreatePage />} />
         <Route path="/runs/:runId" element={<RunDetailPage />} />
+        <Route path="/runs/:runId/repetitions/:repetitionId/artifacts/:artifactId" element={<ArtifactViewerPage />} />
         <Route path="/benchmark-runs/:runId" element={<RunDetailPage />} />
         <Route path="/compare/:comparisonId" element={<ComparePage />} />
         <Route path="/cases" element={<CasesPage />} />

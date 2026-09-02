@@ -209,6 +209,9 @@ export interface RunSummary {
   releaseGate: string;
   status: string;
   completedAt: string;
+  parentRunId?: string | null;
+  dataClass?: string;
+  projectionStatus?: "available" | "partial" | "unavailable";
 }
 
 export interface CaseResult {

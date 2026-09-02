@@ -214,15 +214,21 @@ export function mapContextOptions(data: unknown): ContextOptionsView {
 
 export function mapRunSummary(data: BenchmarkRun): RunSummary {
   const row = record(data);
+  const executionPolicy = nullableRecord(row.executionPolicy);
   const passed = nullableNumber(row.passedCaseCount);
   const completed = nullableNumber(row.completedCaseCount);
+  const status = text(row.status, "unavailable");
+  const explicitDataClass = optionalText(row.dataClass);
+  const dataClass = explicitDataClass
+    ?? (status === "completed_with_substitutions" ? "development_substituted" : executionPolicy?.runClass === "development" ? "development_native" : "unavailable");
   return {
     runId: text(row.runId, "unavailable"), candidate: text(row.runtimeVersion ?? row.candidateId ?? row.candidateSnapshotId, "—"),
     dataset: text(row.datasetVersionRef ?? row.datasetVersion, "—"), profile: text(row.profileVersionId, "—"),
     cases: nullableNumber(row.totalCaseCount), completed,
     passRate: passed != null && completed != null && completed > 0 ? Math.round((passed / completed) * 10_000) / 100 : null,
     qualityScore: null, fatal: null, hg: null, nr: nullableNumber(row.notReadyCaseCount), releaseGate: "unavailable",
-    status: text(row.status, "unavailable"), completedAt: text(row.completedAt ?? row.updatedAt ?? row.createdAt, "—"),
+    status, completedAt: text(row.completedAt ?? row.updatedAt ?? row.createdAt, "—"),
+    parentRunId: nullableText(row.parentRunId), dataClass,
   };
 }
 

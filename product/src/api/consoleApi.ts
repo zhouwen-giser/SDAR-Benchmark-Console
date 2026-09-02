@@ -2,16 +2,26 @@ import { capabilityMeta } from "./capability-map";
 import { LiveHttpConsoleApi } from "./httpConsoleApi";
 import type { TransportRequestOptions } from "./benchmarkApiTransport";
 import type {
+  ArtifactContent,
+  BenchmarkRunPreset,
+  BenchmarkRunRerun,
+  BenchmarkRunRerunRequest,
   BenchmarkRunStatus,
   CreateBenchmarkRun,
   DevelopmentRunPreflight,
   DevelopmentRunPreset,
   DevelopmentSubstitution,
+  DiagnosticOutcomeDistributionRow,
+  DiagnosticSummary,
   DiagnosticArtifact,
   DiagnosticQualification,
   DiagnosticRepetition,
+  ProductArtifact,
+  RepetitionEvaluation,
   RunEvent,
   RunRepetition,
+  RunSubstitution,
+  RunTimelineEvent,
 } from "./generated/model";
 import {
   buildOverview,
@@ -113,12 +123,21 @@ export interface ConsoleApi {
   listRuns(options?: TransportRequestOptions): Promise<ApiResource<RunSummary[]>>;
   getRun(runId: string, options?: TransportRequestOptions): Promise<ApiResource<RunDashboard>>;
   getUgvDiagnosticDevelopmentPreset(options?: TransportRequestOptions): Promise<ApiResource<DevelopmentRunPreset>>;
+  listBenchmarkRunPresets(options?: TransportRequestOptions): Promise<ApiResource<BenchmarkRunPreset[]>>;
+  getBenchmarkRunPreset(presetId: string, options?: TransportRequestOptions): Promise<ApiResource<BenchmarkRunPreset>>;
   preflightBenchmarkRun(input: CreateBenchmarkRun, options?: TransportRequestOptions): Promise<ApiResource<DevelopmentRunPreflight>>;
   createBenchmarkRun(input: CreateBenchmarkRun, options?: TransportRequestOptions): Promise<ApiResource<BenchmarkRunStatus>>;
   cancelBenchmarkRun(runId: string, reason?: string, options?: TransportRequestOptions): Promise<ApiResource<BenchmarkRunStatus>>;
   getBenchmarkRunAuthorityStatus(runId: string, options?: TransportRequestOptions): Promise<ApiResource<BenchmarkRunStatus>>;
   listBenchmarkRunRepetitions(runId: string, options?: TransportRequestOptions): Promise<ApiResource<RunRepetition[]>>;
   listBenchmarkRunEvents(runId: string, options?: TransportRequestOptions): Promise<ApiResource<RunEvent[]>>;
+  createBenchmarkRunRerun(runId: string, input: BenchmarkRunRerunRequest, options?: TransportRequestOptions): Promise<ApiResource<BenchmarkRunRerun>>;
+  getBenchmarkRunDiagnosticSummary(runId: string, options?: TransportRequestOptions): Promise<ApiResource<DiagnosticSummary>>;
+  getBenchmarkRunSubstitutions(runId: string, options?: TransportRequestOptions): Promise<ApiResource<RunSubstitution[]>>;
+  getBenchmarkRunTimeline(runId: string, options?: TransportRequestOptions): Promise<ApiResource<RunTimelineEvent[]>>;
+  getBenchmarkRunRepetitionEvaluation(runId: string, repetitionId: string, options?: TransportRequestOptions): Promise<ApiResource<RepetitionEvaluation>>;
+  getBenchmarkRunRepetitionArtifact(runId: string, repetitionId: string, artifactId: string, options?: TransportRequestOptions): Promise<ApiResource<ProductArtifact>>;
+  getBenchmarkRunRepetitionArtifactContent(runId: string, repetitionId: string, artifactId: string, options?: TransportRequestOptions): Promise<ApiResource<ArtifactContent>>;
   getDiagnosticRunQualification(runId: string, options?: TransportRequestOptions): Promise<ApiResource<DiagnosticQualification>>;
   listDiagnosticExternalCapabilities(runId: string, options?: TransportRequestOptions): Promise<ApiResource<DiagnosticArtifact[]>>;
   getDiagnosticRepetition(runId: string, repetitionId: string, options?: TransportRequestOptions): Promise<ApiResource<DiagnosticRepetition>>;
@@ -156,6 +175,7 @@ export interface ConsoleApi {
   getAnalytics(input: OverviewInput): Promise<ApiResource<OverviewSnapshot>>;
   getAnalyticsModule(key: string, input: OverviewInput, options?: TransportRequestOptions): Promise<ApiResource<AnalyticsModuleView>>;
   getDataCompleteness(options?: TransportRequestOptions): Promise<ApiResource<DataCompletenessView>>;
+  getDiagnosticOutcomeDistribution(options?: TransportRequestOptions): Promise<ApiResource<DiagnosticOutcomeDistributionRow[]>>;
   listReports(): Promise<ApiResource<ReportRecord[]>>;
   createReport(input: { reportType: "snapshot" | "run" | "comparison" | "evaluation"; sourceId: string; format: "json" | "markdown" | "html" }, options?: TransportRequestOptions): Promise<ApiResource<ReportRecord>>;
   getReportContent(reportId: string, options?: TransportRequestOptions): Promise<ApiResource<ReportContentView>>;
@@ -226,6 +246,34 @@ function mockDevelopmentPreset(): DevelopmentRunPreset {
     requestTemplate: mockDevelopmentRequest("live"),
     generatedAt: "2026-09-02T15:00:00.000Z",
   };
+}
+
+function mockProductPresets(): BenchmarkRunPreset[] {
+  const caseIds = ["UGV-NODE-001", "UGV-NODE-002", "UGV-NODE-003", "UGV-CORE-001", "UGV-CORE-002", "UGV-CORE-003", "UGV-MCP-001", "UGV-MCP-002", "UGV-MCP-003", "UGV-XCHAIN-001", "UGV-XCHAIN-002", "UGV-XCHAIN-003"];
+  return [
+    ["ugv-diagnostic-minimal", "UGV Diagnostic Minimal", 1],
+    ["ugv-diagnostic-regression", "UGV Diagnostic Regression", 3],
+    ["ugv-diagnostic-demo", "UGV Diagnostic Demo", 1],
+  ].map(([presetId, label, repeatCount]) => ({
+    presetVersionId: `${presetId}/0.2`,
+    presetId: String(presetId),
+    version: "0.2",
+    contentHash: `sha256:${"c".repeat(64)}`,
+    label: String(label),
+    status: "active" as const,
+    preset: {
+      schemaVersion: "sdar-benchmark.run-preset/v2",
+      presetId,
+      version: "0.2",
+      datasetVersionRef: "sdar-ugv-agent-diagnostic:0.2:dataset-version",
+      candidateSnapshotRef: "sdar-ugv-agent-diagnostic:0.2:development-candidate",
+      selectedCaseIds: caseIds,
+      repeatCount,
+      dataClass: "development_substituted",
+      formalEligible: false,
+    },
+    createdAt: "2026-09-03T00:00:00.000Z",
+  }));
 }
 
 function mockSubstitution(
@@ -378,6 +426,18 @@ export class MockConsoleApi {
     };
   }
 
+  async listBenchmarkRunPresets(): Promise<ApiResource<BenchmarkRunPreset[]>> {
+    await sleep(30);
+    return { data: mockProductPresets(), meta: capabilityMeta("runPresets", { mocked: true }) };
+  }
+
+  async getBenchmarkRunPreset(presetId: string): Promise<ApiResource<BenchmarkRunPreset>> {
+    await sleep(25);
+    const preset = mockProductPresets().find((item) => item.presetVersionId === presetId || item.presetId === presetId);
+    if (!preset) throw new Error(`Preset ${presetId} not found`);
+    return { data: preset, meta: capabilityMeta("runPresetDetail", { mocked: true }) };
+  }
+
   async preflightBenchmarkRun(input: CreateBenchmarkRun): Promise<ApiResource<DevelopmentRunPreflight>> {
     await sleep(40);
     const policy = input.executionPolicy as Record<string, unknown>;
@@ -442,6 +502,54 @@ export class MockConsoleApi {
       data: dashboard.data.events as RunEvent[],
       meta: capabilityMeta("runEvents", { mocked: true }),
     };
+  }
+
+  async createBenchmarkRunRerun(runId: string, input: BenchmarkRunRerunRequest): Promise<ApiResource<BenchmarkRunRerun>> {
+    await sleep(35);
+    return { data: {
+      runId: `run-rerun-${runId}`,
+      parentRunId: runId,
+      status: "queued",
+      datasetVersionRef: "sdar-ugv-agent-diagnostic:0.2:dataset-version",
+      candidateSnapshotId: "sdar-ugv-agent-diagnostic:0.2:development-candidate",
+      contractReleaseId: "development-contract-release",
+      environmentPolicyRef: input.target ?? "simulated",
+      requestHash: `sha256:${"d".repeat(64)}`,
+      created: true,
+      formalEligible: false,
+      createdAt: "2026-09-03T00:00:00.000Z",
+    }, meta: capabilityMeta("runRerun", { mocked: true }) };
+  }
+
+  async getBenchmarkRunDiagnosticSummary(runId: string): Promise<ApiResource<DiagnosticSummary>> {
+    await sleep(25);
+    return { data: { runId, status: "completed_with_substitutions", caseCount: 12, repetitionCount: 12, terminalRepetitionCount: 12, artifactCount: 36, substitutionCount: 12, formalEligible: false, score: null, releaseGate: "unavailable", terminalStates: ["completed"], createdAt: "2026-09-03T00:00:00.000Z", completedAt: "2026-09-03T00:01:00.000Z" }, meta: capabilityMeta("runDiagnosticSummary", { mocked: true }) };
+  }
+
+  async getBenchmarkRunSubstitutions(): Promise<ApiResource<RunSubstitution[]>> {
+    await sleep(25);
+    return { data: [{ caseId: "UGV-XCHAIN-003", track: "cross_chain", scenarioFamily: "control-physical-contradiction", faultType: "control-success-physical-no-effect", dataClass: "development_substituted", formalEligible: false, capabilityRequirements: [{ capabilityId: "physical-verification", requirement: "substitute" }], definitionHash: `sha256:${"e".repeat(64)}` }], meta: capabilityMeta("runSubstitutions", { mocked: true }) };
+  }
+
+  async getBenchmarkRunTimeline(runId: string): Promise<ApiResource<RunTimelineEvent[]>> {
+    await sleep(25);
+    return { data: [{ scope: "run", revision: 1, eventKind: "run.completed_with_substitutions", event: { runId }, eventHash: `sha256:${"1".repeat(64)}`, createdAt: "2026-09-03T00:01:00.000Z", repetitionId: null, caseExecutionId: null }], meta: capabilityMeta("runTimeline", { mocked: true }) };
+  }
+
+  async getBenchmarkRunRepetitionEvaluation(runId: string, repetitionId: string): Promise<ApiResource<RepetitionEvaluation>> {
+    await sleep(25);
+    return { data: { evaluationId: `evaluation-${repetitionId}`, runId, repetitionId, caseExecutionId: `case-execution-${repetitionId}`, readiness: "diagnostic", scoreStatus: "not_formal", qualityScore: null, level: "diagnostic", passed: false, reasonCodes: ["NO_FORMAL_SCORES"], result: {}, resultHash: `sha256:${"f".repeat(64)}`, evaluatedAt: "2026-09-03T00:01:00.000Z", formalEligible: false, dataClass: "development_substituted" }, meta: capabilityMeta("repetitionEvaluation", { mocked: true }) };
+  }
+
+  async getBenchmarkRunRepetitionArtifact(runId: string, repetitionId: string, artifactId: string): Promise<ApiResource<ProductArtifact>> {
+    await sleep(20);
+    return { data: { runId, repetitionId, artifactKind: "execution-trace", artifactIdentity: artifactId, artifactRevision: 1, artifactSchemaVersion: "sdar-benchmark.execution-trace/v1", artifactId, artifactUri: `artifact://development/${artifactId}`, artifactHash: `sha256:${"a".repeat(64)}`, artifactSizeBytes: 42, mediaType: "application/json", summary: { terminal: true }, relationHash: `sha256:${"b".repeat(64)}`, createdAt: "2026-09-03T00:01:00.000Z", dataClass: "development_substituted" }, meta: capabilityMeta("productArtifact", { mocked: true }) };
+  }
+
+  async getBenchmarkRunRepetitionArtifactContent(_runId: string, _repetitionId: string, artifactId: string): Promise<ApiResource<ArtifactContent>> {
+    await sleep(20);
+    const content = JSON.stringify({ artifactId, terminal: true });
+    return { data: { schemaVersion: "sdar-benchmark.artifact-content/v1", artifactId, mediaType: "application/json", sha256: `sha256:${"a".repeat(64)}`, sizeBytes: new TextEncoder().encode(content).length, encoding: "utf-8", content, dataClass: "development_substituted" }, meta: capabilityMeta("productArtifactContent", { mocked: true }) };
   }
 
   async getDiagnosticRunQualification(runId: string): Promise<ApiResource<DiagnosticQualification>> {
@@ -772,6 +880,11 @@ export class MockConsoleApi {
       },
       meta: capabilityMeta("dataCompleteness", { mocked: true, availability: "partial", reasonCodes: ["PROJECTION_LAG", "UNKNOWN_PROVIDER_IDENTITY", "NO_FORMAL_SCORES"] }),
     };
+  }
+
+  async getDiagnosticOutcomeDistribution(): Promise<ApiResource<DiagnosticOutcomeDistributionRow[]>> {
+    await sleep(30);
+    return { data: [{ outcome: "completed", count: 12, substitutedCount: 12, fixtureCount: 0, formalEligible: false, lastObservedAt: "2026-09-03T00:01:00.000Z" }], meta: capabilityMeta("diagnosticOutcomeDistribution", { mocked: true }) };
   }
 
   async listReports(): Promise<ApiResource<ReportRecord[]>> {

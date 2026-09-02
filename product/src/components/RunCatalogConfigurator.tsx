@@ -10,6 +10,7 @@ export interface RunCatalogOption {
 export interface RunPresetCatalogOption extends RunCatalogOption {
   datasetVersionRef: string;
   candidateSnapshotRef: string;
+  candidateSnapshotRefs: string[];
   selectedCaseIds: string[];
   repeatCount: number;
   dataClass: string;

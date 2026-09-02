@@ -9,18 +9,21 @@ afterEach(() => {
 });
 
 describe("SDAR Benchmark Console integration", () => {
-  it("preflights the four-case Development run before enabling creation", async () => {
+  it("preflights a Server-driven Development catalog run before enabling creation", async () => {
     window.history.replaceState(null, "", "/runs/new");
     render(<App />);
     const user = userEvent.setup();
     expect(await screen.findByRole("heading", { name: "新建 Benchmark Run" })).toBeInTheDocument();
     expect(screen.getByText(/所有结果均为 NOT FORMAL QUALIFICATION/)).toBeInTheDocument();
-    const create = screen.getByRole("button", { name: /创建四 Case Run/ });
+    expect((await screen.findAllByLabelText("Preset")).length).toBeGreaterThan(0);
+    const create = screen.getByRole("button", { name: /创建 Benchmark Run/ });
     expect(create).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: /执行预检/ }));
+    const preflight = screen.getByRole("button", { name: /执行预检/ });
+    await waitFor(() => expect(preflight).toBeEnabled());
+    await user.click(preflight);
     expect(await screen.findByText("ready_with_substitutions")).toBeInTheDocument();
     expect(create).toBeEnabled();
-    expect(screen.getByText("UGV-XCHAIN-003")).toBeInTheDocument();
+    expect(screen.getAllByText("UGV-XCHAIN-003").length).toBeGreaterThan(0);
   });
 
   it("shows the blocked decision and explicit API/demo-data provenance", async () => {

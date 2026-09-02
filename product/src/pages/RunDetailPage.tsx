@@ -6,8 +6,10 @@ import { useParams } from "react-router-dom";
 import { consoleApi } from "../api/consoleApi";
 import { capabilityMeta } from "../api/capability-map";
 import { ApiStatusTag, DebugPayloadDrawer, PageHeader, SectionCard } from "../components/common";
+import { DataClassTag } from "../components/TypedAnalyticsModule";
+import { RerunRequestPanel, type BenchmarkRunRerunRequestView } from "../components/RerunRequestPanel";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
-import type { DiagnosticArtifact, DiagnosticRepetition, RunEvent, RunRepetition } from "../api/generated/model";
+import type { DiagnosticArtifact, DiagnosticRepetition, RunEvent, RunTimelineEvent } from "../api/generated/model";
 import type { CaseResult } from "../types";
 import { displayValue, failureTypeName, riskName, statusName, trackName, verdictName } from "../utils/format";
 
@@ -20,7 +22,9 @@ const terminalStates = new Set([
 
 export function RunDetailPage() {
   const { runId = "R-20260815-004" } = useParams();
-  const { navigateWithContext } = useAnalysisContext();
+  const { navigateWithContext, searchParams } = useAnalysisContext();
+  const parentRunId = searchParams.get("parentRunId");
+  const childRunId = searchParams.get("childRunId");
   const queryClient = useQueryClient();
   const [selectedRepetitionId, setSelectedRepetitionId] = useState<string>();
 
@@ -57,6 +61,9 @@ export function RunDetailPage() {
     retry: false,
     refetchInterval: (query) => query.state.data && authority.data && terminalStates.has(authority.data.data.status) ? false : 2_500,
   });
+  const diagnosticSummary = useQuery({ queryKey: ["product-diagnostic-summary", runId], queryFn: () => consoleApi.getBenchmarkRunDiagnosticSummary(runId), retry: false, refetchInterval: authority.data && !terminalStates.has(authority.data.data.status) ? 2_500 : false });
+  const substitutions = useQuery({ queryKey: ["product-substitutions", runId], queryFn: () => consoleApi.getBenchmarkRunSubstitutions(runId), retry: false });
+  const productTimeline = useQuery({ queryKey: ["product-timeline", runId], queryFn: () => consoleApi.getBenchmarkRunTimeline(runId), retry: false, refetchInterval: authority.data && !terminalStates.has(authority.data.data.status) ? 2_500 : false });
   const capabilities = useQuery({
     queryKey: ["diagnostic-capabilities", runId],
     queryFn: () => consoleApi.listDiagnosticExternalCapabilities(runId),
@@ -79,6 +86,7 @@ export function RunDetailPage() {
     queryFn: () => consoleApi.getDiagnosticRepetition(runId, repetitionId!),
     ...diagnosticOptions,
   });
+  const repetitionEvaluation = useQuery({ queryKey: ["product-repetition-evaluation", runId, repetitionId], queryFn: () => consoleApi.getBenchmarkRunRepetitionEvaluation(runId, repetitionId!), ...diagnosticOptions });
   const artifacts = useQuery({
     queryKey: ["diagnostic-artifacts", runId, repetitionId],
     queryFn: () => consoleApi.listDiagnosticRepetitionArtifacts(runId, repetitionId!),
@@ -106,6 +114,10 @@ export function RunDetailPage() {
       await queryClient.invalidateQueries({ queryKey: ["run-authority", runId] });
       await queryClient.invalidateQueries({ queryKey: ["run", runId] });
     },
+  });
+  const rerun = useMutation({
+    mutationFn: (input: BenchmarkRunRerunRequestView) => consoleApi.createBenchmarkRunRerun(runId, input),
+    onSuccess: (resource) => navigateWithContext(`/runs/${resource.data.runId}`, { parentRunId: resource.data.parentRunId, childRunId: undefined }),
   });
 
   const status = authority.data?.data;
@@ -145,6 +157,28 @@ export function RunDetailPage() {
 
       {authority.isError && <Alert type="error" showIcon message="Run Authority 不可用" description="HTTP 模式不会回退 Mock；请检查 Benchmark Server 后重试。" />}
       {cancel.isError && <Alert type="error" showIcon message="取消请求失败" description={errorMessage(cancel.error)} />}
+      {rerun.isError && <Alert type="error" showIcon message="重跑请求失败" description={errorMessage(rerun.error)} />}
+
+      {(parentRunId || childRunId) && <SectionCard title="Parent / Child Run lineage">
+        <Descriptions bordered size="small" column={2} items={[
+          { key: "parent", label: "Parent Run", children: parentRunId ? <Button type="link" onClick={() => navigateWithContext(`/runs/${parentRunId}`, { parentRunId: undefined, childRunId: runId })}>{parentRunId}</Button> : <code>{runId}</code> },
+          { key: "child", label: "Child Run", children: childRunId ? <Button type="link" onClick={() => navigateWithContext(`/runs/${childRunId}`, { parentRunId: runId, childRunId: undefined })}>{childRunId}</Button> : <code>{runId}</code> },
+        ]} />
+        <Alert type="info" showIcon message="Rerun lineage is immutable" description="子 Run 使用新的 runId；父 Run 的请求、状态与结果不会被修改。" />
+      </SectionCard>}
+
+      {diagnosticSummary.data && <SectionCard title="Product Diagnostic Summary" extra={<ApiStatusTag compact meta={diagnosticSummary.data.meta} />}>
+        <Descriptions bordered size="small" column={4} items={[
+          { key: "status", label: "Status", children: <Tag color={authorityColor(diagnosticSummary.data.data.status)}>{diagnosticSummary.data.data.status}</Tag> },
+          { key: "cases", label: "Cases", children: diagnosticSummary.data.data.caseCount },
+          { key: "repetitions", label: "Terminal Repetitions", children: `${diagnosticSummary.data.data.terminalRepetitionCount}/${diagnosticSummary.data.data.repetitionCount}` },
+          { key: "artifacts", label: "Artifacts", children: diagnosticSummary.data.data.artifactCount },
+          { key: "substitutions", label: "Substitutions", children: diagnosticSummary.data.data.substitutionCount },
+          { key: "formal", label: "Formal Eligible", children: <Tag color="red">{String(diagnosticSummary.data.data.formalEligible)}</Tag> },
+          { key: "score", label: "Score", children: diagnosticSummary.data.data.score ?? "—" },
+          { key: "release", label: "Release Gate", children: diagnosticSummary.data.data.releaseGate },
+        ]} />
+      </SectionCard>}
 
       <SectionCard title="Development 执行边界">
         <Space wrap size={[8, 8]}>
@@ -186,20 +220,44 @@ export function RunDetailPage() {
           <article className="diagnostic-layer">
             <DiagnosticHeader title="Agent 层" payload={[repetition.data?.data, executionTrace.data?.data]} />
             <RepetitionSummary value={repetition.data?.data} unavailable={repetition.isError} />
-            <ArtifactInventory values={compactArtifacts([executionTrace.data?.data])} unavailable={executionTrace.isError} />
+            <ArtifactInventory values={compactArtifacts([executionTrace.data?.data])} unavailable={executionTrace.isError} onOpen={(artifactId) => navigateWithContext(artifactPath(runId, repetitionId, artifactId))} />
           </article>
           <article className="diagnostic-layer">
             <DiagnosticHeader title="SMPP Provider 层" payload={[capabilities.data?.data, artifacts.data?.data]} />
-            <ArtifactInventory values={compactArtifacts([...(capabilities.data?.data ?? []), ...(artifacts.data?.data ?? [])])} unavailable={capabilities.isError || artifacts.isError} />
+            <ArtifactInventory values={compactArtifacts([...(capabilities.data?.data ?? []), ...(artifacts.data?.data ?? [])])} unavailable={capabilities.isError || artifacts.isError} onOpen={(artifactId) => navigateWithContext(artifactPath(runId, repetitionId, artifactId))} />
           </article>
           <article className="diagnostic-layer">
             <DiagnosticHeader title="Physical 层" payload={[physicalVerification.data?.data, faultAttribution.data?.data]} />
-            <ArtifactInventory values={compactArtifacts([physicalVerification.data?.data, faultAttribution.data?.data])} unavailable={physicalVerification.isError || faultAttribution.isError} />
+            <ArtifactInventory values={compactArtifacts([physicalVerification.data?.data, faultAttribution.data?.data])} unavailable={physicalVerification.isError || faultAttribution.isError} onOpen={(artifactId) => navigateWithContext(artifactPath(runId, repetitionId, artifactId))} />
           </article>
         </div>
       </SectionCard>
 
-      {runEvents.data && <SectionCard title="Run / Repetition Timeline" extra={<DebugPayloadDrawer payload={runEvents.data.data} />}><RunTimeline values={runEvents.data.data} /></SectionCard>}
+      {repetitionEvaluation.data && <SectionCard title="Selected Repetition Evaluation" extra={<ApiStatusTag compact meta={repetitionEvaluation.data.meta} />}>
+        <Descriptions bordered size="small" column={4} items={[
+          { key: "id", label: "Evaluation", children: <code>{repetitionEvaluation.data.data.evaluationId}</code> },
+          { key: "ready", label: "Readiness", children: repetitionEvaluation.data.data.readiness },
+          { key: "scoreStatus", label: "Score Status", children: <Tag>{repetitionEvaluation.data.data.scoreStatus}</Tag> },
+          { key: "score", label: "Quality Score", children: repetitionEvaluation.data.data.qualityScore ?? "—" },
+          { key: "level", label: "Level", children: repetitionEvaluation.data.data.level },
+          { key: "passed", label: "Passed", children: String(repetitionEvaluation.data.data.passed) },
+          { key: "class", label: "Data Class", children: <DataClassTag value={repetitionEvaluation.data.data.dataClass} /> },
+          { key: "reason", label: "Reasons", children: repetitionEvaluation.data.data.reasonCodes.join(" · ") || "—" },
+        ]} />
+      </SectionCard>}
+
+      {substitutions.data && <SectionCard title="Substitution Inventory" extra={<ApiStatusTag compact meta={substitutions.data.meta} />}>
+        <Table rowKey="caseId" size="small" pagination={false} dataSource={substitutions.data.data} columns={[
+          { title: "Case", dataIndex: "caseId", render: (value: string) => <code>{value}</code> },
+          { title: "Track", dataIndex: "track", render: (value: string) => <Tag>{value}</Tag> },
+          { title: "Scenario", dataIndex: "scenarioFamily", render: (value: string | null) => value ?? "—" },
+          { title: "Fault", dataIndex: "faultType", render: (value: string | null) => value ?? "—" },
+          { title: "Data Class", dataIndex: "dataClass", render: (value: string) => <DataClassTag value={value} /> },
+          { title: "Formal", dataIndex: "formalEligible", render: (value: unknown) => <Tag color="red">{String(value)}</Tag> },
+        ]} />
+      </SectionCard>}
+
+      {(productTimeline.data || runEvents.data) && <SectionCard title="Run / Repetition Timeline" extra={<DebugPayloadDrawer payload={productTimeline.data?.data ?? runEvents.data?.data} />}><RunTimeline values={productTimeline.data?.data ?? runEvents.data!.data} /></SectionCard>}
 
       {dashboard.data && (
         <DashboardProjection
@@ -212,6 +270,10 @@ export function RunDetailPage() {
           <Alert type="warning" showIcon message="Dashboard 投影暂不可用" description="这不会覆盖或改变 PostgreSQL Run Authority 状态。" />
         </SectionCard>
       )}
+
+      {repetitions.length > 0 && <SectionCard title="Rerun selected Cases">
+        <RerunRequestPanel cases={repetitions.map((item) => ({ caseId: item.caseId ?? item.repetitionId }))} pending={rerun.isPending} onSubmit={(input) => rerun.mutate(input)} />
+      </SectionCard>}
     </div>
   );
 }
@@ -272,7 +334,7 @@ function RepetitionSummary({ value, unavailable }: { value?: DiagnosticRepetitio
   ]} />;
 }
 
-function ArtifactInventory({ values, unavailable }: { values: DiagnosticArtifact[]; unavailable: boolean }) {
+function ArtifactInventory({ values, unavailable, onOpen }: { values: DiagnosticArtifact[]; unavailable: boolean; onOpen: (artifactId: string) => void }) {
   if (values.length === 0) return <span className="diagnostic-muted">{unavailable ? "unavailable / artifact not present" : "pending"}</span>;
   return <Table<DiagnosticArtifact>
     className="diagnostic-artifact-table"
@@ -286,6 +348,7 @@ function ArtifactInventory({ values, unavailable }: { values: DiagnosticArtifact
       { title: "Media", render: (_, row) => row.artifactRef.mediaType },
       { title: "Size", render: (_, row) => `${row.artifactRef.sizeBytes} B` },
       { title: "Summary", dataIndex: "summary", render: (value: Record<string, unknown>) => <SummaryFields value={value} /> },
+      { title: "Content", render: (_, row) => <Button type="link" disabled={!row.artifactRef.artifactId} onClick={() => row.artifactRef.artifactId && onOpen(row.artifactRef.artifactId)}>打开</Button> },
     ]}
   />;
 }
@@ -296,8 +359,8 @@ function SummaryFields({ value }: { value: Record<string, unknown> }) {
   return <div className="typed-summary-fields">{entries.map(([key, item]) => <span key={key}><b>{key}</b> {displayField(item)}</span>)}</div>;
 }
 
-function RunTimeline({ values }: { values: RunEvent[] }) {
-  return <Table<RunEvent>
+function RunTimeline({ values }: { values: Array<RunEvent | RunTimelineEvent> }) {
+  return <Table<RunEvent | RunTimelineEvent>
     rowKey={(row) => `${row.scope}:${row.revision}:${row.eventHash}`}
     size="small"
     pagination={values.length > 20 ? { pageSize: 20 } : false}
@@ -353,7 +416,7 @@ function displayField(value: unknown): string {
   return "typed object";
 }
 
-function extractRepetitions(input: unknown[] | undefined): Array<Pick<RunRepetition, "repetitionId" | "caseId">> {
+function extractRepetitions(input: unknown[] | undefined): Array<{ repetitionId: string; caseId: string | null }> {
   if (!input) return [];
   return input.flatMap((value) => {
     if (!value || typeof value !== "object") return [];
@@ -380,4 +443,8 @@ function workerPhase(status: string | undefined) {
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error);
+}
+
+function artifactPath(runId: string, repetitionId: string | null | undefined, artifactId: string) {
+  return `/runs/${encodeURIComponent(runId)}/repetitions/${encodeURIComponent(repetitionId ?? "unknown")}/artifacts/${encodeURIComponent(artifactId)}`;
 }
