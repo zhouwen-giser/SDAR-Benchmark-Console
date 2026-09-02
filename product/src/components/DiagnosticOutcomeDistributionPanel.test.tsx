@@ -6,21 +6,17 @@ afterEach(cleanup);
 
 describe("DiagnosticOutcomeDistributionPanel", () => {
   it("keeps diagnostic outcomes separate from formal scores", () => {
-    render(<DiagnosticOutcomeDistributionPanel value={{
-      schemaVersion: "sdar-benchmark.diagnostic-outcome-distribution/v1",
-      dataClass: "development_substituted",
-      total: 12,
-      passed: 0,
-      failed: 0,
-      indeterminate: 12,
-      cancelled: 0,
-      completedWithSubstitutions: 12,
-      groupBy: "run",
-      watermark: null,
-    }} />);
-    expect(screen.getByText("development_substituted")).toBeInTheDocument();
-    expect(screen.getByText("Indeterminate")).toBeInTheDocument();
-    expect(screen.getByText("With substitutions")).toBeInTheDocument();
+    render(<DiagnosticOutcomeDistributionPanel rows={[{
+      outcome: "completed_with_substitutions",
+      count: 12,
+      substitutedCount: 12,
+      fixtureCount: 0,
+      formalEligible: false,
+      lastObservedAt: "2026-09-03T00:00:00Z",
+    }]} />);
+    expect(screen.getByText("completed_with_substitutions")).toBeInTheDocument();
+    expect(screen.getAllByText("Substituted").length).toBeGreaterThan(0);
+    expect(screen.getByText("false")).toBeInTheDocument();
     expect(screen.queryByText(/quality score/i)).not.toBeInTheDocument();
   });
 });

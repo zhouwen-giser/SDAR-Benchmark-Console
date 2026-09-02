@@ -2942,16 +2942,9 @@ pre {
 
 .diagnostic-outcome-grid {
   display: grid;
-  grid-template-columns: 120px repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
   gap: 14px;
-}
-
-.diagnostic-outcome-total {
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  color: var(--text-secondary);
 }
 
 .typed-resource-toolbar {
