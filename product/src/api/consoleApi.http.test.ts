@@ -25,6 +25,102 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
 describe("LiveHttpConsoleApi contract adapter", () => {
+  it("uses the Server preset request unchanged for Development preflight", async () => {
+    const requestTemplate = {
+      datasetVersionRef: "sdar-ugv-agent-diagnostic/0.1",
+      candidate: { snapshotRef: "candidate-1", specification: { baseUrl: "http://192.168.2.63:10990" } },
+      environment: { adapter: "external_integration", ref: "simulator-63", config: {} },
+      executionPolicy: {
+        runClass: "development",
+        target: "simulated",
+        executionProfile: "ugv-diagnostic-development/0.1",
+        allowDevelopmentSubstitutions: true,
+        fallbackToSimulation: true,
+        permit: { schemaVersion: "sdar-benchmark.development-execution-permit/v1", enabled: true, environmentRef: "simulator-63", target: "simulated", maxConcurrentRuns: 1, maxNavigateCommandsPerRun: 3, allowedFaultProfiles: [] },
+      },
+      contractReleaseRef: "development-contract-release",
+    };
+    let received: unknown;
+    server.use(
+      http.get(`${base}/v1/benchmark-run-presets/ugv-diagnostic-development`, () => HttpResponse.json({
+        schemaVersion: "sdar-benchmark.development-run-preset/v1",
+        presetId: "ugv-four-case-development/0.1",
+        label: "UGV Development",
+        availability: "available",
+        reasonCodes: [],
+        requestTemplate,
+        generatedAt: "2026-09-02T15:00:00Z",
+      })),
+      http.post(`${base}/v1/benchmark-run-preflights`, async ({ request }) => {
+        received = await request.json();
+        return HttpResponse.json({
+          schemaVersion: "sdar-benchmark.development-run-preflight/v1",
+          preflightId: "preflight-1",
+          status: "ready_with_substitutions",
+          canCreateRun: true,
+          canExecuteRun: true,
+          formalEligible: false,
+          checks: [],
+          substitutions: [],
+          warnings: ["development only"],
+          generatedAt: "2026-09-02T15:00:01Z",
+        });
+      }),
+    );
+    const preset = await api.getUgvDiagnosticDevelopmentPreset();
+    const preflight = await api.preflightBenchmarkRun(preset.data.requestTemplate!);
+    expect(received).toEqual(requestTemplate);
+    expect(preflight.data.status).toBe("ready_with_substitutions");
+    expect(preflight.meta.availability).toBe("partial");
+  });
+
+  it("binds Run Authority, cancellation, and all seven diagnostic query operations", async () => {
+    const calls: string[] = [];
+    const runStatus = {
+      runId: "run-dev-1", status: "running", cancellationRequested: false,
+      datasetVersionRef: "dataset-1", candidateSnapshotId: "candidate-1", contractReleaseId: "contract-1",
+      totalCaseCount: 4, completedCaseCount: 1, passedCaseCount: 1, failedCaseCount: 0, notReadyCaseCount: 0,
+      failureClass: null, failureCode: null, createdAt: "2026-09-02T15:00:00Z", startedAt: "2026-09-02T15:00:01Z", completedAt: null, updatedAt: "2026-09-02T15:00:02Z",
+    };
+    const artifact = {
+      relationId: "relation-1", runId: "run-dev-1", repetitionId: "rep-1", subjectKind: "repetition",
+      artifactKind: "execution-trace", artifactIdentity: "artifact-1", artifactRevision: 1,
+      artifactSchemaVersion: "v1", artifactRef: { uri: "artifact://trace", hash: `sha256:${"a".repeat(64)}` },
+      summary: {}, relationHash: `sha256:${"b".repeat(64)}`, createdAt: "2026-09-02T15:00:02Z",
+    };
+    const mark = (name: string, body: Record<string, unknown>) => {
+      calls.push(name);
+      return HttpResponse.json(body);
+    };
+    server.use(
+      http.post(`${base}/v1/benchmark-runs`, () => mark("create", runStatus)),
+      http.get(`${base}/v1/benchmark-runs/run-dev-1`, () => mark("authority", runStatus)),
+      http.post(`${base}/v1/benchmark-runs/run-dev-1/cancel`, () => mark("cancel", { ...runStatus, cancellationRequested: true, status: "cancelling" })),
+      http.get(`${base}/v1/benchmark-runs/run-dev-1/qualification`, () => mark("qualification", envelope("getDiagnosticRunQualification", { runId: "run-dev-1", formalizationStatus: "diagnostic", overallScore: null, releaseGate: "unavailable", artifact, qualification: {} }))),
+      http.get(`${base}/v1/benchmark-runs/run-dev-1/external-capabilities`, () => mark("capabilities", envelope("listDiagnosticExternalCapabilities", [artifact]))),
+      http.get(`${base}/v1/benchmark-runs/run-dev-1/repetitions/rep-1`, () => mark("repetition", envelope("getDiagnosticRepetition", { runId: "run-dev-1", repetitionId: "rep-1", caseExecutionId: "case-exec-1", benchmarkCaseVersionId: "UGV-NODE-001/0.1", repeatIndex: 0, state: "completed", candidateTaskId: null, contextId: null, episodeId: null, environmentSnapshotId: null, terminalState: "completed", authorityRevision: 2, failureClass: null, failureCode: null, createdAt: "2026-09-02T15:00:00Z", submittedAt: null, terminalAt: "2026-09-02T15:00:02Z", completedAt: "2026-09-02T15:00:02Z", updatedAt: "2026-09-02T15:00:02Z" }))),
+      http.get(`${base}/v1/benchmark-runs/run-dev-1/repetitions/rep-1/artifacts`, () => mark("artifacts", envelope("listDiagnosticRepetitionArtifacts", [artifact]))),
+      http.get(`${base}/v1/benchmark-runs/run-dev-1/repetitions/rep-1/execution-trace`, () => mark("trace", envelope("getDiagnosticExecutionTrace", artifact))),
+      http.get(`${base}/v1/benchmark-runs/run-dev-1/repetitions/rep-1/physical-verification`, () => mark("physical", envelope("getDiagnosticPhysicalVerification", artifact))),
+      http.get(`${base}/v1/benchmark-runs/run-dev-1/repetitions/rep-1/fault-attribution`, () => mark("fault", envelope("getDiagnosticFaultAttribution", artifact))),
+    );
+    const request = {} as Parameters<typeof api.createBenchmarkRun>[0];
+    await api.createBenchmarkRun(request);
+    await api.getBenchmarkRunAuthorityStatus("run-dev-1");
+    const cancelled = await api.cancelBenchmarkRun("run-dev-1", "test");
+    await Promise.all([
+      api.getDiagnosticRunQualification("run-dev-1"),
+      api.listDiagnosticExternalCapabilities("run-dev-1"),
+      api.getDiagnosticRepetition("run-dev-1", "rep-1"),
+      api.listDiagnosticRepetitionArtifacts("run-dev-1", "rep-1"),
+      api.getDiagnosticExecutionTrace("run-dev-1", "rep-1"),
+      api.getDiagnosticPhysicalVerification("run-dev-1", "rep-1"),
+      api.getDiagnosticFaultAttribution("run-dev-1", "rep-1"),
+    ]);
+    expect(cancelled.data).toMatchObject({ status: "cancelling", cancellationRequested: true });
+    expect(calls).toEqual(expect.arrayContaining(["create", "authority", "cancel", "qualification", "capabilities", "repetition", "artifacts", "trace", "physical", "fault"]));
+  });
+
   it("preserves envelope partial/null semantics instead of manufacturing score zero", async () => {
     server.use(http.get(`${base}/v1/benchmark-runs`, () => HttpResponse.json(envelope("getBenchmarkRuns", [{ runId: "run-1", status: "completed", datasetVersionRef: "dataset-v1", candidateSnapshotId: "candidate-v1", totalCaseCount: null, completedCaseCount: null, notReadyCaseCount: null }], "partial"))));
     const result = await api.listRuns();
@@ -66,6 +162,14 @@ describe("LiveHttpConsoleApi contract adapter", () => {
   it("HTTP failure rejects and never falls back to Mock", async () => {
     server.use(http.get(`${base}/v1/evaluations`, () => HttpResponse.json({ error: { code: "BACKEND_UNAVAILABLE", retryable: true } }, { status: 503 })));
     await expect(api.listEvaluations()).rejects.toMatchObject({ status: 503, code: "BACKEND_UNAVAILABLE" } satisfies Partial<BenchmarkApiHttpError>);
+  });
+
+  it("never falls back to Mock when Development preflight returns 503", async () => {
+    server.use(http.post(`${base}/v1/benchmark-run-preflights`, () => HttpResponse.json({
+      error: { code: "BACKEND_UNAVAILABLE", retryable: true },
+    }, { status: 503 })));
+    await expect(api.preflightBenchmarkRun({} as Parameters<typeof api.preflightBenchmarkRun>[0]))
+      .rejects.toMatchObject({ status: 503, code: "BACKEND_UNAVAILABLE" });
   });
 
   it.each([[400, "INVALID_REQUEST"], [404, "NOT_FOUND"], [409, "CONFLICT"]] as const)("preserves formal %s errors", async (status, code) => {

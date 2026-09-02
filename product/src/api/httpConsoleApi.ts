@@ -2,6 +2,7 @@ import type {
   AttentionItemListEnvelope,
   AttentionItemEnvelope,
   AttentionStateEnvelope,
+  BenchmarkRunStatus,
   BenchmarkCaseEnvelope,
   BenchmarkCaseListEnvelope,
   BenchmarkRunListEnvelope,
@@ -12,7 +13,14 @@ import type {
   ComparisonDashboardEnvelope,
   ComparisonEvidenceDiffListEnvelope,
   ContextOptionsEnvelope,
+  CreateBenchmarkRun,
   DashboardOverviewResponse,
+  DevelopmentRunPreflight,
+  DevelopmentRunPreset,
+  DiagnosticArtifactEnvelope,
+  DiagnosticArtifactListEnvelope,
+  DiagnosticQualificationEnvelope,
+  DiagnosticRepetitionEnvelope,
   EvaluationBindingEnvelope,
   EvaluationDimensionListEnvelope,
   EvaluationEvidenceGradeListEnvelope,
@@ -164,6 +172,110 @@ export class LiveHttpConsoleApi implements ConsoleApi {
     const results = [repetitions, events, funnel, gate];
     const meta = aggregate("runDashboard", [dashboard.value, ...fulfilled(results)], rejected(results));
     return { data: mapRunDashboard(dashboard.value.data, meta, { repetitions: value(repetitions)?.data, events: value(events)?.data, evidenceFunnel: value(funnel)?.data, releaseGate: value(gate)?.data }), meta };
+  }
+
+  async getUgvDiagnosticDevelopmentPreset(options?: TransportRequestOptions) {
+    const data = await this.transport.get<DevelopmentRunPreset>(
+      "/v1/benchmark-run-presets/ugv-diagnostic-development",
+      options,
+    );
+    return { data, meta: capabilityMeta("runPreset", { mocked: false, mode: "http", generatedAt: data.generatedAt }) };
+  }
+
+  async preflightBenchmarkRun(input: CreateBenchmarkRun, options?: TransportRequestOptions) {
+    const data = await this.transport.post<DevelopmentRunPreflight>(
+      "/v1/benchmark-run-preflights",
+      input,
+      options,
+    );
+    return {
+      data,
+      meta: capabilityMeta("runPreflight", {
+        mocked: false,
+        mode: "http",
+        availability: data.status === "failed_preflight" ? "unavailable" : data.status === "ready_with_substitutions" ? "partial" : "available",
+        reasonCodes: data.checks.flatMap((item) => item.reasonCodes),
+        warnings: data.warnings,
+        generatedAt: data.generatedAt,
+      }),
+    };
+  }
+
+  async createBenchmarkRun(input: CreateBenchmarkRun, options?: TransportRequestOptions) {
+    const data = await this.transport.post<BenchmarkRunStatus>("/v1/benchmark-runs", input, options);
+    return { data, meta: capabilityMeta("runCreate", { mocked: false, mode: "http" }) };
+  }
+
+  async cancelBenchmarkRun(runId: string, reason?: string, options?: TransportRequestOptions) {
+    const data = await this.transport.post<BenchmarkRunStatus>(
+      `/v1/benchmark-runs/${part(runId)}/cancel`,
+      reason === undefined ? {} : { reason },
+      options,
+    );
+    return { data, meta: capabilityMeta("runCancel", { mocked: false, mode: "http" }) };
+  }
+
+  async getBenchmarkRunAuthorityStatus(runId: string, options?: TransportRequestOptions) {
+    const data = await this.transport.get<BenchmarkRunStatus>(`/v1/benchmark-runs/${part(runId)}`, options);
+    return { data, meta: capabilityMeta("runAuthority", { mocked: false, mode: "http" }) };
+  }
+
+  async getDiagnosticRunQualification(runId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<DiagnosticQualificationEnvelope>(
+      `/v1/benchmark-runs/${part(runId)}/qualification`,
+      options,
+    );
+    return mapEnvelope("diagnosticQualification", envelope, (data) => data);
+  }
+
+  async listDiagnosticExternalCapabilities(runId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<DiagnosticArtifactListEnvelope>(
+      `/v1/benchmark-runs/${part(runId)}/external-capabilities`,
+      options,
+    );
+    return mapEnvelope("diagnosticCapabilities", envelope, (data) => data);
+  }
+
+  async getDiagnosticRepetition(runId: string, repetitionId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<DiagnosticRepetitionEnvelope>(
+      `/v1/benchmark-runs/${part(runId)}/repetitions/${part(repetitionId)}`,
+      options,
+    );
+    return mapEnvelope("diagnosticRepetition", envelope, (data) => data);
+  }
+
+  async listDiagnosticRepetitionArtifacts(runId: string, repetitionId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<DiagnosticArtifactListEnvelope>(
+      `/v1/benchmark-runs/${part(runId)}/repetitions/${part(repetitionId)}/artifacts`,
+      options,
+    );
+    return mapEnvelope("diagnosticArtifacts", envelope, (data) => data);
+  }
+
+  async getDiagnosticExecutionTrace(runId: string, repetitionId: string, options?: TransportRequestOptions) {
+    return this.getDiagnosticArtifact(runId, repetitionId, "execution-trace", "diagnosticExecutionTrace", options);
+  }
+
+  async getDiagnosticPhysicalVerification(runId: string, repetitionId: string, options?: TransportRequestOptions) {
+    return this.getDiagnosticArtifact(runId, repetitionId, "physical-verification", "diagnosticPhysicalVerification", options);
+  }
+
+  async getDiagnosticFaultAttribution(runId: string, repetitionId: string, options?: TransportRequestOptions) {
+    return this.getDiagnosticArtifact(runId, repetitionId, "fault-attribution", "diagnosticFaultAttribution", options);
+  }
+
+  private async getDiagnosticArtifact(
+    runId: string,
+    repetitionId: string,
+    path: "execution-trace" | "physical-verification" | "fault-attribution",
+    key: "diagnosticExecutionTrace" | "diagnosticPhysicalVerification" | "diagnosticFaultAttribution",
+    options?: TransportRequestOptions,
+  ) {
+    const envelope = await this.transport.get<DiagnosticArtifactEnvelope>(
+      `/v1/benchmark-runs/${part(runId)}/repetitions/${part(repetitionId)}/${path}`,
+      options,
+    );
+    return mapEnvelope(key, envelope, (data) => data);
   }
 
   async listCases(query: CaseQuery = {}) {

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ProTable, type ProColumns } from "@ant-design/pro-components";
-import { Button, Progress, Select, Tag } from "antd";
-import { EyeOutlined, ReloadOutlined } from "@ant-design/icons";
+import { Button, Progress, Select, Space, Tag } from "antd";
+import { EyeOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { consoleApi } from "../api/consoleApi";
 import { PageHeader, SectionCard } from "../components/common";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
@@ -41,7 +41,12 @@ export function RunsPage() {
         title="基准评测运行"
         subtitle="运行权威状态来自 PostgreSQL；完成后的质量结果来自 ClickHouse 投影，投影等待中不会显示为 0。"
         meta={query.data?.meta}
-        actions={<Button icon={<ReloadOutlined />} onClick={() => query.refetch()}>刷新</Button>}
+        actions={(
+          <Space>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigateWithContext("/runs/new")}>新建 UGV Run</Button>
+            <Button icon={<ReloadOutlined />} onClick={() => query.refetch()}>刷新</Button>
+          </Space>
+        )}
       />
       <SectionCard className="table-card">
         <div className="run-filter-strip">

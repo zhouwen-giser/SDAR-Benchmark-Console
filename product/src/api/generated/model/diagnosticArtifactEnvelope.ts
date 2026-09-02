@@ -5,7 +5,7 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
-import type { DevelopmentExecutionPolicy } from './developmentExecutionPolicy';
-import type { CreateBenchmarkRunExecutionPolicyOneOf } from './createBenchmarkRunExecutionPolicyOneOf';
+import type { DiagnosticEnvelopeMetadata } from './diagnosticEnvelopeMetadata';
+import type { DiagnosticArtifactEnvelopeAllOf } from './diagnosticArtifactEnvelopeAllOf';
 
-export type CreateBenchmarkRunExecutionPolicy = DevelopmentExecutionPolicy | CreateBenchmarkRunExecutionPolicyOneOf;
+export type DiagnosticArtifactEnvelope = DiagnosticEnvelopeMetadata & DiagnosticArtifactEnvelopeAllOf;

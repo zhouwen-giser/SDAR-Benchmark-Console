@@ -207,6 +207,48 @@ paths:
       x-console-status: EXTEND
       x-consistency: watermarked
       x-availability-policy: typed-authoritative
+  /v1/benchmark-run-preflights:
+    post:
+      operationId: preflightBenchmarkRun
+      summary: Resolve a side-effect-free UGV Development execution plan
+      x-command-source: postgres
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBenchmarkRun"
+      responses:
+        "200":
+          description: Ready, ready with explicit substitutions, or a local failed preflight.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DevelopmentRunPreflight"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+      x-capability-id: CAP-114
+      x-console-status: NEW
+      x-consistency: read-only/current
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-run-presets/ugv-diagnostic-development:
+    get:
+      operationId: getUgvDiagnosticDevelopmentPreset
+      summary: Discover the Server-configured four-case UGV Development request
+      x-query-source: derived
+      responses:
+        "200":
+          description: Available request template or explicit configuration gap.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DevelopmentRunPreset"
+      x-capability-id: CAP-115
+      x-console-status: NEW
+      x-consistency: process/current
+      x-availability-policy: typed-authoritative
   /v1/benchmark-runs:
     post:
       operationId: createBenchmarkRun
@@ -303,6 +345,151 @@ paths:
       x-console-status: EXISTING
       x-consistency: transactional/current
       x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/qualification:
+    get:
+      operationId: getDiagnosticRunQualification
+      summary: Get diagnostic-only run qualification authority
+      x-query-source: postgres
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Diagnostic qualification with null score and unavailable release gate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticQualificationEnvelope"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      x-consistency: immutable relation / exact subject / explicit availability
+      x-availability-policy: typed-authoritative
+      x-capability-id: CAP-107
+      x-console-status: NEW
+  /v1/benchmark-runs/{runId}/external-capabilities:
+    get:
+      operationId: listDiagnosticExternalCapabilities
+      summary: List immutable external capability probe Artifacts
+      x-query-source: postgres
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: Bounded external capability Artifact page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticArtifactListEnvelope"
+      x-consistency: immutable relation / exact subject / explicit availability
+      x-availability-policy: typed-authoritative
+      x-capability-id: CAP-108
+      x-console-status: NEW
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}:
+    get:
+      operationId: getDiagnosticRepetition
+      summary: Get a diagnostic repetition authority projection
+      x-query-source: postgres
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - $ref: "#/components/parameters/RepetitionId"
+      responses:
+        "200":
+          description: Repetition authority without raw private detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticRepetitionEnvelope"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      x-consistency: immutable relation / exact subject / explicit availability
+      x-availability-policy: typed-authoritative
+      x-capability-id: CAP-109
+      x-console-status: NEW
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/artifacts:
+    get:
+      operationId: listDiagnosticRepetitionArtifacts
+      summary: List immutable typed Artifacts for a diagnostic repetition
+      x-query-source: postgres
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - $ref: "#/components/parameters/RepetitionId"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: Bounded repetition Artifact page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticArtifactListEnvelope"
+      x-consistency: immutable relation / exact subject / explicit availability
+      x-availability-policy: typed-authoritative
+      x-capability-id: CAP-110
+      x-console-status: NEW
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/execution-trace:
+    get:
+      operationId: getDiagnosticExecutionTrace
+      summary: Get the latest immutable execution-trace Artifact
+      x-query-source: postgres
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - $ref: "#/components/parameters/RepetitionId"
+      responses:
+        "200":
+          description: Exact execution trace Artifact relation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticArtifactEnvelope"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      x-consistency: immutable relation / exact subject / explicit availability
+      x-availability-policy: typed-authoritative
+      x-capability-id: CAP-111
+      x-console-status: NEW
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/physical-verification:
+    get:
+      operationId: getDiagnosticPhysicalVerification
+      summary: Get independent physical-verification Artifact
+      x-query-source: postgres
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - $ref: "#/components/parameters/RepetitionId"
+      responses:
+        "200":
+          description: Physical verification Artifact relation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticArtifactEnvelope"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      x-consistency: immutable relation / exact subject / explicit availability
+      x-availability-policy: typed-authoritative
+      x-capability-id: CAP-112
+      x-console-status: NEW
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/fault-attribution:
+    get:
+      operationId: getDiagnosticFaultAttribution
+      summary: Get deterministic fault-attribution Artifact
+      x-query-source: postgres
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - $ref: "#/components/parameters/RepetitionId"
+      responses:
+        "200":
+          description: Fault attribution Artifact relation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticArtifactEnvelope"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      x-consistency: immutable relation / exact subject / explicit availability
+      x-availability-policy: typed-authoritative
+      x-capability-id: CAP-113
+      x-console-status: NEW
   /v1/benchmark-runs/{runId}/cancel:
     post:
       operationId: cancelBenchmarkRun
@@ -4114,6 +4301,12 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/OpaqueId"
+    RepetitionId:
+      name: repetitionId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/OpaqueId"
     CaseId:
       name: caseId
       in: path
@@ -4357,6 +4550,17 @@ components:
           type: string
         created:
           type: boolean
+        formalEligible:
+          const: false
+        qualificationStatus:
+          const: not_requested
+        qualityScore:
+          type: "null"
+        releaseGate:
+          const: unavailable
+        substitutionCount:
+          type: integer
+          minimum: 0
         authorityStatus:
           type: string
         projectionStatus:
@@ -4412,8 +4616,10 @@ components:
               type: object
               additionalProperties: true
         executionPolicy:
-          type: object
-          additionalProperties: true
+          oneOf:
+            - $ref: "#/components/schemas/DevelopmentExecutionPolicy"
+            - type: object
+              additionalProperties: true
         contractReleaseRef:
           $ref: "#/components/schemas/OpaqueId"
         idempotencyKey:
@@ -4493,6 +4699,224 @@ components:
           format: date-time
         created:
           type: boolean
+    DevelopmentExecutionPermit:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - enabled
+        - environmentRef
+        - target
+        - maxConcurrentRuns
+        - allowedFaultProfiles
+        - expiresAt
+      properties:
+        schemaVersion:
+          const: sdar-benchmark.development-execution-permit/v1
+        enabled:
+          type: boolean
+        environmentRef:
+          type: string
+          minLength: 1
+        target:
+          enum:
+            - simulated
+            - live
+        maxConcurrentRuns:
+          type: integer
+          minimum: 1
+        maxNavigateCommandsPerRun:
+          type: integer
+          minimum: 0
+        allowedFaultProfiles:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+        expiresAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        notes:
+          type:
+            - string
+            - "null"
+    DevelopmentExecutionPolicy:
+      type: object
+      additionalProperties: true
+      required:
+        - runClass
+        - target
+        - executionProfile
+        - allowDevelopmentSubstitutions
+        - fallbackToSimulation
+        - permit
+      properties:
+        runClass:
+          const: development
+        target:
+          enum:
+            - simulated
+            - live
+        executionProfile:
+          const: ugv-diagnostic-development/0.1
+        allowDevelopmentSubstitutions:
+          type: boolean
+        fallbackToSimulation:
+          type: boolean
+        permit:
+          $ref: "#/components/schemas/DevelopmentExecutionPermit"
+        developmentPreflight:
+          $ref: "#/components/schemas/DevelopmentRunPreflight"
+        provenance:
+          type: object
+          additionalProperties: true
+    DevelopmentSubstitution:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - substitutionId
+        - capabilityId
+        - implementationKind
+        - implementationId
+        - reasonCode
+        - sourceCapabilityStatus
+        - artifactRef
+        - activatedAt
+        - formalEligible
+      properties:
+        schemaVersion:
+          const: sdar-benchmark.development-substitution/v1
+        substitutionId:
+          type: string
+        capabilityId:
+          type: string
+        implementationKind:
+          enum:
+            - native
+            - proxy
+            - deterministic_substitute
+        implementationId:
+          type: string
+        reasonCode:
+          type: string
+        sourceCapabilityStatus:
+          enum:
+            - available
+            - unavailable
+            - unknown
+            - not_required
+        artifactRef:
+          type:
+            - string
+            - "null"
+        activatedAt:
+          type: string
+          format: date-time
+        formalEligible:
+          const: false
+    DevelopmentPreflightCheck:
+      type: object
+      additionalProperties: false
+      required:
+        - checkId
+        - status
+        - reasonCodes
+      properties:
+        checkId:
+          type: string
+        status:
+          enum:
+            - pass
+            - warning
+            - fail
+        reasonCodes:
+          type: array
+          items:
+            type: string
+        details:
+          type: object
+          additionalProperties: true
+    DevelopmentRunPreflight:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - preflightId
+        - status
+        - canCreateRun
+        - canExecuteRun
+        - formalEligible
+        - checks
+        - substitutions
+        - warnings
+        - generatedAt
+      properties:
+        schemaVersion:
+          const: sdar-benchmark.development-run-preflight/v1
+        preflightId:
+          type: string
+        status:
+          enum:
+            - ready
+            - ready_with_substitutions
+            - failed_preflight
+        canCreateRun:
+          type: boolean
+        canExecuteRun:
+          type: boolean
+        formalEligible:
+          const: false
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/DevelopmentPreflightCheck"
+        substitutions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DevelopmentSubstitution"
+        warnings:
+          type: array
+          items:
+            type: string
+        generatedAt:
+          type: string
+          format: date-time
+    DevelopmentRunPreset:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - presetId
+        - label
+        - availability
+        - reasonCodes
+        - requestTemplate
+        - generatedAt
+      properties:
+        schemaVersion:
+          const: sdar-benchmark.development-run-preset/v1
+        presetId:
+          const: ugv-four-case-development/0.1
+        label:
+          type: string
+        availability:
+          enum:
+            - available
+            - unavailable
+        reasonCodes:
+          type: array
+          items:
+            type: string
+        requestTemplate:
+          oneOf:
+            - $ref: "#/components/schemas/CreateBenchmarkRun"
+            - type: "null"
+        generatedAt:
+          type: string
+          format: date-time
     PromoteBaseline:
       type: object
       additionalProperties: false
@@ -12655,7 +13079,7 @@ components:
           pattern: ^evaluation-input-[0-9a-f]{64}$
         contentHash: *a15
         schemaVersion:
-          const: sdar-benchmark.evaluation-input/v1
+          const: sdar-benchmark.evaluation-input/v2
         episodeId:
           type: string
         profileVersionId:
@@ -13066,3 +13490,270 @@ components:
         generatedAt:
           type: string
           format: date-time
+    DiagnosticArtifactRef:
+      type: object
+      additionalProperties: false
+      required:
+        - artifactId
+        - uri
+        - sha256
+        - sizeBytes
+        - mediaType
+      properties:
+        artifactId:
+          $ref: "#/components/schemas/OpaqueId"
+        uri:
+          type: string
+          minLength: 1
+          maxLength: 4096
+        sha256:
+          $ref: "#/components/schemas/ContentHash"
+        sizeBytes:
+          type: integer
+          minimum: 1
+        mediaType:
+          type: string
+          minLength: 1
+          maxLength: 256
+    DiagnosticArtifact:
+      type: object
+      additionalProperties: false
+      required:
+        - relationId
+        - runId
+        - repetitionId
+        - subjectKind
+        - artifactKind
+        - artifactIdentity
+        - artifactRevision
+        - artifactSchemaVersion
+        - artifactRef
+        - summary
+        - relationHash
+        - createdAt
+      properties:
+        relationId:
+          $ref: "#/components/schemas/OpaqueId"
+        runId:
+          $ref: "#/components/schemas/OpaqueId"
+        repetitionId:
+          oneOf:
+            - $ref: "#/components/schemas/OpaqueId"
+            - type: "null"
+        subjectKind:
+          enum:
+            - run
+            - repetition
+        artifactKind:
+          type: string
+          pattern: ^[a-z][a-z0-9._-]{0,127}$
+        artifactIdentity:
+          $ref: "#/components/schemas/OpaqueId"
+        artifactRevision:
+          type: integer
+          minimum: 1
+        artifactSchemaVersion:
+          $ref: "#/components/schemas/OpaqueId"
+        artifactRef:
+          $ref: "#/components/schemas/DiagnosticArtifactRef"
+        summary:
+          type: object
+          additionalProperties: true
+        relationHash:
+          $ref: "#/components/schemas/ContentHash"
+        createdAt:
+          type: string
+          format: date-time
+    DiagnosticRepetition:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - repetitionId
+        - caseExecutionId
+        - benchmarkCaseVersionId
+        - repeatIndex
+        - state
+        - candidateTaskId
+        - contextId
+        - episodeId
+        - environmentSnapshotId
+        - terminalState
+        - authorityRevision
+        - failureClass
+        - failureCode
+        - createdAt
+        - submittedAt
+        - terminalAt
+        - completedAt
+        - updatedAt
+      properties:
+        runId:
+          $ref: "#/components/schemas/OpaqueId"
+        repetitionId:
+          $ref: "#/components/schemas/OpaqueId"
+        caseExecutionId:
+          $ref: "#/components/schemas/OpaqueId"
+        benchmarkCaseVersionId:
+          $ref: "#/components/schemas/OpaqueId"
+        repeatIndex:
+          type: integer
+          minimum: 0
+        state:
+          type: string
+        candidateTaskId:
+          type:
+            - string
+            - "null"
+        contextId:
+          type:
+            - string
+            - "null"
+        episodeId:
+          type:
+            - string
+            - "null"
+        environmentSnapshotId:
+          type:
+            - string
+            - "null"
+        terminalState:
+          type:
+            - string
+            - "null"
+        authorityRevision:
+          type: integer
+          minimum: 0
+        failureClass:
+          type:
+            - string
+            - "null"
+        failureCode:
+          type:
+            - string
+            - "null"
+        createdAt:
+          type: string
+          format: date-time
+        submittedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        terminalAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        completedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    DiagnosticQualification:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - formalizationStatus
+        - overallScore
+        - releaseGate
+        - artifact
+        - qualification
+      properties:
+        runId:
+          $ref: "#/components/schemas/OpaqueId"
+        formalizationStatus:
+          const: diagnostic
+        overallScore:
+          type: "null"
+        releaseGate:
+          const: unavailable
+        artifact:
+          $ref: "#/components/schemas/DiagnosticArtifact"
+        qualification:
+          type: object
+          additionalProperties: true
+    DiagnosticEnvelopeMetadata:
+      type: object
+      required:
+        - page
+        - watermark
+        - projectionLagMs
+        - contracts
+        - generatedAt
+      properties:
+        page:
+          type: object
+          additionalProperties: false
+          required:
+            - nextCursor
+          properties:
+            nextCursor:
+              type:
+                - string
+                - "null"
+              maxLength: 4096
+        watermark:
+          type: "null"
+        projectionLagMs:
+          type: "null"
+        contracts:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            type: string
+        generatedAt:
+          type: string
+          format: date-time
+    DiagnosticArtifactEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/DiagnosticEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/components/schemas/DiagnosticArtifact"
+    DiagnosticArtifactListEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/DiagnosticEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              maxItems: 200
+              items:
+                $ref: "#/components/schemas/DiagnosticArtifact"
+    DiagnosticRepetitionEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/DiagnosticEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/components/schemas/DiagnosticRepetition"
+    DiagnosticQualificationEnvelope:
+      type: object
+      unevaluatedProperties: false
+      allOf:
+        - $ref: "#/components/schemas/DiagnosticEnvelopeMetadata"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/components/schemas/DiagnosticQualification"

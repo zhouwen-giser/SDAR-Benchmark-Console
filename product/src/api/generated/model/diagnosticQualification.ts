@@ -6,17 +6,14 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { OpaqueId } from './opaqueId';
+import type { DiagnosticArtifact } from './diagnosticArtifact';
+import type { DiagnosticQualificationQualification } from './diagnosticQualificationQualification';
 
-export interface EvaluationJobStatus {
-  jobId: OpaqueId;
-  state: string;
-  created: boolean;
-  formalEligible?: unknown;
-  qualificationStatus?: 'not_requested';
-  qualityScore?: null;
-  releaseGate?: 'unavailable';
-  /** @minimum 0 */
-  substitutionCount?: number;
-  authorityStatus: string;
-  projectionStatus: 'pending';
+export interface DiagnosticQualification {
+  runId: OpaqueId;
+  formalizationStatus: 'diagnostic';
+  overallScore: null;
+  releaseGate: 'unavailable';
+  artifact: DiagnosticArtifact;
+  qualification: DiagnosticQualificationQualification;
 }

@@ -6,17 +6,21 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { OpaqueId } from './opaqueId';
+import type { ContentHash } from './contentHash';
 
-export interface EvaluationJobStatus {
-  jobId: OpaqueId;
-  state: string;
-  created: boolean;
-  formalEligible?: unknown;
-  qualificationStatus?: 'not_requested';
-  qualityScore?: null;
-  releaseGate?: 'unavailable';
-  /** @minimum 0 */
-  substitutionCount?: number;
-  authorityStatus: string;
-  projectionStatus: 'pending';
+export interface DiagnosticArtifactRef {
+  artifactId: OpaqueId;
+  /**
+   * @minLength 1
+   * @maxLength 4096
+   */
+  uri: string;
+  sha256: ContentHash;
+  /** @minimum 1 */
+  sizeBytes: number;
+  /**
+   * @minLength 1
+   * @maxLength 256
+   */
+  mediaType: string;
 }

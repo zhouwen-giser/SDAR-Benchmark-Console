@@ -16,7 +16,7 @@ export interface EvaluationInputSnapshot {
   snapshotId: string;
   /** @pattern ^sha256:[0-9a-f]{64}$ */
   contentHash: string;
-  schemaVersion: 'sdar-benchmark.evaluation-input/v1';
+  schemaVersion: 'sdar-benchmark.evaluation-input/v2';
   episodeId: string;
   profileVersionId: string;
   requirementSetId: string;
