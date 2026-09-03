@@ -6,7 +6,7 @@ import { buildOverview } from "./mockData";
 describe("mock adapter normalization", () => {
   it("pins the frozen v0.2 125-operation server contract", () => {
     expect(sourceLock.operationCount).toBe(125);
-    expect(sourceLock.openapiSha256).toBe("0061c26ae29efea41ceee4686cd308fef6e58340beb92bd2ec3991f250fed4b4");
+    expect(sourceLock.openapiSha256).toBe("92edbd609860b2dc8f38c123a10a4faf5d6a97355797ac43c4ae6dae30c5ca15");
     expect(apiCapabilityMap.overview.operationId).toBe("getDashboardOverview");
     expect(apiCapabilityMap.evidenceUsage.operationId).toBe("getEvidenceBundlesByBundleIdUsage");
     expect(apiCapabilityMap.reportDownload.operationId).toBe("getReportsByReportIdDownload");

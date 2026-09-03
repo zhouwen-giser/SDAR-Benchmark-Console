@@ -1,9 +1,9 @@
 {
   "repository": "zhouwen-giser/sdar-benchmark-server",
   "branch": "feature/benchmark-product-data-api-v0.2",
-  "commit": "98fde66a3772ae7622c8a0613113fae8f602a7c7",
+  "commit": "67c912be57a587cc8a86bb03bc138d170be952ea",
   "contractState": "frozen-final-commit",
-  "openapiSha256": "0061c26ae29efea41ceee4686cd308fef6e58340beb92bd2ec3991f250fed4b4",
+  "openapiSha256": "92edbd609860b2dc8f38c123a10a4faf5d6a97355797ac43c4ae6dae30c5ca15",
   "operationCount": 125,
-  "syncedAt": "2026-09-02T23:34:08Z"
+  "syncedAt": "2026-09-03T00:31:52Z"
 }

@@ -5,32 +5,23 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
-import type { CandidateAnalyticsCaseCount } from './candidateAnalyticsCaseCount';
-import type { CandidateAnalyticsEvaluatedCaseCount } from './candidateAnalyticsEvaluatedCaseCount';
-import type { CandidateAnalyticsPassRate } from './candidateAnalyticsPassRate';
-import type { CandidateAnalyticsReadyRate } from './candidateAnalyticsReadyRate';
-import type { CandidateAnalyticsNotReadyRate } from './candidateAnalyticsNotReadyRate';
-import type { CandidateAnalyticsFatalRate } from './candidateAnalyticsFatalRate';
-import type { CandidateAnalyticsHardGateFailureRate } from './candidateAnalyticsHardGateFailureRate';
-import type { CandidateAnalyticsMeanScore } from './candidateAnalyticsMeanScore';
-import type { CandidateAnalyticsP10Score } from './candidateAnalyticsP10Score';
-import type { CandidateAnalyticsHighRiskPassRate } from './candidateAnalyticsHighRiskPassRate';
-import type { CandidateAnalyticsCriticalRiskPassRate } from './candidateAnalyticsCriticalRiskPassRate';
+import type { CandidateAnalyticsSubstitutionRate } from './candidateAnalyticsSubstitutionRate';
+import type { CandidateAnalyticsDataClass } from './candidateAnalyticsDataClass';
 
 export interface CandidateAnalytics {
-  benchmarkRunId: string;
   candidateSnapshotId: string;
-  caseCount: CandidateAnalyticsCaseCount;
-  evaluatedCaseCount: CandidateAnalyticsEvaluatedCaseCount;
-  passRate: CandidateAnalyticsPassRate;
-  readyRate: CandidateAnalyticsReadyRate;
-  notReadyRate: CandidateAnalyticsNotReadyRate;
-  fatalRate: CandidateAnalyticsFatalRate;
-  hardGateFailureRate: CandidateAnalyticsHardGateFailureRate;
-  meanScore: CandidateAnalyticsMeanScore;
-  p10Score: CandidateAnalyticsP10Score;
-  highRiskPassRate: CandidateAnalyticsHighRiskPassRate;
-  criticalRiskPassRate: CandidateAnalyticsCriticalRiskPassRate;
-  evaluatedAt: string;
-  projectedAt: string;
+  label: string;
+  /** @minimum 0 */
+  runCount: number;
+  /** @minimum 0 */
+  terminalRunCount: number;
+  /**
+   * @minimum 0
+   * @maximum 1
+   */
+  substitutionRate: CandidateAnalyticsSubstitutionRate;
+  lastRunAt: string;
+  dataClass: CandidateAnalyticsDataClass;
+  formalEligible: boolean;
+  evidenceRefs: string[];
 }

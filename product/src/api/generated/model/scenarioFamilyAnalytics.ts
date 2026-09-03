@@ -5,24 +5,18 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
-import type { ScenarioFamilyAnalyticsCaseCount } from './scenarioFamilyAnalyticsCaseCount';
-import type { ScenarioFamilyAnalyticsPassRate } from './scenarioFamilyAnalyticsPassRate';
-import type { ScenarioFamilyAnalyticsFatalCount } from './scenarioFamilyAnalyticsFatalCount';
-import type { ScenarioFamilyAnalyticsHardGateFailureCount } from './scenarioFamilyAnalyticsHardGateFailureCount';
-import type { ScenarioFamilyAnalyticsMeanScore } from './scenarioFamilyAnalyticsMeanScore';
-import type { ScenarioFamilyAnalyticsP10Score } from './scenarioFamilyAnalyticsP10Score';
+import type { ScenarioFamilyAnalyticsOutcomeCounts } from './scenarioFamilyAnalyticsOutcomeCounts';
+import type { ScenarioFamilyAnalyticsDataClass } from './scenarioFamilyAnalyticsDataClass';
 
 export interface ScenarioFamilyAnalytics {
-  benchmarkRunId: string;
   scenarioFamily: string;
   track: string;
-  riskLevel: string;
-  caseCount: ScenarioFamilyAnalyticsCaseCount;
-  passRate: ScenarioFamilyAnalyticsPassRate;
-  fatalCount: ScenarioFamilyAnalyticsFatalCount;
-  hardGateFailureCount: ScenarioFamilyAnalyticsHardGateFailureCount;
-  meanScore: ScenarioFamilyAnalyticsMeanScore;
-  p10Score: ScenarioFamilyAnalyticsP10Score;
-  evaluatedAt: string;
-  projectedAt: string;
+  /** @minimum 0 */
+  caseCount: number;
+  /** @minimum 0 */
+  repetitionCount: number;
+  outcomeCounts: ScenarioFamilyAnalyticsOutcomeCounts;
+  dataClass: ScenarioFamilyAnalyticsDataClass;
+  formalEligible: boolean;
+  evidenceRefs: string[];
 }

@@ -6,16 +6,18 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { AnalyticsDimensionDimensionId } from './analyticsDimensionDimensionId';
-import type { AnalyticsDimensionScoreMean } from './analyticsDimensionScoreMean';
+import type { AnalyticsDimensionValue } from './analyticsDimensionValue';
+import type { AnalyticsDimensionStatus } from './analyticsDimensionStatus';
+import type { AnalyticsDimensionDataClass } from './analyticsDimensionDataClass';
 
 export interface AnalyticsDimension {
-  benchmarkRunId: string;
   dimensionId: AnalyticsDimensionDimensionId;
+  value: AnalyticsDimensionValue;
+  status: AnalyticsDimensionStatus;
   /** @minimum 0 */
-  applicableCount: number;
-  scoreMean?: AnalyticsDimensionScoreMean;
-  /** @minimum 0 */
-  failedGateCount?: number;
-  evaluatedAt?: string;
+  metricCount: number;
+  dataClass: AnalyticsDimensionDataClass;
+  evidenceRefs: string[];
+  formalEligible?: boolean;
   projectedAt?: string;
 }

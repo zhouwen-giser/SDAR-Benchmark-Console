@@ -15,7 +15,7 @@ The full Playwright suite discovered the catalog at runtime, selected and
 reordered three of the 12 Dataset 0.2 cases, changed repeat count to one,
 preflighted, created a Run, and waited on the returned dynamic Run ID.
 
-- Parent Run: `run_ee9b7803e4329782bc1a138168d39b4ce20f182b5569e1131e79f3ba9538db19`.
+- Parent Run: `run_36a355fa49f6188c2117ab3ab09f5602abaaa218de0134ba6e53a6c846fa26f3`.
 - Result: `3/3` terminal, 12 typed artifacts, 3 explicit substitutions.
 - Boundary: `formalEligible=false`, `score=null`,
   `releaseGate=unavailable`.
@@ -24,7 +24,7 @@ The rerun UI selected one case and created a new immutable child through the
 rerun API. The browser verified parent/child navigation, parent counts remained
 `3/3`, and the child reached `1/1` terminal.
 
-- Child Run: `run_1707774f3c04c42bba1a2390bd6137f93eefb50352dbc718b3e0c89426f240b8`.
+- Child Run: `run_403ba0cfd99b8b4297f0500c39155d7e3e8412a2af5bac4a3c0efa7cdbcccd96`.
 - Result: `1/1` terminal, 4 typed artifacts, 1 explicit substitution.
 - The Artifact Viewer opened an ID discovered from that child Run and verified
   metadata/content ownership, numeric size, exact UTF-8 byte length, and
@@ -34,7 +34,12 @@ rerun API. The browser verified parent/child navigation, parent counts remained
 
 - Diagnostic outcome and all module-specific Analytics views rendered without
   fabricated rows.
-- Data Completeness returned and displayed `complete` for the current runtime.
+- Live HTTP assertions covered all 18 Analytics endpoints against the Goal
+  Package minimum-field matrix and verified that every returned row exposes
+  `evidenceRefs` or `reasonCodes`.
+- Data Completeness returned and displayed `complete` for the current runtime;
+  its exact section order is registry, run, projection, identity, artifact,
+  formal.
 - Formal score distribution returned zero observations, null percentiles, and
   `NO_FORMAL_SCORES`.
 - The existing proxy-outage test proved an HTTP failure never activates Mock
@@ -44,16 +49,17 @@ rerun API. The browser verified parent/child navigation, parent counts remained
 ## Commands
 
 - `VITE_BENCHMARK_API_UPSTREAM=http://127.0.0.1:18094 pnpm test:e2e`:
-  `8/8` PASS.
+  `9/9` PASS.
 - `pnpm check`: Vitest `38/38` PASS; API generation/verification, strict
   TypeScript, and production Vite build PASS.
 
 ## Shared Server K11/K12 evidence
 
-- Final Server lock:
-  `98fde66a3772ae7622c8a0613113fae8f602a7c7`; OpenAPI SHA-256
-  `0061c26ae29efea41ceee4686cd308fef6e58340beb92bd2ec3991f250fed4b4`,
-  125/125 operations implemented.
+- Frozen Server functional lock:
+  `67c912be57a587cc8a86bb03bc138d170be952ea`; OpenAPI SHA-256
+  `92edbd609860b2dc8f38c123a10a4faf5d6a97355797ac43c4ae6dae30c5ca15`,
+  125/125 operations implemented. The final Server acceptance report commit is
+  pending this Console handoff.
 - Regression Run
   `run_60d914e2507b9973f3227bc082610b4c5cf19cf6d05ebe0cf190738d33db2d4b`
   reached 36/36 terminal repetitions.
@@ -67,10 +73,14 @@ rerun API. The browser verified parent/child navigation, parent counts remained
 - Dataset 0.1 remained byte-for-byte unchanged and passed the legacy
   Server/standard-worker restart E2E. Worker restart also left the v0.2
   regression Run at exactly 36 repetitions with no duplicate authority rows.
-- Server `pnpm verify` passed 656/656 unit and 65/65 contract tests plus build,
-  14 migrations, generated assets, architecture, and OpenAPI checks. Focused
-  real-PostgreSQL integration passed 11/11; live Skills and Providers responses
-  passed Ajv 2020 validation against the frozen schemas.
+- Server `pnpm verify` passed 656/656 unit and 67/67 contract tests plus build,
+  14 migrations, generated assets, architecture, and OpenAPI checks. Real
+  PostgreSQL integration passed 58 with 4 explicit skips; task-owned
+  ClickHouse write coverage passed 8/8. Twenty-three live schema checks cover
+  18 Analytics, six completeness sections, and four Evaluation resource types.
+- Preflight/Create parity now rejects an unresolved contract release during
+  preflight and accepts the exact immutable release ref; focused unit passed
+  13/13 and real PostgreSQL Console integration passed 11/11.
 
 All of this evidence remains Development-only: no Formal Score, Baseline,
 Release Gate PASS, or live-native qualification is claimed.

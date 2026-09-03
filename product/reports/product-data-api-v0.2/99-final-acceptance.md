@@ -2,21 +2,24 @@
 
 ## Decision
 
-PASS for the Development Product Data/API v0.2 scope.
+PASS for the Console and shared functional gates. The completion marker remains
+withheld only until the Server records this Console handoff in its final
+report-only acceptance commit.
 
 ## Source locks and contract hashes
 
 - Server stacked base:
   `codex/ugv-four-case-diagnostic-vertical-v0.1@1d91138b56eb70e4edebe4c72fd0a824820ccf87`.
-- Server final lock:
-  `feature/benchmark-product-data-api-v0.2@98fde66a3772ae7622c8a0613113fae8f602a7c7`;
-  Draft PR #5 remains open and stacked on the Development Vertical branch.
-- Console implementation/E2E lock:
-  `feature/benchmark-console-product-data-api-v0.2@3c030249f46044e8c914ae94324414e9adef92be`;
-  Draft PR #2 remains open and stacked on
+- Server functional lock:
+  `feature/benchmark-product-data-api-v0.2@67c912be57a587cc8a86bb03bc138d170be952ea`.
+  Draft PR #5 remains open and stacked on the Development Vertical branch; its
+  final report-only acceptance commit is pending this Console handoff.
+- Console branch: `feature/benchmark-console-product-data-api-v0.2`; the final
+  typed-contract/E2E commit is the commit containing this report. Draft PR #2
+  remains open and stacked on
   `feature/benchmark-control-ugv-diagnostic-v0.1`.
 - OpenAPI SHA-256:
-  `0061c26ae29efea41ceee4686cd308fef6e58340beb92bd2ec3991f250fed4b4`.
+  `92edbd609860b2dc8f38c123a10a4faf5d6a97355797ac43c4ae6dae30c5ca15`.
 - Server routes, OpenAPI operations, unique operation IDs, and generated Console
   operations: 125/125.
 
@@ -37,6 +40,12 @@ PASS for the Development Product Data/API v0.2 scope.
 - Additive Product v0.2 operations: 11.
 - Final operations: 125.
 - Partial/blocked or contract-only implementations: 0.
+- The Goal Package Analytics minimum-field matrix is satisfied for 18/18
+  module-specific row schemas with `additionalProperties=false` and explicit
+  evidence/reason provenance.
+- K7 Fatal, Hard Gate, Metric, and Dimension DTOs share version, label, status,
+  value, unit, expectation, reasons, evidence, data-class, and formalization
+  fields.
 - Typed Evaluation, Artifact, timeline, substitution, completeness, rerun, and
   Analytics resources distinguish available, partial, unavailable, null, and
   zero values without fabricated success data.
@@ -69,27 +78,32 @@ Console verification passed:
 
 - `pnpm check`: API generation/verification, Vitest 38/38, strict TypeScript,
   and production build.
-- Live HTTP Playwright against `http://127.0.0.1:18094`: 8/8, including custom
+- Live HTTP Playwright against `http://127.0.0.1:18094`: 9/9, including custom
   three-Case creation, child rerun, Artifact SHA-256/UTF-8 size verification,
   typed Analytics/completeness, `NO_FORMAL_SCORES`, proxy outage/recovery, and
-  1920/1600/1440 responsive layouts.
+  1920/1600/1440 responsive layouts, all 18 Analytics minimum-field assertions,
+  and the exact six-section completeness assertion.
 
 ## Joint E2E
 
 - Console parent
-  `run_ee9b7803e4329782bc1a138168d39b4ce20f182b5569e1131e79f3ba9538db19`:
+  `run_36a355fa49f6188c2117ab3ab09f5602abaaa218de0134ba6e53a6c846fa26f3`:
   3/3 terminal.
 - Console rerun child
-  `run_1707774f3c04c42bba1a2390bd6137f93eefb50352dbc718b3e0c89426f240b8`:
+  `run_403ba0cfd99b8b4297f0500c39155d7e3e8412a2af5bac4a3c0efa7cdbcccd96`:
   1/1 terminal; parent unchanged.
 - Server regression
   `run_60d914e2507b9973f3227bc082610b4c5cf19cf6d05ebe0cf190738d33db2d4b`:
   36/36 terminal; restart produced no duplicates.
 - Six Demo Runs across three immutable candidates: 72/72 terminal.
-- Server `pnpm verify`: 656/656 unit, 65/65 contract, build, 14 migrations,
+- Server `pnpm verify`: 656/656 unit, 67/67 contract, build, 14 migrations,
   generated assets, architecture, and OpenAPI PASS.
-- Focused real-PostgreSQL integration: 11/11 PASS. Live Skills and Providers
-  payloads also validate against the final Ajv 2020 schemas.
+- Real PostgreSQL integration: 58 PASS / 4 explicit skips. Task-owned
+  ClickHouse writes: 8/8 PASS. Twenty-three live response validations cover all
+  18 Analytics modules, six completeness sections, and four K7 Evaluation
+  resource types against the frozen schemas.
+- The post-validation preflight/create parity regression passed focused unit
+  13/13 and real PostgreSQL Console integration 11/11 without OpenAPI drift.
 
 ## Explicit non-claims
 
@@ -102,4 +116,4 @@ Console verification passed:
 
 ## Completion marker
 
-SDAR_BENCHMARK_PRODUCT_DATA_API_V0_2_COMPLETE
+Withheld pending final requirement-by-requirement acceptance.

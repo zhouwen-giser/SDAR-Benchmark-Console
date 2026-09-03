@@ -5,34 +5,17 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
-import type { AnalyticsChangeSummaryPassRateDelta } from './analyticsChangeSummaryPassRateDelta';
-import type { AnalyticsChangeSummaryMeanScoreDelta } from './analyticsChangeSummaryMeanScoreDelta';
-import type { AnalyticsChangeSummaryP10ScoreDelta } from './analyticsChangeSummaryP10ScoreDelta';
+import type { AnalyticsChangeSummaryDataClass } from './analyticsChangeSummaryDataClass';
 
 export interface AnalyticsChangeSummary {
   comparisonId: string;
-  baselineRunId: string;
-  benchmarkRunId: string;
+  baselineId: string;
+  candidateRunId: string;
   /** @minimum 0 */
-  comparableCaseCount?: number;
-  /** @minimum 0 */
-  improvedCases?: number;
-  /** @minimum 0 */
-  unchangedCases?: number;
-  /** @minimum 0 */
-  regressedCases?: number;
-  /** @minimum 0 */
-  newFatalCases?: number;
-  /** @minimum 0 */
-  newGateFailureCases?: number;
-  /** @minimum 0 */
-  recoveredCases?: number;
-  /** @minimum 0 */
-  nonComparableCases?: number;
-  passRateDelta?: AnalyticsChangeSummaryPassRateDelta;
-  meanScoreDelta?: AnalyticsChangeSummaryMeanScoreDelta;
-  p10ScoreDelta?: AnalyticsChangeSummaryP10ScoreDelta;
-  comparisonStatus: string;
-  comparedAt?: string;
+  changedCaseCount: number;
+  reasonCodes: string[];
+  evidenceRefs: string[];
+  dataClass?: AnalyticsChangeSummaryDataClass;
+  formalEligible?: boolean;
   projectedAt?: string;
 }

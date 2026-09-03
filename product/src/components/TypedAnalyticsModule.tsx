@@ -90,7 +90,7 @@ function AnalyticsValue({ field, value }: { field: string; value: unknown }) {
 }
 
 export function DataClassTag({ value }: { value: string }) {
-  const color = value === "formal" ? "green" : value === "development_native" ? "blue" : value === "development_substituted" ? "gold" : value === "development_fixture" ? "purple" : "default";
+  const color = value === "formal" ? "green" : value === "development_native" ? "blue" : ["development_substitute", "development_substituted"].includes(value) ? "gold" : value === "development_fixture" ? "purple" : "default";
   return <Tag color={color}>{value}</Tag>;
 }
 

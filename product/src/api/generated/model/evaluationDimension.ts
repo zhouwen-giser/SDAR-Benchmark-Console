@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { EvaluationDimensionDimensionId } from './evaluationDimensionDimensionId';
+import type { EvaluationDimensionStatus } from './evaluationDimensionStatus';
+import type { EvaluationDimensionValue } from './evaluationDimensionValue';
+import type { EvaluationDimensionUnit } from './evaluationDimensionUnit';
+import type { EvaluationDimensionDataClass } from './evaluationDimensionDataClass';
 import type { EvaluationDimensionScore } from './evaluationDimensionScore';
 import type { EvaluationDimensionThreshold } from './evaluationDimensionThreshold';
 import type { EvaluationDimensionPassed } from './evaluationDimensionPassed';
@@ -13,6 +17,16 @@ import type { EvaluationDimensionMetricIds } from './evaluationDimensionMetricId
 
 export interface EvaluationDimension {
   dimensionId: EvaluationDimensionDimensionId;
+  version: string;
+  label: string;
+  status: EvaluationDimensionStatus;
+  value: EvaluationDimensionValue;
+  unit: EvaluationDimensionUnit;
+  expectation: string;
+  reasonCodes: string[];
+  evidenceRefs: string[];
+  dataClass: EvaluationDimensionDataClass;
+  formalEligible: boolean;
   applicable: boolean;
   score?: EvaluationDimensionScore;
   threshold?: EvaluationDimensionThreshold;

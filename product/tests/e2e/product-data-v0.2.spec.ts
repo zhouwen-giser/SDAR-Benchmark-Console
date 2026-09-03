@@ -5,6 +5,27 @@ const api = "/benchmark-api/v1";
 let parentRunId = "";
 let childRunId = "";
 
+const analyticsMinimumFields: Record<string, string[]> = {
+  candidates: ["candidateSnapshotId", "label", "runCount", "terminalRunCount", "substitutionRate", "lastRunAt"],
+  tracks: ["track", "caseCount", "repetitionCount", "passCount", "failCount", "indeterminateCount"],
+  "scenario-families": ["scenarioFamily", "track", "caseCount", "repetitionCount", "outcomeCounts"],
+  risks: ["riskLevel", "caseCount", "repetitionCount", "failureCount"],
+  skills: ["skillId", "skillVersion", "invocationCount", "terminalCount", "statusCounts", "durationStats"],
+  providers: ["providerId", "providerInstanceId", "operation", "taskCount", "executionCount", "missionCount", "closureStatus"],
+  "quality-trend": ["runId", "completedAt", "qualityScore", "scoreStatus", "diagnosticPassRate", "dataClass"],
+  "change-summary": ["comparisonId", "baselineId", "candidateRunId", "changedCaseCount", "reasonCodes"],
+  "track-risk-matrix": ["track", "riskLevel", "repetitionCount", "failedCount", "indeterminateCount"],
+  metrics: ["metricId", "version", "value", "unit", "status", "evidenceCount", "dataClass"],
+  dimensions: ["dimensionId", "value", "status", "metricCount", "dataClass"],
+  "readiness-funnel": ["stage", "inputCount", "readyCount", "blockedCount", "reasonCodes"],
+  stability: ["caseId", "repeatCount", "terminalRate", "outcomeConsistency", "durationVariance"],
+  "regression-contributors": ["factor", "delta", "caseIds", "evidenceRefs", "dataClass"],
+  "score-distribution": ["observationCount", "p10", "p25", "median", "p75", "p90", "availability"],
+  operational: ["metricKey", "unit", "current", "baseline", "delta", "sampleCount", "dataClass"],
+  gates: ["gateId", "version", "status", "count", "evidenceRefs"],
+  fatals: ["fatalId", "version", "status", "count", "evidenceRefs"],
+};
+
 async function waitForTerminal(request: APIRequestContext, runId: string) {
   await expect.poll(async () => {
     const response = await request.get(`${api}/benchmark-runs/${encodeURIComponent(runId)}`);
@@ -36,7 +57,9 @@ test.describe.serial("Product Data API v0.2 live HTTP workflow", () => {
     const caseCheckboxes = page.locator(".run-catalog-case-grid input[type=checkbox]");
     await expect(caseCheckboxes).toHaveCount(12);
     for (const caseId of ["UGV-CORE-001", "UGV-CORE-002", "UGV-CORE-003", "UGV-MCP-001", "UGV-MCP-002", "UGV-MCP-003", "UGV-XCHAIN-001", "UGV-XCHAIN-002", "UGV-XCHAIN-003"]) {
-      await page.getByRole("checkbox", { name: `${caseId} · ${caseId}` }).uncheck();
+      const checkbox = page.getByRole("checkbox", { name: `${caseId} · ${caseId}` });
+      await checkbox.click();
+      await expect(checkbox).not.toBeChecked();
     }
     const repeat = page.getByRole("spinbutton", { name: "Repeat count" });
     await repeat.fill("1");
@@ -108,5 +131,28 @@ test.describe.serial("Product Data API v0.2 live HTTP workflow", () => {
     const score = await scoreResponse.json() as { data: Array<{ observationCount: number; p10: null; p25: null; median: null; p75: null; p90: null; availability: string; reasonCodes: string[] }> };
     expect(score.data[0]).toMatchObject({ observationCount: 0, p10: null, p25: null, median: null, p75: null, p90: null });
     expect(score.data[0]?.reasonCodes).toContain("NO_FORMAL_SCORES");
+  });
+
+  test("validates all 18 analytics modules and six completeness sections over live HTTP", async ({ request }) => {
+    for (const [moduleKey, requiredFields] of Object.entries(analyticsMinimumFields)) {
+      const response = await request.get(`${api}/analytics/${moduleKey}`);
+      expect(response.status(), moduleKey).toBe(200);
+      const body = await response.json() as { data?: unknown };
+      expect(Array.isArray(body.data), moduleKey).toBe(true);
+      for (const row of body.data as Array<Record<string, unknown>>) {
+        for (const field of requiredFields) expect(row, `${moduleKey}.${field}`).toHaveProperty(field);
+        expect(
+          Object.hasOwn(row, "evidenceRefs") || Object.hasOwn(row, "reasonCodes"),
+          `${moduleKey}.provenance`,
+        ).toBe(true);
+      }
+    }
+
+    const response = await request.get(`${api}/data-completeness`);
+    expect(response.status()).toBe(200);
+    const body = await response.json() as { data: { sections: Array<{ sectionId: string }> } };
+    expect(body.data.sections.map((section) => section.sectionId)).toEqual([
+      "registry", "run", "projection", "identity", "artifact", "formal",
+    ]);
   });
 });

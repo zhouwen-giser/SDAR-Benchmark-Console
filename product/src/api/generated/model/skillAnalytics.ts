@@ -25,6 +25,7 @@ export interface SkillAnalytics {
   sourceCompleteness: SkillAnalyticsSourceCompleteness;
   dataClass: SkillAnalyticsDataClass;
   formalEligible: boolean;
+  evidenceRefs: string[];
   evaluatedAt: string;
   projectedAt: string;
 }

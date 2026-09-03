@@ -8,6 +8,7 @@
 import type { AnalyticsOperationalCurrent } from './analyticsOperationalCurrent';
 import type { AnalyticsOperationalBaseline } from './analyticsOperationalBaseline';
 import type { AnalyticsOperationalDelta } from './analyticsOperationalDelta';
+import type { AnalyticsOperationalAvailability } from './analyticsOperationalAvailability';
 import type { AnalyticsOperationalDataClass } from './analyticsOperationalDataClass';
 
 export interface AnalyticsOperational {
@@ -19,6 +20,8 @@ export interface AnalyticsOperational {
   delta: AnalyticsOperationalDelta;
   /** @minimum 0 */
   sampleCount: number;
+  availability: AnalyticsOperationalAvailability;
+  reasonCodes: string[];
   dataClass: AnalyticsOperationalDataClass;
   formalEligible: boolean;
   evaluatedAt: string;

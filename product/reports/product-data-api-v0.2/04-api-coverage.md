@@ -2,7 +2,7 @@
 
 ## Frozen contract
 
-- Server OpenAPI SHA-256: `0061c26ae29efea41ceee4686cd308fef6e58340beb92bd2ec3991f250fed4b4`.
+- Server OpenAPI SHA-256: `92edbd609860b2dc8f38c123a10a4faf5d6a97355797ac43c4ae6dae30c5ca15`.
 - Paths, operations, and unique operation IDs: `125 / 125 / 125`.
 - The generated client is reproducible after Orval generation and whitespace normalization.
 - The original 114 operations remain; all 11 v0.2 operations are additive.
@@ -26,10 +26,18 @@ than falling back to Mock data.
   and the browser-computed SHA-256 before marking content verified.
 - Analytics and Data Completeness render typed tables/cards; raw payloads remain
   behind explicit Debug actions.
+- All 18 Analytics modules use the Goal Package minimum fields and expose no
+  arbitrary public row properties. K7 Evaluation rule/metric rows carry the
+  common identity, status, expectation, evidence, data-class, and formalization
+  fields.
+- Data Completeness renders registry, run, projection, identity, artifact, and
+  formal sections explicitly.
 
 ## Verification
 
 - `pnpm api:verify`: PASS, 125 operations and exact hash.
 - `pnpm check`: PASS, Vitest `38/38`, strict TypeScript, production build.
+- Live HTTP Playwright validates all 18 Analytics modules and the exact six
+  completeness sections in addition to the Product workflow.
 - Large Vite chunk warning is recorded as non-blocking and does not affect the
   functional Development workflow.
