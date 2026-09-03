@@ -19,6 +19,9 @@
     "parentPullRequestState": "open_draft",
     "parentPullRequestBase": "codex/ugv-four-case-diagnostic-vertical-v0.1",
     "targetBranch": "feature/benchmark-live-native-operations-v0.3",
+    "targetCommit": "e328b09204447e9f9ab367171b30e8a79efe8ccd",
+    "targetPullRequest": 6,
+    "targetPullRequestState": "open_draft",
     "targetBranchOwner": "server-session",
     "worktreeAtObservation": "clean"
   },
@@ -43,7 +46,12 @@
     "baseGeneratedClientVerification": "passed",
     "targetOperationCount": 172,
     "additiveOperationCount": 47,
-    "contractState": "awaiting-v0.3-server-freeze"
+    "targetSha256": "335c50caea64b9ac6aa0aac69c143d73ee802955715ab79218f6f9801b8b81a3",
+    "targetSchemaCount": 326,
+    "serverOpenApiCount": 172,
+    "serverRouterCount": 172,
+    "serverInventoryCount": 172,
+    "contractState": "frozen-m1-synced"
   },
   "dataset": {
     "ref": "sdar-ugv-agent-diagnostic:0.2:dataset-version",
@@ -88,11 +96,16 @@
       "writePolicy": "read-first-conditional-companion-owned-by-support-session"
     },
     "simulatorReferee": {
-      "repository": null,
+      "repository": "agent/isr-simulation",
+      "localPath": "/home/zhouwen/code/isr-simulation",
+      "branch": "master",
+      "commit": "c10620572a7e1f0a881a8bd97198618bcf5d3d5a",
+      "refereeAssetCommit": "0ba135f",
       "buildRef": null,
       "imageDigest": null,
       "observedEndpoint": "http://192.168.2.63:7879",
-      "status": "source-identity-unresolved",
+      "assetIdentityStatus": "exact-combined-js-css-hash-match",
+      "runtimeDeploymentStatus": "bare-metal-remote-build-identity-unresolved",
       "discoveryOwner": "server-and-simulator-support-session",
       "blocks": [
         "native-software-readiness",

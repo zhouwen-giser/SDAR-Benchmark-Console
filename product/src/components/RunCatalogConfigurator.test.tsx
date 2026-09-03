@@ -12,7 +12,7 @@ describe("RunCatalogConfigurator", () => {
       datasets={[{ id: "dataset/0.2", label: "Dataset 0.2" }]}
       candidates={[{ id: "candidate/0.2", label: "Candidate 0.2" }]}
       cases={[{ caseId: "UGV-NODE-002", label: "stale telemetry", track: "NODE" }, { caseId: "UGV-CORE-003", label: "physical closure", track: "CORE" }]}
-      value={{ presetId: "regression/0.2", datasetVersionRef: "dataset/0.2", candidateSnapshotRef: "candidate/0.2", target: "simulated", selectedCaseIds: ["UGV-NODE-002", "UGV-CORE-003"], repeatCount: 3 }}
+      value={{ presetId: "regression/0.2", datasetVersionRef: "dataset/0.2", candidateSnapshotRef: "candidate/0.2", target: "simulated", nativeRequirement: "prefer_native", environmentId: "ugv-simulator-dev", resourceIds: ["vehicle:ugv1"], telemetryPolicy: "allow_partial", observationTimePolicy: "require_source_observed_at", reconciliationPolicy: "automatic", streamingEnabled: true, selectedCaseIds: ["UGV-NODE-002", "UGV-CORE-003"], repeatCount: 3 }}
       onChange={onChange}
     />);
     expect(screen.getByText("stale telemetry")).toBeInTheDocument();

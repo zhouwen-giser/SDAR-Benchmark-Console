@@ -1987,6 +1987,108 @@ pre {
   }
 }
 
+/* Live-native v0.3 operational workspaces */
+
+.operational-page {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.operational-meta-strip {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: linear-gradient(120deg, rgba(16, 40, 61, .9), rgba(7, 20, 32, .95));
+  color: var(--text-2);
+  font-size: 10px;
+}
+
+.operational-meta-strip .ant-alert {
+  margin-top: 2px;
+}
+
+.operational-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.operational-kpi-grid .section-card-body {
+  display: grid;
+  min-height: 96px;
+  align-content: center;
+  gap: 5px;
+}
+
+.operational-kpi-grid span {
+  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.operational-kpi-grid strong {
+  font-size: 23px;
+  line-height: 1.1;
+}
+
+.operational-kpi-grid small {
+  color: var(--text-3);
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+
+.operational-kpi-ready {
+  border-color: rgba(40, 199, 111, .45);
+  background: linear-gradient(145deg, rgba(16, 74, 51, .42), rgba(8, 22, 33, .98));
+}
+
+.operational-kpi-warning {
+  border-color: rgba(245, 185, 66, .45);
+  background: linear-gradient(145deg, rgba(87, 64, 21, .4), rgba(8, 22, 33, .98));
+}
+
+.operational-two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr);
+  gap: 12px;
+}
+
+.topology-graph-card,
+.identity-graph-card {
+  min-height: 470px;
+}
+
+.topology-graph-card .section-card-body,
+.identity-graph-card .section-card-body {
+  min-height: 420px;
+}
+
+.operational-loading {
+  min-height: 520px;
+  padding: 28px;
+}
+
+.operational-drawer-stack {
+  display: grid;
+  gap: 16px;
+}
+
+@media (max-width: 1540px) {
+  .operational-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1440px) {
+  .operational-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 1399px) {
   .desktop-width-notice {
     display: flex;

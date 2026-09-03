@@ -89,4 +89,23 @@ describe("SDAR Benchmark Console integration", () => {
     expect(await screen.findByText(/报告预览 · DRAFT-001/)).toBeInTheDocument();
     expect(screen.getByText("DRAFT-001")).toBeInTheDocument();
   });
+
+  it.each([
+    ["/system/topology", "System Topology", "Native execution"],
+    ["/environments", "Environments", "Environment registry"],
+    ["/environments/ugv-simulator-dev", "Environment · ugv-simulator-dev", "Lease and cleanup history"],
+    ["/resources", "Resources", "Resource registry and live status"],
+    ["/resources/vehicle%3Augv1", "Resource · vehicle:ugv1", "Four time domains"],
+    ["/runs/run-fixture-native-001/identity", "Identity Closure · run-fixture-native-001", "Exact identity graph"],
+    ["/runs/run-fixture-native-001/repetitions/repetition-fixture-core-001/trajectory", "Trajectory · repetition-fixture-core-001", "Physical proof summary"],
+    ["/telemetry", "Telemetry Workspace", "Telemetry source registry"],
+    ["/reconciliation", "Reconciliation Center", "Side-effect policy"],
+    ["/analytics/native", "Native Analytics", "Non-formal boundary"],
+  ])("renders typed v0.3 operational workspace %s", async (path, heading, landmark) => {
+    window.history.replaceState(null, "", path);
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: heading })).toBeInTheDocument();
+    expect(await screen.findByText(landmark, { exact: false })).toBeInTheDocument();
+    expect(screen.getByText(/FORMAL ELIGIBLE: FALSE/)).toBeInTheDocument();
+  });
 });

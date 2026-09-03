@@ -48,6 +48,8 @@ import {
   systemComponentName,
   trackName,
 } from "../utils/format";
+import { operationalApi } from "../operational/api";
+import { OperationalMetaStrip, OperationalStatusTag } from "../operational/components";
 
 const scenarioOptions = [
   { label: "已阻塞", value: "blocked" },
@@ -201,6 +203,41 @@ function GateIcon({ status }: { status: string }) {
   if (status === "ready") return <CheckCircleFilled />;
   if (status === "invalid") return <ExclamationCircleFilled />;
   return <CloseCircleFilled />;
+}
+
+function OperationalOverviewSummary({ navigate }: { navigate: (path: string) => void }) {
+  const topology = useQuery({ queryKey: ["overview-operational-topology"], queryFn: () => operationalApi.getSystemTopology(), retry: false, refetchInterval: 10_000 });
+  const environments = useQuery({ queryKey: ["overview-operational-environments"], queryFn: () => operationalApi.listEnvironments(), retry: false, refetchInterval: 10_000 });
+  const resources = useQuery({ queryKey: ["overview-operational-resources"], queryFn: () => operationalApi.listResources(), retry: false, refetchInterval: 5_000 });
+  const telemetry = useQuery({ queryKey: ["overview-operational-telemetry"], queryFn: () => operationalApi.listTelemetrySources(), retry: false, refetchInterval: 10_000 });
+  const reconciliation = useQuery({ queryKey: ["overview-operational-reconciliation"], queryFn: () => operationalApi.listReconciliationJobs(), retry: false, refetchInterval: 5_000 });
+  const runs = useQuery({ queryKey: ["overview-operational-runs"], queryFn: () => consoleApi.listRuns(), retry: false, refetchInterval: 5_000 });
+  const activeRuns = (runs.data?.data ?? []).filter((item) => !["completed", "completed_with_substitutions", "failed", "cancelled"].includes(item.status)).length;
+  const maxTelemetryLag = Math.max(0, ...(telemetry.data?.data ?? []).map((item) => Math.max(0, ...Object.values(item.lags).map((value) => value ?? 0))));
+  const pendingJobs = (reconciliation.data?.data ?? []).filter((item) => ["queued", "running", "waiting_source"].includes(item.state)).length;
+  const failed = [topology, environments, resources, telemetry, reconciliation].filter((query) => query.isError).length;
+
+  return (
+    <SectionCard title="Live-native operations" className="operational-overview" extra={<Button size="small" onClick={() => navigate("/system/topology")}>打开系统拓扑 <ArrowRightOutlined /></Button>}>
+      {topology.data && <OperationalMetaStrip meta={topology.data.meta} />}
+      <div className="operational-kpi-grid">
+        <article><span>Native readiness</span><strong>{topology.data ? String(topology.data.data.nativeExecutionReady) : "—"}</strong><small>{topology.data?.data.overallStatus ?? (failed ? "source unavailable" : "loading")}</small></article>
+        <article><span>Active runs</span><strong>{runs.data ? activeRuns : "—"}</strong><small>PostgreSQL Run Authority</small></article>
+        <article><span>Environments</span><strong>{environments.data?.data.length ?? "—"}</strong><small>{(environments.data?.data ?? []).filter((item) => item.leaseStatus === "available").length} available</small></article>
+        <article><span>Resources</span><strong>{resources.data?.data.length ?? "—"}</strong><small>{(resources.data?.data ?? []).filter((item) => item.availability === "available").length} available</small></article>
+        <article><span>Telemetry lag</span><strong>{telemetry.data ? `${maxTelemetryLag} ms` : "—"}</strong><small>{(telemetry.data?.data ?? []).filter((item) => item.status !== "ready").length} non-ready sources</small></article>
+        <article><span>Reconcile jobs</span><strong>{reconciliation.data ? pendingJobs : "—"}</strong><small>active · no new physical side effects</small></article>
+      </div>
+      <Space wrap>
+        <OperationalStatusTag value={topology.data?.data.overallStatus ?? (failed ? "unavailable" : "unknown")} />
+        <Button size="small" onClick={() => navigate("/environments")}>Environments</Button>
+        <Button size="small" onClick={() => navigate("/resources")}>Resources</Button>
+        <Button size="small" onClick={() => navigate("/telemetry")}>Telemetry</Button>
+        <Button size="small" onClick={() => navigate("/reconciliation")}>Reconciliation</Button>
+        <Button size="small" onClick={() => navigate("/analytics/native")}>Native analytics</Button>
+      </Space>
+    </SectionCard>
+  );
 }
 
 function ReleaseGateCard({ data, onOpen }: { data: OverviewSnapshot; onOpen: () => void }) {
@@ -411,6 +448,7 @@ export function OverviewPage() {
     return (
       <div className="overview-page">
         <div className="overview-loading-header"><h1>SDAR 基准质量指挥中心</h1></div>
+        <OperationalOverviewSummary navigate={navigateWithContext} />
         <DataStatePanel state={fallback} onRetry={() => { if (currentApiMode() === "http") void query.refetch(); else setFilters({ dataState: "loaded" }); }}><span /></DataStatePanel>
       </div>
     );
@@ -422,6 +460,7 @@ export function OverviewPage() {
   return (
     <div className="overview-page">
       <ContextBar data={data} options={contextQuery.data?.data} onRefresh={() => { void query.refetch(); void contextQuery.refetch(); }} />
+      <OperationalOverviewSummary navigate={navigateWithContext} />
       <SnapshotAlert status={data.snapshot.dataStatus} watermark={data.snapshot.watermark} lagMs={data.snapshot.projectionLagMs} moduleErrors={data.snapshot.moduleErrors} />
       <DataStatePanel state={effectiveState} onRetry={() => setFilters({ dataState: "loaded" })}>
         <div className="overview-grid overview-summary">

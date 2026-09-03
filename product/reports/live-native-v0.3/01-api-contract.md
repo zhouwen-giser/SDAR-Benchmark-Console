@@ -9,7 +9,16 @@
 - The accepted generated client contains 125 operations and passes its binding
   verifier.
 
-## v0.3 freeze target
+## v0.3 frozen lock
+
+- Server branch: `feature/benchmark-live-native-operations-v0.3`
+- Server commit: `e328b09204447e9f9ab367171b30e8a79efe8ccd`
+- OpenAPI SHA-256: `335c50caea64b9ac6aa0aac69c143d73ee802955715ab79218f6f9801b8b81a3`
+- OpenAPI / Router / Server inventory: `172 / 172 / 172`
+- Schemas: `326`
+- Console source lock and generated client verification: `172 operations / 172 unique operationIds`
+
+## Additive contract
 
 The Server contract must retain all 125 operations and add exactly the 47
 operations in `matrices/API_DELTA_47.csv`, for 172 OpenAPI operations, router
@@ -38,7 +47,13 @@ unavailable response into Mock or Seed data.
 
 ## Current state
 
-The v0.3 OpenAPI is not yet frozen. Console generation and implementation will
-begin immediately after the Server session publishes one reproducible 172-op
-path/hash/commit lock. This wait does not block independent Console structure,
-component tests, or M0 evidence work.
+The unique M1 contract is frozen and mechanically synchronized into the Console.
+The generated DTOs are the Console wire types; local operational names only alias
+those generated types. Server authority implementations may move from typed
+unavailable to available during M2–M10 without changing this contract.
+
+The first M1 runtime probe found that the temporary unavailable adapter emitted
+`data: null` for envelopes whose frozen schemas require a concrete DTO or array,
+including the SSE event envelope. Console treats such responses as unavailable
+and never falls back to Mock; Server was given the exact wire mismatch for an
+implementation-only correction.

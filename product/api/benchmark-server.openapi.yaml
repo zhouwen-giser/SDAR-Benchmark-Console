@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: SDAR Benchmark Server API
-  version: 0.1.0
-  description: Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
+  version: 0.3.0
+  description: Unauthenticated SDAR Benchmark Server Live Native Operations v0.3 API. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies. Development responses never imply formal qualification.
 security: []
 servers:
   - url: http://127.0.0.1:18090
@@ -1717,6 +1717,36 @@ paths:
           schema:
             type: string
             maxLength: 512
+        - name: componentId
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 512
+        - name: environmentId
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 512
+        - name: resourceId
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 512
+        - name: jobId
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 512
+        - name: nativeLayer
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 512
       responses:
         "200":
           description: List ordered Fatal/HG/Critical/NR/Regression/Stability/Projection attention items
@@ -1787,6 +1817,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/AttentionStateCommand"
+      x-command-semantics: preserve-current-workflow-authority-and-append-review-action-event
   /v1/anomalies:
     get:
       operationId: getAnomalies
@@ -4519,6 +4550,1204 @@ paths:
       x-console-status: NEW
       x-consistency: transactional/current
       x-availability-policy: typed-authoritative
+  /v1/system/topology:
+    get:
+      operationId: getSystemTopology
+      tags:
+        - System
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemTopologyResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-127
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/system/components:
+    get:
+      operationId: listSystemComponents
+      tags:
+        - System
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemComponentListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-128
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/system/components/{componentId}:
+    get:
+      operationId: getSystemComponent
+      tags:
+        - System
+      parameters:
+        - name: componentId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemComponentResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-129
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/system/components/{componentId}/probe:
+    post:
+      operationId: probeSystemComponent
+      tags:
+        - System
+      parameters:
+        - name: componentId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemComponentResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-command-source: derived
+      x-capability-id: CAP-130
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/system/compatibility:
+    get:
+      operationId: getSystemCompatibility
+      tags:
+        - System
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompatibilityMatrixResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: mixed
+      x-capability-id: CAP-131
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/environments:
+    get:
+      operationId: listEnvironments
+      tags:
+        - Environments
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvironmentDetailListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-132
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/environments/{environmentId}:
+    get:
+      operationId: getEnvironment
+      tags:
+        - Environments
+      parameters:
+        - name: environmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvironmentDetailResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-133
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/environments/{environmentId}/probe:
+    post:
+      operationId: probeEnvironment
+      tags:
+        - Environments
+      parameters:
+        - name: environmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvironmentDetailResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-command-source: derived
+      x-capability-id: CAP-134
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/environments/{environmentId}/resources:
+    get:
+      operationId: listEnvironmentResources
+      tags:
+        - Environments
+      parameters:
+        - name: environmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceDetailListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-135
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/environments/{environmentId}/fault-profiles:
+    get:
+      operationId: listEnvironmentFaultProfiles
+      tags:
+        - Environments
+      parameters:
+        - name: environmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FaultProfileListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-136
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/environments/{environmentId}/leases:
+    get:
+      operationId: listEnvironmentLeases
+      tags:
+        - Environments
+      parameters:
+        - name: environmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvironmentLeaseListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-137
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/resources:
+    get:
+      operationId: listResources
+      tags:
+        - Resources
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceDetailListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-138
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/resources/{resourceId}:
+    get:
+      operationId: getResource
+      tags:
+        - Resources
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceDetailResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-139
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/resources/{resourceId}/capabilities:
+    get:
+      operationId: listResourceCapabilities
+      tags:
+        - Resources
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceCapabilityListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-140
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/resources/{resourceId}/observations/latest:
+    get:
+      operationId: getResourceLatestObservations
+      tags:
+        - Resources
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhysicalObservationListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: derived
+      x-capability-id: CAP-141
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/resources/{resourceId}/missions:
+    get:
+      operationId: listResourceMissions
+      tags:
+        - Resources
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceMissionListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-142
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/resources/{resourceId}/benchmark-history:
+    get:
+      operationId: listResourceBenchmarkHistory
+      tags:
+        - Resources
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceBenchmarkHistoryListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: mixed
+      x-capability-id: CAP-143
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/execution-plan:
+    get:
+      operationId: getBenchmarkRunExecutionPlan
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunExecutionPlanResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: mixed
+      x-capability-id: CAP-144
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/native-coverage:
+    get:
+      operationId: getBenchmarkRunNativeCoverage
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NativeCoverageResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-145
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/identity-closure:
+    get:
+      operationId: getBenchmarkRunIdentityClosure
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityClosureResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: derived
+      x-capability-id: CAP-146
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/telemetry-status:
+    get:
+      operationId: getBenchmarkRunTelemetryStatus
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryStatusResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-147
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/environment:
+    get:
+      operationId: getBenchmarkRunEnvironment
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunEnvironmentResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: mixed
+      x-capability-id: CAP-148
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/resource-bindings:
+    get:
+      operationId: listBenchmarkRunResourceBindings
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceBindingListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-149
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/stream:
+    get:
+      operationId: streamBenchmarkRun
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+        - name: Last-Event-ID
+          in: header
+          required: false
+          description: Resume strictly after this Run-scoped monotonic event identifier.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Run-scoped authoritative event stream with heartbeat and bounded replay.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: no-cache
+          content:
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/RunStreamEventResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-150
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+      x-stream-resume-header: Last-Event-ID
+      x-stream-event-schema: "#/components/schemas/RunStreamEventResourceEnvelope"
+      x-stream-heartbeat: comment-frame
+      x-stream-backpressure: bounded-client-buffer
+      x-stream-gap-repair: authoritative-snapshot-and-resume-after-event-id
+      x-stream-authority: delivery-only-postgresql-snapshot
+  /v1/benchmark-runs/{runId}/reconcile:
+    post:
+      operationId: reconcileBenchmarkRun
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "202":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReconciliationJobResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-command-source: postgres
+      x-capability-id: CAP-151
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReconcileRequest"
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/trajectory:
+    get:
+      operationId: getBenchmarkRunRepetitionTrajectory
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+        - name: repetitionId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrajectoryResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: artifact
+      x-capability-id: CAP-152
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/identity-closure:
+    get:
+      operationId: getBenchmarkRunRepetitionIdentityClosure
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+        - name: repetitionId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityClosureResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: derived
+      x-capability-id: CAP-153
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/telemetry:
+    get:
+      operationId: getBenchmarkRunRepetitionTelemetry
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+        - name: repetitionId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryStatusResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-154
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/provider-closure:
+    get:
+      operationId: getBenchmarkRunRepetitionProviderClosure
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+        - name: repetitionId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderClosureResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: derived
+      x-capability-id: CAP-155
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/physical-observations:
+    get:
+      operationId: listBenchmarkRunRepetitionPhysicalObservations
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+        - name: repetitionId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhysicalObservationListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: derived
+      x-capability-id: CAP-156
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/benchmark-runs/{runId}/repetitions/{repetitionId}/raw-trace-links:
+    get:
+      operationId: listBenchmarkRunRepetitionRawTraceLinks
+      tags:
+        - Benchmark runs
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+        - name: repetitionId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RawTraceLinksResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: derived
+      x-capability-id: CAP-157
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/reconciliation-jobs:
+    get:
+      operationId: listReconciliationJobs
+      tags:
+        - Reconciliation jobs
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReconciliationJobListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-158
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/reconciliation-jobs/{jobId}:
+    get:
+      operationId: getReconciliationJob
+      tags:
+        - Reconciliation jobs
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReconciliationJobResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-159
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/reconciliation-jobs/{jobId}/events:
+    get:
+      operationId: listReconciliationJobEvents
+      tags:
+        - Reconciliation jobs
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReconciliationJobEventListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-160
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/reconciliation-jobs/{jobId}/cancel:
+    post:
+      operationId: cancelReconciliationJob
+      tags:
+        - Reconciliation jobs
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "202":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReconciliationJobResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-command-source: postgres
+      x-capability-id: CAP-161
+      x-console-status: NEW
+      x-consistency: transactional/current
+      x-availability-policy: typed-authoritative
+  /v1/telemetry-sources:
+    get:
+      operationId: listTelemetrySources
+      tags:
+        - Telemetry sources
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetrySourceListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-162
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/telemetry-sources/{sourceId}:
+    get:
+      operationId: getTelemetrySource
+      tags:
+        - Telemetry sources
+      parameters:
+        - name: sourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetrySourceResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-163
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/telemetry-sources/{sourceId}/watermarks:
+    get:
+      operationId: getTelemetrySourceWatermarks
+      tags:
+        - Telemetry sources
+      parameters:
+        - name: sourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryWatermarksResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: clickhouse
+      x-capability-id: CAP-164
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/telemetry-sources/{sourceId}/drift:
+    get:
+      operationId: getTelemetrySourceDrift
+      tags:
+        - Telemetry sources
+      parameters:
+        - name: sourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryDriftResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: mixed
+      x-capability-id: CAP-165
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/attention-items/{attentionId}/timeline:
+    get:
+      operationId: getAttentionItemTimeline
+      tags:
+        - Attention items
+      parameters:
+        - name: attentionId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunStreamEventListResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: postgres
+      x-capability-id: CAP-166
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/attention-items/{attentionId}/evidence:
+    get:
+      operationId: getAttentionItemEvidence
+      tags:
+        - Attention items
+      parameters:
+        - name: attentionId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttentionEvidenceResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: mixed
+      x-capability-id: CAP-167
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/analytics/native-coverage:
+    get:
+      operationId: listNativeCoverageAnalytics
+      tags:
+        - Analytics
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NativeAnalyticsResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: clickhouse
+      x-capability-id: CAP-168
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/analytics/telemetry-lag:
+    get:
+      operationId: listTelemetryLagAnalytics
+      tags:
+        - Analytics
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NativeAnalyticsResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: clickhouse
+      x-capability-id: CAP-169
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/analytics/reconciliation:
+    get:
+      operationId: listReconciliationAnalytics
+      tags:
+        - Analytics
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NativeAnalyticsResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: mixed
+      x-capability-id: CAP-170
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/analytics/identity-closure:
+    get:
+      operationId: listIdentityClosureAnalytics
+      tags:
+        - Analytics
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NativeAnalyticsResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: clickhouse
+      x-capability-id: CAP-171
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/analytics/environment-reliability:
+    get:
+      operationId: listEnvironmentReliabilityAnalytics
+      tags:
+        - Analytics
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NativeAnalyticsResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: mixed
+      x-capability-id: CAP-172
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
+  /v1/analytics/physical-verification:
+    get:
+      operationId: listPhysicalVerificationAnalytics
+      tags:
+        - Analytics
+      parameters: []
+      responses:
+        "200":
+          description: Expose typed live-native operational authority without changing formal scoring authority.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NativeAnalyticsResourceEnvelope"
+      summary: Expose typed live-native operational authority without changing formal scoring authority.
+      x-query-source: clickhouse
+      x-capability-id: CAP-173
+      x-console-status: NEW
+      x-consistency: watermarked-or-live
+      x-availability-policy: typed-authoritative
 components:
   parameters:
     EvaluationId:
@@ -4855,6 +6084,8 @@ components:
               additionalProperties: true
         executionPolicy:
           oneOf:
+            - $ref: "#/components/schemas/LiveNativeExecutionPolicy"
+            - $ref: "#/components/schemas/LiveNativeExecutionPolicy"
             - $ref: "#/components/schemas/DevelopmentExecutionPolicy"
             - type: object
               additionalProperties: true
@@ -4862,6 +6093,29 @@ components:
           $ref: "#/components/schemas/OpaqueId"
         idempotencyKey:
           $ref: "#/components/schemas/OpaqueId"
+        nativeRequirement:
+          type: string
+          enum:
+            - prefer_native
+            - require_native
+        telemetryPolicy:
+          type: string
+          enum:
+            - require_full
+            - allow_partial
+            - development_relay
+        observationTimePolicy:
+          type: string
+          enum:
+            - require_source_observed_at
+            - allow_received_at_fallback
+        reconciliationPolicy:
+          type: string
+          enum:
+            - automatic
+            - manual
+        streamingEnabled:
+          type: boolean
     BenchmarkRunStatus:
       type: object
       additionalProperties: false
@@ -5122,6 +6376,22 @@ components:
         generatedAt:
           type: string
           format: date-time
+        nativeRequirement: &a6
+          type:
+            - string
+            - "null"
+        selectedEnvironment:
+          oneOf:
+            - $ref: "#/components/schemas/EnvironmentDetail"
+            - type: "null"
+        selectedResources:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResourceDetail"
+        nativeLayerStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/NativeCoverageLayer"
     DevelopmentRunPreset:
       type: object
       additionalProperties: false
@@ -5495,6 +6765,34 @@ components:
         generatedAt:
           type: string
           format: date-time
+        nativeRuns:
+          type: array
+          items:
+            $ref: "#/components/schemas/NativeRunSummary"
+        environmentStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnvironmentDetail"
+        resourceStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResourceDetail"
+        nativeCoverage:
+          oneOf:
+            - $ref: "#/components/schemas/NativeCoverage"
+            - type: "null"
+        telemetryLag:
+          oneOf:
+            - $ref: "#/components/schemas/TelemetryStageLags"
+            - type: "null"
+        reconciliation:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReconciliationJob"
+        nativeAttentionSummary:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttentionSubject"
     CaseResultItem:
       type: object
       additionalProperties: true
@@ -9195,6 +10493,15 @@ components:
             - string
             - "null"
           format: date-time
+        executionTarget: *a6
+        nativeRequirement: *a6
+        nativeSummary:
+          oneOf:
+            - $ref: "#/components/schemas/NativeRunSummary"
+            - type: "null"
+        streamAvailable:
+          type: boolean
+        activeReconciliationJobId: *a6
     Baseline:
       type: object
       additionalProperties: false
@@ -9595,6 +10902,16 @@ components:
             - type: array
               items: {}
             - type: "null"
+        affectedResources:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttentionSubject"
+        evidenceLinks: &a7
+          type: array
+          items: &a19
+            type: string
+        nativeLayers: *a7
+        reconciliationJobId: *a6
     Anomaly:
       type: object
       additionalProperties: false
@@ -11574,10 +12891,10 @@ components:
           maxItems: 200
           items:
             $ref: "#/components/schemas/EvaluationProfile"
-        runs: &a7
+        runs: &a9
           type: array
           maxItems: 200
-          items: &a6
+          items: &a8
             type: object
             additionalProperties: true
         baselines:
@@ -11612,6 +12929,21 @@ components:
                 - "null"
         compatibilityPolicy:
           type: string
+        environments:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnvironmentDetail"
+        resources:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResourceDetail"
+        executionTargets: *a7
+        nativeRequirementOptions: *a7
+        telemetryPolicies: *a7
+        faultProfiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/FaultProfile"
     EvaluationCatalog:
       type: object
       additionalProperties: false
@@ -11626,14 +12958,14 @@ components:
         - scoreStatuses
         - availability
       properties:
-        profile: *a6
-        metrics: *a7
-        dimensions: *a7
-        hardGates: *a7
-        fatals: *a7
-        evidenceGrades: *a7
-        levels: *a7
-        scoreStatuses: *a7
+        profile: *a8
+        metrics: *a9
+        dimensions: *a9
+        hardGates: *a9
+        fatals: *a9
+        evidenceGrades: *a9
+        levels: *a9
+        scoreStatuses: *a9
         availability:
           $ref: "#/components/schemas/ConsoleAvailability"
     CandidateOverview:
@@ -11650,7 +12982,7 @@ components:
             $ref: "#/components/schemas/Candidate"
         analyticsVisibility:
           oneOf:
-            - *a7
+            - *a9
             - type: "null"
         watermark:
           type:
@@ -11667,14 +12999,28 @@ components:
         - operations
         - trust
       properties:
-        postgres: *a6
-        clickhouse: &a8
+        postgres: *a8
+        clickhouse: &a11
           oneOf:
-            - *a6
+            - *a8
             - type: "null"
-        contracts: *a6
-        operations: *a6
-        trust: *a6
+        contracts: *a8
+        operations: *a8
+        trust: *a8
+        developmentReady:
+          type: boolean
+        nativeExecutionReady:
+          type: boolean
+        nativeFourCaseReady:
+          type: boolean
+        telemetryClosureReady:
+          type: boolean
+        environmentReady:
+          type: boolean
+        activeNativeRunCount: &a10
+          type: integer
+          minimum: 0
+        quarantinedEnvironmentCount: *a10
     SystemContracts:
       type: object
       additionalProperties: false
@@ -11684,9 +13030,9 @@ components:
         - telemetryHandoffs
         - executableRuleBodiesAvailable
       properties:
-        releases: *a7
-        frozenEvaluationProfile: *a6
-        telemetryHandoffs: *a6
+        releases: *a9
+        frozenEvaluationProfile: *a8
+        telemetryHandoffs: *a8
         executableRuleBodiesAvailable:
           type: boolean
     SystemProjections:
@@ -11697,9 +13043,9 @@ components:
         - outbox
         - sourceWatermarks
       properties:
-        checkpoints: *a7
-        outbox: *a7
-        sourceWatermarks: *a7
+        checkpoints: *a9
+        outbox: *a9
+        sourceWatermarks: *a9
     RunDashboard:
       type: object
       additionalProperties: false
@@ -11708,12 +13054,12 @@ components:
       properties:
         authority:
           $ref: "#/components/schemas/BenchmarkRun"
-        analytics: *a8
-        results: *a7
-        cases: *a7
-        releaseGate: *a8
-        tracks: *a7
-        risks: *a7
+        analytics: *a11
+        results: *a9
+        cases: *a9
+        releaseGate: *a11
+        tracks: *a9
+        risks: *a9
     OperationalSummary:
       type: object
       additionalProperties: false
@@ -11821,6 +13167,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/AnalyticsOperational"
+        nativeLayerLatency:
+          oneOf:
+            - $ref: "#/components/schemas/TelemetryStageLags"
+            - type: "null"
+        telemetryStageLag:
+          oneOf:
+            - $ref: "#/components/schemas/TelemetryStageLags"
+            - type: "null"
+        identityClosure:
+          oneOf:
+            - $ref: "#/components/schemas/IdentityClosure"
+            - type: "null"
+        environmentCleanupStatus: *a6
     ComparisonDashboard:
       type: object
       additionalProperties: false
@@ -11832,7 +13191,7 @@ components:
       properties:
         comparison:
           $ref: "#/components/schemas/Comparison"
-        waterfall: *a8
+        waterfall: *a11
         regressionGroups:
           type: object
           additionalProperties:
@@ -12677,33 +14036,33 @@ components:
         - evaluatedAt
         - projectedAt
       properties:
-        benchmarkRunId: &a9
+        benchmarkRunId: &a12
           type: string
-        caseExecutionId: *a9
-        caseId: *a9
-        caseVersion: *a9
-        repetitionCount: &a10
+        caseExecutionId: *a12
+        caseId: *a12
+        caseVersion: *a12
+        repetitionCount: &a13
           type: integer
           minimum: 0
-        evaluatedRepetitions: *a10
-        passedRepetitions: *a10
-        failedRepetitions: *a10
-        notReadyRepetitions: *a10
-        fatalRepetitions: *a10
-        hardGateFailureRepetitions: *a10
-        passStability: &a11
+        evaluatedRepetitions: *a13
+        passedRepetitions: *a13
+        failedRepetitions: *a13
+        notReadyRepetitions: *a13
+        fatalRepetitions: *a13
+        hardGateFailureRepetitions: *a13
+        passStability: &a14
           type:
             - number
             - "null"
-        qualityScoreMean: *a11
-        qualityScoreStddev: *a11
-        qualityScoreP10: *a11
-        caseVerdict: *a9
-        resultHash: *a9
-        evaluatedAt: &a12
+        qualityScoreMean: *a14
+        qualityScoreStddev: *a14
+        qualityScoreP10: *a14
+        caseVerdict: *a12
+        resultHash: *a12
+        evaluatedAt: &a15
           type: string
           format: date-time
-        projectedAt: *a12
+        projectedAt: *a15
     ProjectedCaseExecution:
       type: object
       additionalProperties: false
@@ -12718,22 +14077,22 @@ components:
         - resultStatus
         - projectedAt
       properties:
-        benchmarkRunId: *a9
-        caseExecutionId: *a9
-        caseId: *a9
-        caseVersion: *a9
-        track: *a9
-        scenarioFamily: &a13
+        benchmarkRunId: *a12
+        caseExecutionId: *a12
+        caseId: *a12
+        caseVersion: *a12
+        track: *a12
+        scenarioFamily: &a16
           type:
             - string
             - "null"
-        riskLevel: *a9
-        requirementLevel: *a9
-        plannedRepeatCount: *a10
-        executionStatus: *a9
-        errorClass: *a13
-        errorCode: *a13
-        resultStatus: *a13
+        riskLevel: *a12
+        requirementLevel: *a12
+        plannedRepeatCount: *a13
+        executionStatus: *a12
+        errorClass: *a16
+        errorCode: *a16
+        resultStatus: *a16
         startedAt:
           type:
             - string
@@ -12744,7 +14103,7 @@ components:
             - string
             - "null"
           format: date-time
-        projectedAt: *a12
+        projectedAt: *a15
     BenchmarkReleaseGate:
       type: object
       additionalProperties: false
@@ -12756,23 +14115,23 @@ components:
         - hardGateFailedCases
         - releaseGate
       properties:
-        benchmarkRunId: *a9
-        datasetId: *a9
-        datasetVersion: *a9
-        candidateSnapshotId: *a9
-        totalCases: *a10
-        validEvaluationCases: *a10
-        readyCases: *a10
-        degradedCases: *a10
-        notReadyCases: *a10
-        provenFatalCases: *a10
-        hardGateFailedCases: *a10
-        passedCases: *a10
-        overallPassRate: *a11
-        meanScore: *a11
-        p10Score: *a11
-        fatalResultCount: *a10
-        hardGateResultCount: *a10
+        benchmarkRunId: *a12
+        datasetId: *a12
+        datasetVersion: *a12
+        candidateSnapshotId: *a12
+        totalCases: *a13
+        validEvaluationCases: *a13
+        readyCases: *a13
+        degradedCases: *a13
+        notReadyCases: *a13
+        provenFatalCases: *a13
+        hardGateFailedCases: *a13
+        passedCases: *a13
+        overallPassRate: *a14
+        meanScore: *a14
+        p10Score: *a14
+        fatalResultCount: *a13
+        hardGateResultCount: *a13
         releaseGate:
           type: string
           enum:
@@ -12790,27 +14149,27 @@ components:
         - comparedAt
         - projectedAt
       properties:
-        comparisonId: *a9
-        baselineRunId: *a9
-        candidateRunId: *a9
-        datasetId: *a9
-        datasetVersion: *a9
-        contractReleaseId: *a9
-        comparableCaseCount: *a10
-        improvedCases: *a10
-        unchangedCases: *a10
-        regressedCases: *a10
-        newFatalCases: *a10
-        newGateFailureCases: *a10
-        recoveredCases: *a10
-        nonComparableCases: *a10
-        passRateDelta: *a11
-        meanScoreDelta: *a11
-        p10ScoreDelta: *a11
-        comparisonStatus: *a9
-        comparisonHash: *a9
-        comparedAt: *a12
-        projectedAt: *a12
+        comparisonId: *a12
+        baselineRunId: *a12
+        candidateRunId: *a12
+        datasetId: *a12
+        datasetVersion: *a12
+        contractReleaseId: *a12
+        comparableCaseCount: *a13
+        improvedCases: *a13
+        unchangedCases: *a13
+        regressedCases: *a13
+        newFatalCases: *a13
+        newGateFailureCases: *a13
+        recoveredCases: *a13
+        nonComparableCases: *a13
+        passRateDelta: *a14
+        meanScoreDelta: *a14
+        p10ScoreDelta: *a14
+        comparisonStatus: *a12
+        comparisonHash: *a12
+        comparedAt: *a15
+        projectedAt: *a15
     ComparisonCaseProjection:
       type: object
       additionalProperties: false
@@ -12822,9 +14181,9 @@ components:
         - reasonCodes
         - comparedAt
       properties:
-        comparisonId: *a9
-        caseId: *a9
-        caseVersion: *a9
+        comparisonId: *a12
+        caseId: *a12
+        caseVersion: *a12
         comparisonVerdict:
           type: string
           enum:
@@ -12837,13 +14196,13 @@ components:
             - NEW_CASE
             - REMOVED_CASE
             - NON_COMPARABLE
-        baselineScore: *a11
-        candidateScore: *a11
-        scoreDelta: *a11
+        baselineScore: *a14
+        candidateScore: *a14
+        scoreDelta: *a14
         reasonCodes:
           type: array
-          items: *a9
-        comparedAt: *a12
+          items: *a12
+        comparedAt: *a15
     CandidateAnalytics:
       type: object
       additionalProperties: false
@@ -12858,17 +14217,17 @@ components:
         - formalEligible
         - evidenceRefs
       properties:
-        candidateSnapshotId: *a9
-        label: *a9
-        runCount: *a10
-        terminalRunCount: *a10
+        candidateSnapshotId: *a12
+        label: *a12
+        runCount: *a13
+        terminalRunCount: *a13
         substitutionRate:
           type:
             - number
             - "null"
           minimum: 0
           maximum: 1
-        lastRunAt: *a12
+        lastRunAt: *a15
         dataClass:
           type: string
           enum:
@@ -12878,7 +14237,7 @@ components:
           type: boolean
         evidenceRefs:
           type: array
-          items: *a9
+          items: *a12
     TrackAnalytics:
       type: object
       additionalProperties: false
@@ -12893,12 +14252,12 @@ components:
         - formalEligible
         - evidenceRefs
       properties:
-        track: *a9
-        caseCount: *a10
-        repetitionCount: *a10
-        passCount: *a10
-        failCount: *a10
-        indeterminateCount: *a10
+        track: *a12
+        caseCount: *a13
+        repetitionCount: *a13
+        passCount: *a13
+        failCount: *a13
+        indeterminateCount: *a13
         dataClass:
           type: string
           enum:
@@ -12908,7 +14267,7 @@ components:
           type: boolean
         evidenceRefs:
           type: array
-          items: *a9
+          items: *a12
     ScenarioFamilyAnalytics:
       type: object
       additionalProperties: false
@@ -12922,13 +14281,13 @@ components:
         - formalEligible
         - evidenceRefs
       properties:
-        scenarioFamily: *a9
-        track: *a9
-        caseCount: *a10
-        repetitionCount: *a10
+        scenarioFamily: *a12
+        track: *a12
+        caseCount: *a13
+        repetitionCount: *a13
         outcomeCounts:
           type: object
-          additionalProperties: *a10
+          additionalProperties: *a13
         dataClass:
           type: string
           enum:
@@ -12938,7 +14297,7 @@ components:
           type: boolean
         evidenceRefs:
           type: array
-          items: *a9
+          items: *a12
     RiskAnalytics:
       type: object
       additionalProperties: false
@@ -12951,10 +14310,10 @@ components:
         - formalEligible
         - evidenceRefs
       properties:
-        riskLevel: *a9
-        caseCount: *a10
-        repetitionCount: *a10
-        failureCount: *a10
+        riskLevel: *a12
+        caseCount: *a13
+        repetitionCount: *a13
+        failureCount: *a13
         dataClass:
           type: string
           enum:
@@ -12964,7 +14323,7 @@ components:
           type: boolean
         evidenceRefs:
           type: array
-          items: *a9
+          items: *a12
     SkillAnalytics:
       type: object
       additionalProperties: false
@@ -12985,14 +14344,14 @@ components:
         - evaluatedAt
         - projectedAt
       properties:
-        benchmarkRunId: *a9
-        skillId: *a9
-        skillVersion: *a9
-        invocationCount: *a10
-        terminalCount: *a10
+        benchmarkRunId: *a12
+        skillId: *a12
+        skillVersion: *a12
+        invocationCount: *a13
+        terminalCount: *a13
         statusCounts:
           type: object
-          additionalProperties: *a10
+          additionalProperties: *a13
         durationStats:
           type: object
           additionalProperties: false
@@ -13001,15 +14360,15 @@ components:
             - meanMs
             - maximumMs
           properties:
-            minimumMs: *a11
-            meanMs: *a11
-            maximumMs: *a11
+            minimumMs: *a14
+            meanMs: *a14
+            maximumMs: *a14
         caseCoverage:
           type: array
-          items: *a9
+          items: *a12
         trackCoverage:
           type: array
-          items: *a9
+          items: *a12
         sourceCompleteness:
           type: string
           enum:
@@ -13026,9 +14385,9 @@ components:
           type: boolean
         evidenceRefs:
           type: array
-          items: *a9
-        evaluatedAt: *a12
-        projectedAt: *a12
+          items: *a12
+        evaluatedAt: *a15
+        projectedAt: *a15
     ProviderAnalytics:
       type: object
       additionalProperties: false
@@ -13051,23 +14410,23 @@ components:
         - evaluatedAt
         - projectedAt
       properties:
-        benchmarkRunId: *a9
-        providerId: *a9
-        providerInstanceId: *a9
-        operation: *a9
-        taskCount: *a10
-        executionCount: *a10
-        missionCount: *a10
+        benchmarkRunId: *a12
+        providerId: *a12
+        providerInstanceId: *a12
+        operation: *a12
+        taskCount: *a13
+        executionCount: *a13
+        missionCount: *a13
         transportTerminalCounts:
           type: object
-          additionalProperties: *a10
+          additionalProperties: *a13
         businessTerminalCounts:
           type: object
-          additionalProperties: *a10
+          additionalProperties: *a13
         physicalTerminalCounts:
           type: object
-          additionalProperties: *a10
-        reconciliationCount: *a10
+          additionalProperties: *a13
+        reconciliationCount: *a13
         closureStatus:
           type: string
           enum:
@@ -13085,9 +14444,9 @@ components:
           type: boolean
         evidenceRefs:
           type: array
-          items: *a9
-        evaluatedAt: *a12
-        projectedAt: *a12
+          items: *a12
+        evaluatedAt: *a15
+        projectedAt: *a15
     BenchmarkCaseAggregateListQueryEnvelope:
       type: object
       additionalProperties: false
@@ -13714,18 +15073,18 @@ components:
           type: string
         contractVersion:
           type: string
-        contractHash: &a14
+        contractHash: &a17
           type: string
           pattern: ^sha256:[0-9a-f]{64}$
         sourceIdentity:
           type: string
-        sourceIdentityHash: *a14
+        sourceIdentityHash: *a17
         sourceRevision:
           type: string
-        sourceWatermark: &a15
+        sourceWatermark: &a18
           type: string
           format: date-time
-        sourceContentHash: *a14
+        sourceContentHash: *a17
         sourceRelease:
           type:
             - string
@@ -13737,7 +15096,7 @@ components:
           minimum: 1
         artifactUri:
           type: string
-        artifactHash: *a14
+        artifactHash: *a17
         artifactSizeBytes:
           type: integer
           minimum: 0
@@ -13777,7 +15136,7 @@ components:
         snapshotId:
           type: string
           pattern: ^evaluation-input-[0-9a-f]{64}$
-        contentHash: *a14
+        contentHash: *a17
         schemaVersion:
           const: sdar-benchmark.evaluation-input/v2
         episodeId:
@@ -13789,16 +15148,16 @@ components:
         requirementSetVersion:
           type: integer
           minimum: 1
-        requirementSetHash: *a14
+        requirementSetHash: *a17
         bundleSnapshotId:
           type: string
-        bundleHash: *a14
+        bundleHash: *a17
         manifestId:
           type: string
         manifestRevision:
           type: integer
           minimum: 1
-        sourceSnapshotHash: *a14
+        sourceSnapshotHash: *a17
         canonicalReadiness:
           type: string
           enum:
@@ -13818,7 +15177,7 @@ components:
             type: string
         formalInputEligible:
           type: boolean
-        canonicalWatermark: *a15
+        canonicalWatermark: *a18
         domainWatermark:
           type:
             - string
@@ -13829,17 +15188,17 @@ components:
             - string
             - "null"
           format: date-time
-        effectiveWatermark: *a15
+        effectiveWatermark: *a18
         artifactUri:
           type: string
-        artifactHash: *a14
+        artifactHash: *a17
         artifactSizeBytes:
           type: integer
           minimum: 1
         artifactMediaType:
           const: application/json
-        snapshotCreatedAt: *a15
-        recordedAt: *a15
+        snapshotCreatedAt: *a18
+        recordedAt: *a18
         sources:
           type: array
           maxItems: 3
@@ -13902,7 +15261,7 @@ components:
             - benchmark
         inputSnapshotId:
           type: string
-        inputSnapshotContentHash: *a14
+        inputSnapshotContentHash: *a17
         overallReadiness:
           type: string
           enum:
@@ -13912,7 +15271,7 @@ components:
             - blocked
         formalInputEligible:
           type: boolean
-        effectiveWatermark: *a15
+        effectiveWatermark: *a18
         sources:
           type: array
           maxItems: 3
@@ -14519,6 +15878,16 @@ components:
         createdAt:
           type: string
           format: date-time
+        nativeOnly:
+          type: boolean
+        liveNativeAvailable:
+          type: boolean
+        nativePolicies:
+          oneOf:
+            - $ref: "#/components/schemas/LiveNativePolicySelection"
+            - type: "null"
+        compatibleEnvironmentIds: *a7
+        compatibleResourceIds: *a7
     BenchmarkRunPresetListEnvelope:
       type: object
       unevaluatedProperties: false
@@ -14681,6 +16050,25 @@ components:
             - string
             - "null"
           format: date-time
+        nativeCoverage:
+          oneOf:
+            - $ref: "#/components/schemas/NativeCoverage"
+            - type: "null"
+        identityClosureStatus: *a6
+        telemetryStatus: *a6
+        environment:
+          oneOf:
+            - $ref: "#/components/schemas/EnvironmentDetail"
+            - type: "null"
+        resources:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResourceDetail"
+        reconciliation:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReconciliationJob"
+        attentionCount: *a10
     DiagnosticSummaryEnvelope:
       type: object
       unevaluatedProperties: false
@@ -14779,6 +16167,13 @@ components:
           type:
             - string
             - "null"
+        authority: *a6
+        sourceRef: *a6
+        dataClass: *a6
+        identityRefs:
+          type: array
+          items:
+            $ref: "#/components/schemas/LiveNativeIdentityReference"
     RunTimelineEnvelope:
       type: object
       unevaluatedProperties: false
@@ -15031,6 +16426,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DataCompletenessSection"
+        component:
+          $ref: "#/components/schemas/DataCompletenessSection"
+        environment:
+          $ref: "#/components/schemas/DataCompletenessSection"
+        resource:
+          $ref: "#/components/schemas/DataCompletenessSection"
+        nativeCoverage:
+          $ref: "#/components/schemas/DataCompletenessSection"
+        identityClosure:
+          $ref: "#/components/schemas/DataCompletenessSection"
+        physicalTruth:
+          $ref: "#/components/schemas/DataCompletenessSection"
+        telemetryWatermark:
+          $ref: "#/components/schemas/DataCompletenessSection"
     DataCompletenessEnvelope:
       type: object
       unevaluatedProperties: false
@@ -15082,3 +16491,1916 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/DiagnosticOutcomeDistributionRow"
+    LiveNativeResourceMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - generatedAt
+        - authority
+        - dataClass
+        - availability
+        - formalEligible
+        - revision
+        - watermark
+        - projectionLagMs
+        - sourceRefs
+        - reasonCodes
+        - unavailableFields
+        - warnings
+      properties:
+        schemaVersion: *a19
+        generatedAt: &a22
+          type: string
+          format: date-time
+        authority:
+          type: string
+          enum:
+            - postgresql
+            - artifact_store
+            - clickhouse
+            - runtime
+            - smpp
+            - provider
+            - simulator
+            - telemetry
+            - composite
+        dataClass:
+          type: string
+          enum:
+            - formal
+            - development_native
+            - development_native_test_fault
+            - development_substituted
+            - development_fixture
+            - unavailable
+        availability:
+          type: string
+          enum:
+            - available
+            - partial
+            - unavailable
+        formalEligible:
+          type: boolean
+        revision: &a20
+          type:
+            - integer
+            - "null"
+          minimum: 0
+        watermark: *a6
+        projectionLagMs: *a20
+        sourceRefs: *a7
+        reasonCodes: *a7
+        unavailableFields: *a7
+        warnings: *a7
+    SystemComponent:
+      type: object
+      additionalProperties: false
+      required:
+        - componentId
+        - componentType
+        - displayName
+        - health
+        - readiness
+        - lastSeenAt
+        - contracts
+        - capabilities
+      properties:
+        componentId: *a19
+        componentType: *a19
+        displayName: *a19
+        repository: *a6
+        branch: *a6
+        commit: *a6
+        version: *a6
+        imageDigest: *a6
+        endpoint: *a6
+        health:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unavailable
+            - unknown
+        readiness:
+          type: string
+          enum:
+            - ready
+            - partial
+            - not_ready
+            - unknown
+        lastSeenAt: &a21
+          type:
+            - string
+            - "null"
+          format: date-time
+        latencyMs: *a20
+        contracts: *a7
+        capabilities: *a7
+        reasonCodes: *a7
+    SystemTopologyEdge:
+      type: object
+      additionalProperties: false
+      required:
+        - edgeId
+        - from
+        - to
+        - protocol
+        - status
+        - lastSuccessAt
+        - reasonCodes
+      properties:
+        edgeId: *a19
+        from: *a19
+        to: *a19
+        protocol: *a19
+        status:
+          type: string
+          enum:
+            - ready
+            - degraded
+            - unavailable
+            - drift
+            - unknown
+        lastSuccessAt: *a21
+        watermark: *a6
+        reasonCodes: *a7
+    SystemTopology:
+      type: object
+      additionalProperties: false
+      required:
+        - topologyRevision
+        - generatedAt
+        - nodes
+        - edges
+        - overallStatus
+        - nativeExecutionReady
+        - reasonCodes
+      properties:
+        topologyRevision:
+          type: integer
+          minimum: 1
+        generatedAt: *a22
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/SystemComponent"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/SystemTopologyEdge"
+        overallStatus:
+          type: string
+          enum:
+            - ready
+            - degraded
+            - unavailable
+            - contract_drift
+        nativeExecutionReady:
+          type: boolean
+        reasonCodes: *a7
+      example:
+        topologyRevision: 1
+        generatedAt: 2026-09-03T00:00:00Z
+        nodes: []
+        edges: []
+        overallStatus: degraded
+        nativeExecutionReady: false
+        reasonCodes:
+          - SIMULATOR_REPOSITORY_UNRESOLVED
+    CompatibilityRelation:
+      type: object
+      additionalProperties: false
+      required:
+        - producer
+        - consumer
+        - contract
+        - expectedVersion
+        - observedVersion
+        - status
+        - reasonCodes
+      properties:
+        producer: *a19
+        consumer: *a19
+        contract: *a19
+        expectedVersion: *a6
+        observedVersion: *a6
+        expectedHash: *a6
+        observedHash: *a6
+        status:
+          type: string
+          enum:
+            - exact
+            - backward_compatible
+            - forward_compatible
+            - drift
+            - unresolved
+            - not_required
+        reasonCodes: *a7
+    CompatibilityMatrix:
+      type: object
+      additionalProperties: false
+      required:
+        - generatedAt
+        - relations
+      properties:
+        generatedAt: *a22
+        relations:
+          type: array
+          items:
+            $ref: "#/components/schemas/CompatibilityRelation"
+    EnvironmentDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - environmentId
+        - environmentVersion
+        - kind
+        - leaseStatus
+        - resourceCount
+        - nativeCapabilities
+        - supportedFaultProfiles
+      properties:
+        environmentId: *a19
+        environmentVersion: *a19
+        kind:
+          type: string
+          enum:
+            - simulator
+            - live_test_range
+            - fixture
+            - replay
+        repositoryRef: *a6
+        buildRef: *a6
+        imageDigest: *a6
+        controlEndpointComponentId: *a6
+        refereeEndpointComponentId: *a6
+        telemetrySourceIds: *a7
+        resourceCount: *a10
+        activeMissionCount: *a10
+        uncertainTaskCount: *a10
+        leaseStatus:
+          type: string
+          enum:
+            - available
+            - leased
+            - quarantined
+            - cleanup_required
+            - unavailable
+        nativeCapabilities: *a7
+        supportedFaultProfiles: *a7
+        lastProbeAt: *a21
+        lastCleanupAt: *a21
+        reasonCodes: *a7
+    FaultProfile:
+      type: object
+      additionalProperties: false
+      required:
+        - faultProfileId
+        - owner
+        - dataClass
+        - available
+        - reasonCodes
+      properties:
+        faultProfileId: *a19
+        owner:
+          type: string
+          enum:
+            - simulator
+            - smpp
+            - provider
+            - benchmark_fixture
+        dataClass:
+          type: string
+          enum:
+            - development_native
+            - development_native_test_fault
+            - development_substituted
+            - development_fixture
+            - unavailable
+        available:
+          type: boolean
+        contractRef: *a6
+        reasonCodes: *a7
+    EnvironmentLease:
+      type: object
+      additionalProperties: false
+      required:
+        - leaseId
+        - environmentId
+        - runId
+        - state
+        - createdAt
+        - expiresAt
+        - fenceToken
+        - reasonCodes
+      properties:
+        leaseId: *a19
+        environmentId: *a19
+        runId: *a19
+        state:
+          type: string
+          enum:
+            - active
+            - released
+            - expired
+            - quarantined
+            - cleanup_required
+        createdAt: *a22
+        expiresAt: *a21
+        fenceToken: *a19
+        reasonCodes: *a7
+    ResourceObservationTimes:
+      type: object
+      additionalProperties: false
+      required:
+        - sourceObservedAt
+        - receivedAt
+        - ingestedAt
+        - projectedAt
+      properties:
+        sourceObservedAt: *a21
+        receivedAt: *a21
+        ingestedAt: *a21
+        projectedAt: *a21
+    ResourceDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - resourceId
+        - resourceType
+        - environmentId
+        - availability
+        - capabilities
+        - observationTimes
+      properties:
+        resourceId: *a19
+        resourceType: *a19
+        environmentId: *a19
+        providerId: *a6
+        providerInstanceId: *a6
+        providerOperations: *a7
+        availability:
+          type: string
+          enum:
+            - available
+            - busy
+            - offline
+            - stale
+            - unknown
+        position:
+          type:
+            - object
+            - "null"
+        speedMps: &a23
+          type:
+            - number
+            - "null"
+        positionAccuracyM: *a23
+        observationTimes:
+          $ref: "#/components/schemas/ResourceObservationTimes"
+        activeMissionId: *a6
+        activeMcpTaskId: *a6
+        activeBenchmarkRunId: *a6
+        capabilities: *a7
+        reasonCodes: *a7
+    ResourceCapability:
+      type: object
+      additionalProperties: false
+      required:
+        - capabilityId
+        - operationName
+        - availability
+        - native
+        - reasonCodes
+      properties:
+        capabilityId: *a19
+        operationName: *a6
+        availability:
+          type: string
+          enum:
+            - available
+            - disabled
+            - unknown
+            - unavailable
+        native:
+          type: boolean
+        contractRef: *a6
+        sourceRef: *a6
+        reasonCodes: *a7
+    ResourceMission:
+      type: object
+      additionalProperties: false
+      required:
+        - missionId
+        - resourceId
+        - state
+        - current
+        - sourceObservedAt
+        - sourceRef
+        - reasonCodes
+      properties:
+        missionId: *a19
+        resourceId: *a19
+        state: *a19
+        current:
+          type: boolean
+        externalExecutionId: *a6
+        benchmarkRunId: *a6
+        sourceObservedAt: *a21
+        sourceRef: *a19
+        reasonCodes: *a7
+    ResourceBenchmarkHistory:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - resourceId
+        - caseCount
+        - terminalCount
+        - startedAt
+        - terminalAt
+        - nativeCoverage
+        - reasonCodes
+      properties:
+        runId: *a19
+        resourceId: *a19
+        caseCount: *a10
+        terminalCount: *a10
+        startedAt: *a21
+        terminalAt: *a21
+        nativeCoverage:
+          type: string
+          enum:
+            - native
+            - mixed
+            - substituted
+            - unavailable
+        reasonCodes: *a7
+    RunExecutionPlan:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - candidateSnapshotRef
+        - datasetVersionRef
+        - caseOrder
+        - repeatCount
+        - executionTarget
+        - nativeRequirement
+        - telemetryPolicy
+        - cleanupPolicy
+        - contentHash
+      properties:
+        runId: *a19
+        candidateSnapshotRef: *a19
+        datasetVersionRef: *a19
+        caseOrder: *a7
+        repeatCount:
+          type: integer
+          minimum: 1
+        environmentRef: *a6
+        resourceSelectors:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - resourceId
+            properties:
+              resourceId: *a19
+        executionTarget:
+          type: string
+          enum:
+            - simulated
+            - live_native
+        nativeRequirement:
+          type: string
+          enum:
+            - prefer_native
+            - require_native
+        telemetryPolicy:
+          type: string
+          enum:
+            - require_full
+            - allow_partial
+            - development_relay
+        observationTimePolicy:
+          type: string
+          enum:
+            - require_source_observed_at
+            - allow_received_at_fallback
+        reconciliationPolicy:
+          type: string
+          enum:
+            - automatic
+            - manual
+        streamingEnabled:
+          type: boolean
+        faultProfiles: *a7
+        cleanupPolicy: *a19
+        contentHash:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+    NativeCoverageLayer:
+      type: object
+      additionalProperties: false
+      required:
+        - layer
+        - status
+        - sourceRef
+        - reasonCodes
+      properties:
+        layer: *a19
+        status:
+          type: string
+          enum:
+            - native
+            - native_test_fault
+            - proxy
+            - deterministic_substitute
+            - unavailable
+            - not_required
+        sourceRef: *a6
+        reasonCodes: *a7
+    NativeCoverage:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - overall
+        - layers
+        - nativeLayerCount
+        - substitutedLayerCount
+        - unavailableLayerCount
+        - formalEligible
+      properties:
+        runId: *a19
+        overall:
+          type: string
+          enum:
+            - native
+            - mixed
+            - substituted
+            - unavailable
+        nativeLayerCount: *a10
+        substitutedLayerCount: *a10
+        unavailableLayerCount: *a10
+        layers:
+          type: array
+          items:
+            $ref: "#/components/schemas/NativeCoverageLayer"
+        formalEligible:
+          const: false
+      example:
+        runId: run_live_native_example
+        overall: native
+        nativeLayerCount: 9
+        substitutedLayerCount: 0
+        unavailableLayerCount: 0
+        layers:
+          - layer: candidate
+            status: native
+            sourceRef: runtime:task/example
+            reasonCodes: []
+          - layer: mcp_tasks
+            status: native_test_fault
+            sourceRef: smpp:fault/example
+            reasonCodes: []
+        formalEligible: false
+    IdentityNode:
+      type: object
+      additionalProperties: false
+      required:
+        - nodeId
+        - kind
+        - identity
+        - authority
+      properties:
+        nodeId: *a19
+        kind: *a19
+        identity: *a19
+        authority: *a19
+        sourceRef: *a6
+    IdentityEdge:
+      type: object
+      additionalProperties: false
+      required:
+        - edgeId
+        - from
+        - to
+        - kind
+        - status
+        - authority
+        - matchCount
+        - reasonCodes
+      properties:
+        edgeId: *a19
+        from: *a19
+        to: *a19
+        kind: *a19
+        status:
+          type: string
+          enum:
+            - exact
+            - unresolved
+            - conflict
+            - not_required
+        authority: *a19
+        matchCount: *a10
+        sourceRefs: *a7
+        reasonCodes: *a7
+    IdentityClosure:
+      type: object
+      additionalProperties: false
+      required:
+        - scope
+        - nodes
+        - edges
+        - overallStatus
+        - reasonCodes
+      properties:
+        scope:
+          type: string
+          enum:
+            - run
+            - repetition
+        runId: *a19
+        repetitionId: *a6
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentityNode"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentityEdge"
+        overallStatus:
+          type: string
+          enum:
+            - exact
+            - partial
+            - unresolved
+            - conflict
+        reasonCodes: *a7
+    TelemetryStatusSource:
+      type: object
+      additionalProperties: false
+      required:
+        - sourceId
+        - sourceType
+        - status
+        - factCount
+        - relationCount
+        - watermark
+        - lags
+        - reasonCodes
+      properties:
+        sourceId: *a19
+        sourceType: *a19
+        status:
+          type: string
+          enum:
+            - ready
+            - partial
+            - unavailable
+            - drift
+            - conflict
+        factCount: *a10
+        relationCount: *a10
+        watermark: *a6
+        lags:
+          $ref: "#/components/schemas/TelemetryStageLags"
+        reasonCodes: *a7
+    TelemetryStageLags:
+      type: object
+      additionalProperties: false
+      required: []
+      properties:
+        observedToReceivedMs: *a20
+        receivedToIngestedMs: *a20
+        ingestedToProjectedMs: *a20
+        projectedToEvaluationMs: *a20
+        projectionLagMs: *a20
+    TelemetryStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - scope
+        - sources
+        - overallStatus
+        - reasonCodes
+      properties:
+        scope:
+          type: string
+          enum:
+            - run
+            - repetition
+            - source
+        runId: *a6
+        repetitionId: *a6
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/TelemetryStatusSource"
+        overallStatus:
+          type: string
+          enum:
+            - ready
+            - partial
+            - unavailable
+            - drift
+            - conflict
+        reasonCodes: *a7
+    RunEnvironment:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - environment
+        - lease
+        - cleanupStatus
+        - reasonCodes
+      properties:
+        runId: *a19
+        environment:
+          $ref: "#/components/schemas/EnvironmentDetail"
+        lease:
+          oneOf:
+            - $ref: "#/components/schemas/EnvironmentLease"
+            - type: "null"
+        cleanupStatus:
+          type: string
+          enum:
+            - not_started
+            - running
+            - complete
+            - partial
+            - failed
+            - not_required
+        reasonCodes: *a7
+    ResourceBinding:
+      type: object
+      additionalProperties: false
+      required:
+        - bindingId
+        - runId
+        - resourceId
+        - revision
+        - status
+        - reasonCodes
+      properties:
+        bindingId: *a19
+        runId: *a19
+        resourceId: *a19
+        revision: *a10
+        status:
+          type: string
+          enum:
+            - exact
+            - unresolved
+            - conflict
+            - released
+        sourceRef: *a6
+        reasonCodes: *a7
+    RunStreamEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - eventId
+        - eventType
+        - runId
+        - repetitionId
+        - authorityRevision
+        - occurredAt
+        - receivedAt
+        - source
+        - dataClass
+        - payload
+        - payloadRef
+      properties:
+        eventId: *a19
+        eventType: *a19
+        runId: *a19
+        repetitionId: *a6
+        authorityRevision: *a20
+        occurredAt: *a22
+        receivedAt: *a22
+        source: *a19
+        dataClass:
+          type: string
+          enum:
+            - development_native
+            - development_native_test_fault
+            - development_substituted
+            - development_fixture
+            - unavailable
+        payload:
+          type:
+            - object
+            - "null"
+        payloadRef: *a6
+    ReconcileRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - scopes
+        - reason
+        - idempotencyKey
+      properties:
+        schemaVersion:
+          const: sdar-benchmark.reconcile-request/v1
+        scopes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - candidate
+              - mcp_task
+              - provider_closure
+              - telemetry
+              - evaluation_input
+              - projection
+              - environment_cleanup
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        idempotencyKey:
+          type: string
+          minLength: 1
+          maxLength: 200
+      example:
+        schemaVersion: sdar-benchmark.reconcile-request/v1
+        scopes:
+          - candidate
+          - mcp_task
+          - provider_closure
+          - telemetry
+          - evaluation_input
+          - projection
+        reason: operator requested live-chain diagnosis
+        idempotencyKey: reconcile-example-001
+    ReconciliationJob:
+      type: object
+      additionalProperties: false
+      required:
+        - jobId
+        - runId
+        - type
+        - state
+        - scopes
+        - sideEffectPolicy
+        - createdAt
+        - updatedAt
+        - reasonCodes
+      properties:
+        jobId: *a19
+        runId: *a19
+        repetitionId: *a6
+        type:
+          type: string
+          enum:
+            - candidate_reconcile
+            - mcp_task_reconcile
+            - provider_closure_rebuild
+            - telemetry_recapture
+            - evaluation_input_rebuild
+            - projection_replay
+            - environment_cleanup
+            - composite
+        state:
+          type: string
+          enum:
+            - queued
+            - running
+            - waiting_source
+            - completed
+            - completed_partial
+            - failed
+            - cancelled
+        scopes: *a7
+        sideEffectPolicy:
+          const: no_new_physical_side_effect
+        createdAt: *a22
+        updatedAt: *a22
+        completedAt: *a21
+        reasonCodes: *a7
+        result:
+          type:
+            - object
+            - "null"
+    ReconciliationJobEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - eventId
+        - jobId
+        - revision
+        - eventType
+        - occurredAt
+        - reasonCodes
+      properties:
+        eventId: *a19
+        jobId: *a19
+        revision: *a10
+        eventType: *a19
+        occurredAt: *a22
+        reasonCodes: *a7
+    TrajectorySample:
+      type: object
+      additionalProperties: false
+      required:
+        - sequence
+        - position
+        - speedMps
+        - missionState
+        - sourceObservedAt
+        - receivedAt
+        - accuracyM
+      properties:
+        sequence: *a10
+        position:
+          type: object
+        speedMps: *a23
+        missionState: *a6
+        sourceObservedAt: *a21
+        receivedAt: *a21
+        accuracyM: *a23
+    TrajectoryGap:
+      type: object
+      additionalProperties: false
+      required:
+        - afterSequence
+        - beforeSequence
+        - reasonCode
+      properties:
+        afterSequence: *a20
+        beforeSequence: *a20
+        reasonCode: *a19
+    Trajectory:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - repetitionId
+        - coordinateFrame
+        - start
+        - target
+        - final
+        - toleranceM
+        - samples
+        - gaps
+        - downsampled
+        - fullArtifactRef
+      properties:
+        runId: *a19
+        repetitionId: *a19
+        coordinateFrame:
+          type: string
+          enum:
+            - WGS84
+            - LOCAL_ENU
+        start:
+          type:
+            - object
+            - "null"
+        target:
+          type:
+            - object
+            - "null"
+        final:
+          type:
+            - object
+            - "null"
+        toleranceM: *a23
+        samples:
+          type: array
+          maxItems: 2000
+          items:
+            $ref: "#/components/schemas/TrajectorySample"
+        gaps:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrajectoryGap"
+        downsampled:
+          type: boolean
+        fullArtifactRef: *a6
+    ProviderClosureReadiness:
+      type: object
+      additionalProperties: false
+      required:
+        - expectedFactCount
+        - selectedFactCount
+        - foreignFactCount
+        - unresolvedBindingCount
+        - truncated
+        - hasMore
+        - hintsUsedForAuthority
+      properties:
+        expectedFactCount: *a10
+        selectedFactCount: *a10
+        foreignFactCount: *a10
+        unresolvedBindingCount: *a10
+        truncated:
+          type: boolean
+        hasMore:
+          type: boolean
+        hintsUsedForAuthority:
+          type: boolean
+    ProviderClosureRow:
+      type: object
+      additionalProperties: false
+      required:
+        - identity
+        - sourceRef
+      properties:
+        identity: *a19
+        sourceRef: *a19
+    ProviderClosure:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - repetitionId
+        - status
+        - mcpTask
+        - providerExecutions
+        - deviceMissions
+        - facts
+        - relations
+        - readiness
+      properties:
+        runId: *a19
+        repetitionId: *a19
+        status:
+          type: string
+          enum:
+            - ready
+            - partial
+            - unresolved
+            - conflict
+            - truncated
+            - source_moved
+        mcpTask:
+          oneOf:
+            - $ref: "#/components/schemas/ProviderClosureRow"
+            - type: "null"
+        providerExecutions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProviderClosureRow"
+        deviceMissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProviderClosureRow"
+        facts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProviderClosureRow"
+        relations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProviderClosureRow"
+        readiness:
+          $ref: "#/components/schemas/ProviderClosureReadiness"
+    PhysicalObservation:
+      type: object
+      additionalProperties: false
+      required:
+        - observationId
+        - resourceId
+        - missionId
+        - kind
+        - sourceObservedAt
+        - receivedAt
+        - sourceRef
+        - payload
+      properties:
+        observationId: *a19
+        resourceId: *a19
+        missionId: *a6
+        kind:
+          type: string
+          enum:
+            - position
+            - speed
+            - mission_state
+            - ground_truth_pose
+        sourceObservedAt: *a21
+        receivedAt: *a22
+        ingestedAt: *a21
+        projectedAt: *a21
+        sourceRef: *a19
+        accuracyM: *a23
+        sequence: *a20
+        payload:
+          type: object
+    RawTraceLink:
+      type: object
+      additionalProperties: false
+      required:
+        - sourceId
+        - traceId
+        - queryParameters
+        - availableFrom
+        - availableUntil
+      properties:
+        sourceId: *a19
+        traceId: *a6
+        queryParameters:
+          type: object
+        availableFrom: *a21
+        availableUntil: *a21
+    RawTraceLinks:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - repetitionId
+        - links
+      properties:
+        runId: *a19
+        repetitionId: *a19
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/RawTraceLink"
+    TelemetrySourceTimestamps:
+      type: object
+      additionalProperties: false
+      required:
+        - lastObservedAt
+        - lastReceivedAt
+        - lastIngestedAt
+        - lastProjectedAt
+      properties:
+        lastObservedAt: *a21
+        lastReceivedAt: *a21
+        lastIngestedAt: *a21
+        lastProjectedAt: *a21
+    TelemetrySourceCounts:
+      type: object
+      additionalProperties: false
+      required:
+        - factCount
+        - relationCount
+        - conflictCount
+        - lateCount
+        - unresolvedCount
+      properties:
+        factCount: *a10
+        relationCount: *a10
+        conflictCount: *a10
+        lateCount: *a10
+        unresolvedCount: *a10
+    TelemetrySource:
+      type: object
+      additionalProperties: false
+      required:
+        - sourceId
+        - sourceType
+        - componentId
+        - contractVersion
+        - schemaHash
+        - sourceIdentity
+        - timestamps
+        - lags
+        - counts
+        - status
+      properties:
+        sourceId: *a19
+        sourceType: *a19
+        componentId: *a19
+        environmentId: *a6
+        contractVersion: *a6
+        schemaHash: *a6
+        sourceIdentity: *a6
+        timestamps:
+          $ref: "#/components/schemas/TelemetrySourceTimestamps"
+        lags:
+          $ref: "#/components/schemas/TelemetryStageLags"
+        counts:
+          $ref: "#/components/schemas/TelemetrySourceCounts"
+        status:
+          type: string
+          enum:
+            - ready
+            - partial
+            - unavailable
+            - drift
+        reasonCodes: *a7
+      example:
+        sourceId: sdar-telemetry-main
+        sourceType: canonical_and_provider_closure
+        componentId: sdar-telemetry
+        environmentId: ugv-simulator-dev
+        contractVersion: provider-closure/v2
+        schemaHash: sha256:example
+        sourceIdentity: environment-scoped
+        timestamps:
+          lastObservedAt: 2026-09-03T00:00:00Z
+          lastReceivedAt: 2026-09-03T00:00:00Z
+          lastIngestedAt: 2026-09-03T00:00:01Z
+          lastProjectedAt: 2026-09-03T00:00:02Z
+        lags:
+          projectionLagMs: 1000
+        counts:
+          factCount: 10
+          relationCount: 8
+          conflictCount: 0
+          lateCount: 0
+          unresolvedCount: 0
+        status: ready
+        reasonCodes: []
+    TelemetryWatermarks:
+      type: object
+      additionalProperties: false
+      required:
+        - sourceId
+        - observed
+        - received
+        - ingested
+        - projected
+        - lags
+        - reasonCodes
+      properties:
+        sourceId: *a19
+        observed: *a21
+        received: *a21
+        ingested: *a21
+        projected: *a21
+        lags:
+          $ref: "#/components/schemas/TelemetryStageLags"
+        reasonCodes: *a7
+    TelemetryTypeMismatch:
+      type: object
+      additionalProperties: false
+      required:
+        - field
+        - expectedType
+        - observedType
+      properties:
+        field: *a19
+        expectedType: *a19
+        observedType: *a19
+    TelemetryDrift:
+      type: object
+      additionalProperties: false
+      required:
+        - sourceId
+        - expectedContract
+        - observedContract
+        - compatibilityStatus
+        - missingFields
+        - extraFields
+        - typeMismatches
+        - affectedRuns
+      properties:
+        sourceId: *a19
+        expectedContract:
+          type:
+            - object
+            - "null"
+        observedContract:
+          type:
+            - object
+            - "null"
+        compatibilityStatus:
+          type: string
+          enum:
+            - exact
+            - compatible
+            - drift
+            - unresolved
+        missingFields: *a7
+        extraFields: *a7
+        typeMismatches:
+          type: array
+          items:
+            $ref: "#/components/schemas/TelemetryTypeMismatch"
+        firstDetectedAt: *a21
+        lastDetectedAt: *a21
+        affectedRuns: *a7
+    AttentionSubject:
+      type: object
+      additionalProperties: false
+      required:
+        - kind
+        - id
+      properties:
+        kind: *a19
+        id: *a19
+    AttentionEvidence:
+      type: object
+      additionalProperties: false
+      required:
+        - attentionId
+        - subjects
+        - evidenceRefs
+        - timelineRefs
+        - reasonCodes
+      properties:
+        attentionId: *a19
+        subjects:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttentionSubject"
+        evidenceRefs: *a7
+        timelineRefs: *a7
+        reasonCodes: *a7
+    NativeAnalyticsRow:
+      type: object
+      additionalProperties: false
+      required:
+        - rowId
+        - status
+        - value
+        - sourceRefs
+        - reasonCodes
+      properties:
+        rowId: *a19
+        status: *a19
+        value: *a23
+        sourceRefs: *a7
+        reasonCodes: *a7
+    NativeAnalyticsEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - module
+        - rows
+        - availability
+        - dataClass
+        - watermark
+        - generatedAt
+      properties:
+        module:
+          type: string
+          enum:
+            - native-coverage
+            - telemetry-lag
+            - reconciliation
+            - identity-closure
+            - environment-reliability
+            - physical-verification
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/NativeAnalyticsRow"
+        availability:
+          type: string
+          enum:
+            - available
+            - partial
+            - unavailable
+        dataClass:
+          type: string
+          enum:
+            - development_native
+            - development_native_test_fault
+            - development_substituted
+            - development_fixture
+            - unavailable
+        watermark: *a6
+        reasonCodes: *a7
+        generatedAt: *a22
+    SystemTopologyResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/SystemTopology"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    SystemComponentListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SystemComponent"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    SystemComponentResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/SystemComponent"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    CompatibilityMatrixResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/CompatibilityMatrix"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    EnvironmentDetailListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnvironmentDetail"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    EnvironmentDetailResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/EnvironmentDetail"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    ResourceDetailListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResourceDetail"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    FaultProfileListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FaultProfile"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    EnvironmentLeaseListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnvironmentLease"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    ResourceDetailResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/ResourceDetail"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    ResourceCapabilityListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResourceCapability"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    PhysicalObservationListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PhysicalObservation"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    ResourceMissionListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResourceMission"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    ResourceBenchmarkHistoryListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResourceBenchmarkHistory"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    RunExecutionPlanResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/RunExecutionPlan"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    NativeCoverageResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/NativeCoverage"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    IdentityClosureResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/IdentityClosure"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    TelemetryStatusResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/TelemetryStatus"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    RunEnvironmentResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/RunEnvironment"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    ResourceBindingListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResourceBinding"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    RunStreamEventResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/RunStreamEvent"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    RunStreamEventListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RunStreamEvent"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    ReconciliationJobResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/ReconciliationJob"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    ReconciliationJobListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReconciliationJob"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    ReconciliationJobEventListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReconciliationJobEvent"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    TrajectoryResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/Trajectory"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    ProviderClosureResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/ProviderClosure"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    RawTraceLinksResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/RawTraceLinks"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    TelemetrySourceListResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TelemetrySource"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    TelemetrySourceResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/TelemetrySource"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    TelemetryWatermarksResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/TelemetryWatermarks"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    TelemetryDriftResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/TelemetryDrift"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    AttentionEvidenceResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/AttentionEvidence"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    NativeAnalyticsResourceEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/NativeAnalyticsEnvelope"
+        meta:
+          $ref: "#/components/schemas/LiveNativeResourceMetadata"
+    LiveNativePolicySelection:
+      type: object
+      additionalProperties: false
+      required:
+        - executionTarget
+        - nativeRequirement
+        - telemetryPolicy
+        - observationTimePolicy
+        - reconciliationPolicy
+        - streamingEnabled
+      properties:
+        executionTarget:
+          type: string
+          enum:
+            - simulated
+            - live_native
+        nativeRequirement:
+          type: string
+          enum:
+            - prefer_native
+            - require_native
+        telemetryPolicy:
+          type: string
+          enum:
+            - require_full
+            - allow_partial
+            - development_relay
+        observationTimePolicy:
+          type: string
+          enum:
+            - require_source_observed_at
+            - allow_received_at_fallback
+        reconciliationPolicy:
+          type: string
+          enum:
+            - automatic
+            - manual
+        streamingEnabled:
+          type: boolean
+    NativeRunSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - overall
+        - nativeLayerCount
+        - substitutionCount
+        - unavailableLayerCount
+        - identityClosureStatus
+        - telemetryStatus
+        - formalEligible
+        - reasonCodes
+      properties:
+        overall:
+          type: string
+          enum:
+            - native
+            - mixed
+            - substituted
+            - unavailable
+        nativeLayerCount: *a10
+        substitutionCount: *a10
+        unavailableLayerCount: *a10
+        identityClosureStatus:
+          type: string
+          enum:
+            - exact
+            - partial
+            - unresolved
+            - conflict
+        telemetryStatus:
+          type: string
+          enum:
+            - ready
+            - partial
+            - unavailable
+            - drift
+            - conflict
+        formalEligible:
+          const: false
+        reasonCodes: *a7
+    LiveNativeIdentityReference:
+      type: object
+      additionalProperties: false
+      required:
+        - kind
+        - identity
+        - authority
+        - sourceRef
+      properties:
+        kind: *a19
+        identity: *a19
+        authority: *a19
+        sourceRef: *a6
+    LiveNativeExecutionPolicy:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - executionTarget
+        - nativeRequirement
+        - telemetryPolicy
+        - observationTimePolicy
+        - reconciliationPolicy
+        - streamingEnabled
+        - formalEligible
+      properties:
+        schemaVersion:
+          const: sdar-benchmark.live-native-execution-policy/v1
+        executionTarget:
+          const: live_native
+        nativeRequirement:
+          const: require_native
+        telemetryPolicy:
+          const: require_full
+        observationTimePolicy:
+          const: require_source_observed_at
+        reconciliationPolicy:
+          type: string
+          enum:
+            - automatic
+            - manual
+        streamingEnabled:
+          type: boolean
+        formalEligible:
+          const: false
+      example:
+        schemaVersion: sdar-benchmark.live-native-execution-policy/v1
+        executionTarget: live_native
+        nativeRequirement: require_native
+        telemetryPolicy: require_full
+        observationTimePolicy: require_source_observed_at
+        reconciliationPolicy: automatic
+        streamingEnabled: true
+        formalEligible: false

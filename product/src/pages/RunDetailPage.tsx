@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Descriptions, Popconfirm, Progress, Select, Space, Table, Tag } from "antd";
-import { ArrowRightOutlined, StopOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined, LinkOutlined, StopOutlined, SyncOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import { consoleApi } from "../api/consoleApi";
 import { capabilityMeta } from "../api/capability-map";
@@ -12,6 +12,9 @@ import { useAnalysisContext } from "../hooks/useAnalysisContext";
 import type { DiagnosticArtifact, DiagnosticRepetition, RunEvent, RunTimelineEvent } from "../api/generated/model";
 import type { CaseResult } from "../types";
 import { displayValue, failureTypeName, riskName, statusName, trackName, verdictName } from "../utils/format";
+import { operationalApi } from "../operational/api";
+import { NativeBoundaryNotice, OperationalMetaStrip, OperationalStatusTag } from "../operational/components";
+import { useRunStream } from "../operational/useRunStream";
 
 const terminalStates = new Set([
   "completed",
@@ -70,6 +73,12 @@ export function RunDetailPage() {
     retry: false,
     refetchInterval: authority.data && !terminalStates.has(authority.data.data.status) ? 3_000 : false,
   });
+  const executionPlan = useQuery({ queryKey: ["operational-execution-plan", runId], queryFn: () => operationalApi.getRunExecutionPlan(runId), retry: false });
+  const nativeCoverage = useQuery({ queryKey: ["operational-native-coverage", runId], queryFn: () => operationalApi.getRunNativeCoverage(runId), retry: false, refetchInterval: authority.data && !terminalStates.has(authority.data.data.status) ? 2_500 : false });
+  const identityClosure = useQuery({ queryKey: ["operational-identity-closure", runId], queryFn: () => operationalApi.getRunIdentityClosure(runId), retry: false, refetchInterval: authority.data && !terminalStates.has(authority.data.data.status) ? 2_500 : false });
+  const telemetryStatus = useQuery({ queryKey: ["operational-telemetry-status", runId], queryFn: () => operationalApi.getRunTelemetryStatus(runId), retry: false, refetchInterval: authority.data && !terminalStates.has(authority.data.data.status) ? 2_500 : false });
+  const runEnvironment = useQuery({ queryKey: ["operational-run-environment", runId], queryFn: () => operationalApi.getRunEnvironment(runId), retry: false });
+  const resourceBindings = useQuery({ queryKey: ["operational-resource-bindings", runId], queryFn: () => operationalApi.getRunResourceBindings(runId), retry: false });
 
   const repetitions = useMemo(
     () => extractRepetitions(runRepetitions.data?.data ?? dashboard.data?.data.repetitions),
@@ -107,6 +116,9 @@ export function RunDetailPage() {
     queryFn: () => consoleApi.getDiagnosticFaultAttribution(runId, repetitionId!),
     ...diagnosticOptions,
   });
+  const repetitionIdentity = useQuery({ queryKey: ["operational-repetition-identity", runId, repetitionId], queryFn: () => operationalApi.getRepetitionIdentityClosure(runId, repetitionId!), ...diagnosticOptions });
+  const repetitionTelemetry = useQuery({ queryKey: ["operational-repetition-telemetry", runId, repetitionId], queryFn: () => operationalApi.getRepetitionTelemetry(runId, repetitionId!), ...diagnosticOptions });
+  const providerClosure = useQuery({ queryKey: ["operational-provider-closure", runId, repetitionId], queryFn: () => operationalApi.getRepetitionProviderClosure(runId, repetitionId!), ...diagnosticOptions });
   const cancel = useMutation({
     mutationFn: () => consoleApi.cancelBenchmarkRun(runId, "cancelled from SDAR Benchmark Console"),
     onSuccess: async (resource) => {
@@ -118,6 +130,23 @@ export function RunDetailPage() {
   const rerun = useMutation({
     mutationFn: (input: BenchmarkRunRerunRequestView) => consoleApi.createBenchmarkRunRerun(runId, input),
     onSuccess: (resource) => navigateWithContext(`/runs/${resource.data.runId}`, { parentRunId: resource.data.parentRunId, childRunId: undefined }),
+  });
+  const reconcile = useMutation({
+    mutationFn: () => operationalApi.reconcileRun(runId, {
+      schemaVersion: "sdar-benchmark.reconcile-request/v1",
+      scopes: ["candidate", "mcp_task", "provider_closure", "telemetry", "evaluation_input", "projection"],
+      reason: "operator requested snapshot repair from live run monitor",
+      idempotencyKey: `console-reconcile-${runId}-${crypto.randomUUID()}`,
+    }),
+    onSuccess: (resource) => navigateWithContext("/reconciliation", { jobId: resource.data.jobId, runId }),
+  });
+  const stream = useRunStream({
+    runId,
+    enabled: executionPlan.data?.data.streamingEnabled !== false,
+    maxEvents: 200,
+    onGapRepair: async () => {
+      await queryClient.invalidateQueries({ predicate: (query) => query.queryKey.includes(runId) });
+    },
   });
 
   const status = authority.data?.data;
@@ -158,6 +187,7 @@ export function RunDetailPage() {
       {authority.isError && <Alert type="error" showIcon message="Run Authority 不可用" description="HTTP 模式不会回退 Mock；请检查 Benchmark Server 后重试。" />}
       {cancel.isError && <Alert type="error" showIcon message="取消请求失败" description={errorMessage(cancel.error)} />}
       {rerun.isError && <Alert type="error" showIcon message="重跑请求失败" description={errorMessage(rerun.error)} />}
+      {reconcile.isError && <Alert type="error" showIcon message="Reconcile 创建失败" description={errorMessage(reconcile.error)} />}
 
       {(parentRunId || childRunId) && <SectionCard title="Parent / Child Run lineage">
         <Descriptions bordered size="small" column={2} items={[
@@ -205,6 +235,50 @@ export function RunDetailPage() {
           ]} />
         </div>
         {status && <Progress percent={status.totalCaseCount === 0 ? 0 : Math.round((status.completedCaseCount / status.totalCaseCount) * 100)} status={status.status === "failed" ? "exception" : undefined} />}
+      </SectionCard>
+
+      <SectionCard
+        title="Live Run Monitor"
+        extra={<Space wrap><OperationalStatusTag value={stream.state} /><Tag>Last-Event-ID {stream.lastEventId ?? "—"}</Tag><Tag>buffer {stream.events.length}/200</Tag></Space>}
+      >
+        <NativeBoundaryNotice dataClass={nativeCoverage.data?.meta.dataClass} />
+        {executionPlan.data && <OperationalMetaStrip meta={executionPlan.data.meta} />}
+        <div className="operational-kpi-grid">
+          <article><span>Execution target</span><strong>{executionPlan.data?.data.executionTarget ?? "—"}</strong><small>{executionPlan.data?.data.nativeRequirement ?? "unavailable"}</small></article>
+          <article><span>Native coverage</span><strong>{nativeCoverage.data?.data.overall ?? "—"}</strong><small>{nativeCoverage.data ? `${nativeCoverage.data.data.nativeLayerCount} native · ${nativeCoverage.data.data.substitutedLayerCount} substituted` : "waiting snapshot"}</small></article>
+          <article><span>Identity closure</span><strong>{identityClosure.data?.data.overallStatus ?? "—"}</strong><small>{identityClosure.data ? `${identityClosure.data.data.edges.length} edges` : "waiting snapshot"}</small></article>
+          <article><span>Telemetry</span><strong>{telemetryStatus.data?.data.overallStatus ?? "—"}</strong><small>{telemetryStatus.data ? `${telemetryStatus.data.data.sources.length} sources` : "waiting snapshot"}</small></article>
+          <article><span>Environment cleanup</span><strong>{runEnvironment.data?.data.cleanupStatus ?? "—"}</strong><small>{runEnvironment.data?.data.environment?.environmentId ?? "environment unresolved"}</small></article>
+          <article><span>SSE delivery</span><strong>{stream.state}</strong><small>{stream.gapCount} gap repairs · {stream.droppedEventCount} buffered drops</small></article>
+        </div>
+        {stream.error && <Alert type="warning" showIcon message="SSE 暂时中断，正在按 Last-Event-ID 重连" description={stream.error} />}
+        <Space wrap>
+          <Button icon={<LinkOutlined />} onClick={() => navigateWithContext(`/runs/${encodeURIComponent(runId)}/identity`)}>Identity graph</Button>
+          {repetitionId && <Button icon={<LinkOutlined />} onClick={() => navigateWithContext(`/runs/${encodeURIComponent(runId)}/repetitions/${encodeURIComponent(repetitionId)}/trajectory`)}>Trajectory</Button>}
+          <Button icon={<SyncOutlined />} loading={reconcile.isPending} onClick={() => reconcile.mutate()}>Side-effect-free reconcile</Button>
+        </Space>
+        <Descriptions bordered size="small" column={3} items={[
+          { key: "plan", label: "Frozen order", children: executionPlan.data?.data.caseOrder.join(" → ") ?? "—" },
+          { key: "resource", label: "Resource bindings", children: resourceBindings.data?.data.map((item) => `${item.resourceId}@${item.revision}`).join(" · ") || "—" },
+          { key: "heartbeat", label: "Last heartbeat", children: stream.lastHeartbeatAt ?? "—" },
+          { key: "identity", label: "Selected repetition identity", children: repetitionIdentity.data?.data.overallStatus ?? "—" },
+          { key: "telemetry", label: "Selected repetition telemetry", children: repetitionTelemetry.data?.data.overallStatus ?? "—" },
+          { key: "closure", label: "Provider Closure v2", children: providerClosure.data?.data.status ?? "—" },
+        ]} />
+        {stream.events.length > 0 && <Table
+          size="small"
+          pagination={{ pageSize: 8 }}
+          rowKey={(row) => row.data.eventId}
+          dataSource={[...stream.events].reverse()}
+          columns={[
+            { title: "Event ID", render: (_, row) => <code>{row.data.eventId}</code> },
+            { title: "Type", render: (_, row) => <Tag>{row.data.eventType}</Tag> },
+            { title: "Authority revision", render: (_, row) => row.data.authorityRevision ?? "—" },
+            { title: "Repetition", render: (_, row) => row.data.repetitionId ?? "—" },
+            { title: "Occurred", render: (_, row) => row.data.occurredAt },
+            { title: "Data class", render: (_, row) => <OperationalStatusTag value={row.data.dataClass} /> },
+          ]}
+        />}
       </SectionCard>
 
       <SectionCard title="UGV 诊断：Agent / SMPP Provider / Physical" extra={capabilities.data && <ApiStatusTag compact meta={capabilities.data.meta} />}>
