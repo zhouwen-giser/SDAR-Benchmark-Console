@@ -1,0 +1,115 @@
+{
+  "schemaVersion": "sdar-benchmark.live-native-source-lock/v0.3",
+  "goalId": "sdar-benchmark-live-native-operations-console-v0.3",
+  "observedAt": "2026-09-03T12:23:56+08:00",
+  "goalPackage": {
+    "path": "/home/zhouwen/下载/SDAR_Benchmark_Live_Native_Operations_Console_Codex_Goal_Package_V0.3.zip",
+    "sha256": "8fe540b36b7960d21b54230b31e0c4cfba8a8b2b130d342e5241416ba27d1f28",
+    "archiveFileCount": 96,
+    "checksumEntries": 95,
+    "archiveTest": "passed",
+    "checksumStatus": "passed"
+  },
+  "benchmarkServer": {
+    "repository": "zhouwen-giser/sdar-benchmark-server",
+    "baseBranch": "feature/benchmark-product-data-api-v0.2",
+    "baseCommit": "09feee3d99a1e50e076e0178d603a700ed7b4730",
+    "functionalCommit": "67c912be57a587cc8a86bb03bc138d170be952ea",
+    "parentPullRequest": 5,
+    "parentPullRequestState": "open_draft",
+    "parentPullRequestBase": "codex/ugv-four-case-diagnostic-vertical-v0.1",
+    "targetBranch": "feature/benchmark-live-native-operations-v0.3",
+    "targetBranchOwner": "server-session",
+    "worktreeAtObservation": "clean"
+  },
+  "benchmarkConsole": {
+    "repository": "zhouwen-giser/SDAR-Benchmark-Console",
+    "baseBranch": "feature/benchmark-console-product-data-api-v0.2",
+    "baseCommit": "99b67f1be3d9d2e20dbe98fc24ca93248b9f7e1c",
+    "functionalCommit": "8979f689733c5971001b5f8932089b8df5a66f7a",
+    "parentPullRequest": 2,
+    "parentPullRequestState": "open_draft",
+    "parentPullRequestBase": "feature/benchmark-control-ugv-diagnostic-v0.1",
+    "targetBranch": "feature/benchmark-operational-console-v0.3",
+    "targetBranchCreatedFrom": "99b67f1be3d9d2e20dbe98fc24ca93248b9f7e1c",
+    "baseAncestry": "passed",
+    "worktreeBeforeBranch": "clean"
+  },
+  "benchmarkOpenApi": {
+    "consolePath": "/home/zhouwen/web-download/SDAR-Benchmark-Console/product/api/benchmark-server.openapi.yaml",
+    "serverPath": "/home/zhouwen/web-download/sdar-benchmark-server/openapi/benchmark-server.openapi.yaml",
+    "baseSha256": "92edbd609860b2dc8f38c123a10a4faf5d6a97355797ac43c4ae6dae30c5ca15",
+    "baseOperationCount": 125,
+    "baseGeneratedClientVerification": "passed",
+    "targetOperationCount": 172,
+    "additiveOperationCount": 47,
+    "contractState": "awaiting-v0.3-server-freeze"
+  },
+  "dataset": {
+    "ref": "sdar-ugv-agent-diagnostic:0.2:dataset-version",
+    "expectedHash": "sha256:b212fac3e1b36aed788f5c380ffc799d8a1be00abfaf7445a3e7bd6f5bc29081",
+    "caseCount": 12,
+    "serverByteCompatibilityVerification": "delegated-to-server-session"
+  },
+  "nativeDependencies": {
+    "sdarRuntime": {
+      "packageRef": "codex/smpp-mcp-tasks-consumer-sync-v0.1@0a73800b8991da50bea13b03f4f39670cf29da10",
+      "observedLocalHead": "0a73800b8991da50bea13b03f4f39670cf29da10",
+      "pullRequest": 30,
+      "pullRequestState": "open_ready",
+      "worktreeState": "dirty-existing-reports-and-redacted-attempt-artifacts",
+      "writePolicy": "conditional-companion-owned-by-support-session"
+    },
+    "smpp": {
+      "packageBase": "main@0a7b91fd591105c18e5b57eaa4c25e0b35196119",
+      "observedOriginMain": "76b1a8a5307554e11038b0548717aa7fea5c4488",
+      "observedLocalBranch": "codex/smpp-mcp-tasks-ugv-diagnostic-support-v0.1",
+      "observedLocalHead": "6ba14f8567eff4a3fe30e3399a5d72f45d525d0c",
+      "sourcePullRequest": 20,
+      "sourcePullRequestState": "merged",
+      "writePolicy": "read-first-conditional-companion-owned-by-support-session"
+    },
+    "smppTelemetry": {
+      "packageBase": "main@071f409cb21be86322a116b7d1fb41e8bc2b0db1",
+      "observedOriginMain": "a5e3dea00f825c4400523c8a957e539c901ee0c6",
+      "observedLocalBranch": "codex/smpp-mcp-tasks-telemetry-sync-v0.1",
+      "observedLocalHead": "b663f989c0784400a1ef394f2451cc8b7a76057c",
+      "sourcePullRequest": 5,
+      "sourcePullRequestState": "merged",
+      "writePolicy": "read-first-conditional-companion-owned-by-support-session"
+    },
+    "sdarTelemetry": {
+      "packageBase": "main@3e43350dd0d0e37fe65ec318d0d9881820a88f5a",
+      "observedOriginMain": "3e43350dd0d0e37fe65ec318d0d9881820a88f5a",
+      "observedLocalBranch": "codex/smpp-mcp-tasks-provider-closure-sync-v0.1",
+      "observedLocalHead": "01719507aea97f2bcca904fc3838127ee2fd29b2",
+      "sourcePullRequest": 3,
+      "sourcePullRequestState": "merged",
+      "writePolicy": "read-first-conditional-companion-owned-by-support-session"
+    },
+    "simulatorReferee": {
+      "repository": null,
+      "buildRef": null,
+      "imageDigest": null,
+      "observedEndpoint": "http://192.168.2.63:7879",
+      "status": "source-identity-unresolved",
+      "discoveryOwner": "server-and-simulator-support-session",
+      "blocks": [
+        "native-software-readiness",
+        "live-native-execution"
+      ],
+      "doesNotBlock": [
+        "M0-M12 functional implementation",
+        "operational API development",
+        "operational Console development"
+      ]
+    }
+  },
+  "scope": {
+    "consoleBrowserAuthority": "benchmark-server-only",
+    "formalEligible": false,
+    "qualityScore": null,
+    "releaseGate": "unavailable",
+    "sitesUsed": false
+  }
+}
