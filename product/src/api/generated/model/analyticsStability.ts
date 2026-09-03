@@ -5,32 +5,20 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
-import type { AnalyticsStabilityPassStability } from './analyticsStabilityPassStability';
-import type { AnalyticsStabilityQualityScoreMean } from './analyticsStabilityQualityScoreMean';
-import type { AnalyticsStabilityQualityScoreStddev } from './analyticsStabilityQualityScoreStddev';
-import type { AnalyticsStabilityQualityScoreP10 } from './analyticsStabilityQualityScoreP10';
-import type { AnalyticsStabilityFatalStability } from './analyticsStabilityFatalStability';
-import type { AnalyticsStabilityGateStability } from './analyticsStabilityGateStability';
-import type { AnalyticsStabilityTerminalStateStability } from './analyticsStabilityTerminalStateStability';
-import type { AnalyticsStabilityPlanStructuralVariance } from './analyticsStabilityPlanStructuralVariance';
+import type { AnalyticsStabilityTerminalRate } from './analyticsStabilityTerminalRate';
+import type { AnalyticsStabilityOutcomeConsistency } from './analyticsStabilityOutcomeConsistency';
+import type { AnalyticsStabilityDurationVariance } from './analyticsStabilityDurationVariance';
+import type { AnalyticsStabilityDataClass } from './analyticsStabilityDataClass';
 
 export interface AnalyticsStability {
-  benchmarkRunId: string;
-  caseExecutionId: string;
   caseId: string;
-  caseVersion?: string;
   /** @minimum 0 */
-  repetitionCount: number;
-  /** @minimum 0 */
-  evaluatedRepetitions?: number;
-  passStability?: AnalyticsStabilityPassStability;
-  qualityScoreMean?: AnalyticsStabilityQualityScoreMean;
-  qualityScoreStddev?: AnalyticsStabilityQualityScoreStddev;
-  qualityScoreP10?: AnalyticsStabilityQualityScoreP10;
-  fatalStability?: AnalyticsStabilityFatalStability;
-  gateStability?: AnalyticsStabilityGateStability;
-  terminalStateStability?: AnalyticsStabilityTerminalStateStability;
-  planStructuralVariance?: AnalyticsStabilityPlanStructuralVariance;
-  evaluatedAt?: string;
+  repeatCount: number;
+  terminalRate: AnalyticsStabilityTerminalRate;
+  outcomeConsistency: AnalyticsStabilityOutcomeConsistency;
+  durationVariance: AnalyticsStabilityDurationVariance;
+  evidenceRefs: string[];
+  dataClass?: AnalyticsStabilityDataClass;
+  formalEligible?: boolean;
   projectedAt?: string;
 }

@@ -125,6 +125,39 @@ describe("LiveHttpConsoleApi contract adapter", () => {
     expect(calls).toEqual(expect.arrayContaining(["create", "authority", "cancel", "qualification", "capabilities", "run-repetitions", "run-events", "repetition", "artifacts", "trace", "physical", "fault"]));
   });
 
+  it("binds all eleven Product Data API operations without fallback", async () => {
+    const calls: string[] = [];
+    const mark = <T,>(name: string, data: T) => {
+      calls.push(name);
+      return HttpResponse.json(envelope(name, data));
+    };
+    const preset = { presetVersionId: "ugv-diagnostic-regression/0.2", presetId: "ugv-diagnostic-regression", version: "0.2", contentHash: `sha256:${"a".repeat(64)}`, label: "Regression", status: "active", preset: { selectedCaseIds: ["UGV-NODE-001"], repeatCount: 3 }, createdAt: "2026-09-03T00:00:00Z" };
+    const artifact = { runId: "run-1", repetitionId: "rep-1", artifactKind: "execution-trace", artifactIdentity: "artifact-1", artifactRevision: 1, artifactSchemaVersion: "v1", artifactId: "artifact-1", artifactUri: "artifact://artifact-1", artifactHash: `sha256:${"b".repeat(64)}`, artifactSizeBytes: 2, mediaType: "application/json", summary: {}, relationHash: `sha256:${"c".repeat(64)}`, createdAt: "2026-09-03T00:00:00Z", dataClass: "development_substituted" };
+    server.use(
+      http.get(`${base}/v1/benchmark-run-presets`, () => mark("listBenchmarkRunPresets", [preset])),
+      http.get(`${base}/v1/benchmark-run-presets/ugv-diagnostic-regression%2F0.2`, () => mark("getBenchmarkRunPreset", preset)),
+      http.post(`${base}/v1/benchmark-runs/run-1/reruns`, () => mark("createBenchmarkRunRerun", { runId: "run-2", parentRunId: "run-1", created: true })),
+      http.get(`${base}/v1/benchmark-runs/run-1/diagnostic-summary`, () => mark("getBenchmarkRunDiagnosticSummary", { runId: "run-1", status: "completed_with_substitutions", score: null, releaseGate: "unavailable" })),
+      http.get(`${base}/v1/benchmark-runs/run-1/substitutions`, () => mark("getBenchmarkRunSubstitutions", [{ caseId: "UGV-NODE-001", dataClass: "development_substituted" }])),
+      http.get(`${base}/v1/benchmark-runs/run-1/timeline`, () => mark("getBenchmarkRunTimeline", [{ scope: "run", revision: 1, eventKind: "run.created" }])),
+      http.get(`${base}/v1/benchmark-runs/run-1/repetitions/rep-1/evaluation`, () => mark("getBenchmarkRunRepetitionEvaluation", { evaluationId: "eval-1", runId: "run-1", repetitionId: "rep-1", qualityScore: null, formalEligible: false })),
+      http.get(`${base}/v1/benchmark-runs/run-1/repetitions/rep-1/artifacts/artifact-1`, () => mark("getBenchmarkRunRepetitionArtifact", artifact)),
+      http.get(`${base}/v1/benchmark-runs/run-1/repetitions/rep-1/artifacts/artifact-1/content`, () => mark("getBenchmarkRunRepetitionArtifactContent", { schemaVersion: "sdar-benchmark.artifact-content/v1", artifactId: "artifact-1", mediaType: "application/json", sha256: `sha256:${"b".repeat(64)}`, sizeBytes: 2, encoding: "utf-8", content: "{}", dataClass: "development_substituted" })),
+      http.get(`${base}/v1/data-completeness`, () => mark("getDataCompleteness", { schemaVersion: "sdar-benchmark.data-completeness/v1", generatedAt: "2026-09-03T00:00:00Z", overallStatus: "partial", sections: [] })),
+      http.get(`${base}/v1/analytics/diagnostic-outcome-distribution`, () => mark("getDiagnosticOutcomeDistribution", [{ outcome: "completed", count: 1, substitutedCount: 1, fixtureCount: 0, formalEligible: false, lastObservedAt: "2026-09-03T00:00:00Z" }])),
+    );
+    const rerun = { schemaVersion: "sdar-benchmark.run-rerun-request/v1", selectedCaseIds: ["UGV-NODE-001"], repeatCount: 1, reason: "test", idempotencyKey: "test-rerun" } as Parameters<typeof api.createBenchmarkRunRerun>[1];
+    const results = await Promise.all([
+      api.listBenchmarkRunPresets(), api.getBenchmarkRunPreset("ugv-diagnostic-regression/0.2"), api.createBenchmarkRunRerun("run-1", rerun),
+      api.getBenchmarkRunDiagnosticSummary("run-1"), api.getBenchmarkRunSubstitutions("run-1"), api.getBenchmarkRunTimeline("run-1"),
+      api.getBenchmarkRunRepetitionEvaluation("run-1", "rep-1"), api.getBenchmarkRunRepetitionArtifact("run-1", "rep-1", "artifact-1"),
+      api.getBenchmarkRunRepetitionArtifactContent("run-1", "rep-1", "artifact-1"), api.getDataCompleteness(), api.getDiagnosticOutcomeDistribution(),
+    ]);
+    expect(calls).toHaveLength(11);
+    expect(results.every((result) => result.meta.mocked === false)).toBe(true);
+    expect((results[8].data as { content: string }).content).toBe("{}");
+  });
+
   it("preserves envelope partial/null semantics instead of manufacturing score zero", async () => {
     server.use(http.get(`${base}/v1/benchmark-runs`, () => HttpResponse.json(envelope("getBenchmarkRuns", [{ runId: "run-1", status: "completed", datasetVersionRef: "dataset-v1", candidateSnapshotId: "candidate-v1", totalCaseCount: null, completedCaseCount: null, notReadyCaseCount: null }], "partial"))));
     const result = await api.listRuns();

@@ -1,10 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Button, Descriptions, Empty, Table, Tabs, Tag } from "antd";
+import { Alert, Button, Descriptions, Empty, Space, Table, Tabs, Tag } from "antd";
 import { LinkOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import { consoleApi } from "../api/consoleApi";
-import { ApiStatusTag, PageHeader, SectionCard } from "../components/common";
+import { ApiStatusTag, DebugPayloadDrawer, PageHeader, SectionCard } from "../components/common";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
+import type {
+  EvaluationDimensionView,
+  EvaluationEvidenceGradeView,
+  EvaluationEvidenceLinksView,
+  EvaluationFatalView,
+  EvaluationFindingView,
+  EvaluationHardGateView,
+  EvaluationMetricView,
+  EvaluationReadinessView,
+  TelemetryProvenanceView,
+} from "../types";
 import { displayValue, readinessName, scoreStatusName, sourceName, verdictName } from "../utils/format";
 
 export function EvaluationPage() {
@@ -44,7 +55,13 @@ export function EvaluationPage() {
       </div> : <Empty description="评价未关联 EvaluationInputSnapshot" />;
     }
     const payload = resource.data.data;
-    return <><ApiStatusTag compact meta={resource.data.meta} /><pre className="evaluation-tab-json">{JSON.stringify(payload, null, 2)}</pre></>;
+    return <>
+      <div className="typed-resource-toolbar">
+        <ApiStatusTag compact meta={resource.data.meta} />
+        <DebugPayloadDrawer payload={payload} />
+      </div>
+      <EvaluationResource active={active} payload={payload} />
+    </>;
   };
 
   const tabs = [
@@ -67,4 +84,177 @@ export function EvaluationPage() {
       <Tabs activeKey={active} items={tabs} onChange={(tab) => setQueryParams({ tab })} />
     </div>
   );
+}
+
+function EvaluationResource({ active, payload }: { active: string; payload: unknown }) {
+  if (active === "readiness") {
+    const value = payload as EvaluationReadinessView;
+    return <Descriptions bordered size="small" column={2} items={[
+      { key: "source", label: "Source Evidence", children: <StatusValue value={value.sourceEvidenceReadiness} /> },
+      { key: "evaluation", label: "Evaluation", children: <StatusValue value={value.evaluationReadiness} /> },
+      { key: "missing", label: "Missing Families", children: <ValueList values={value.missingFamilies} empty="无缺失" /> },
+      { key: "conflicting", label: "Conflicting Families", children: <ValueList values={value.conflictingFamilies} empty="无冲突" /> },
+      { key: "reasons", label: "Reason Codes", span: 2, children: <ValueList values={value.reasonCodes} empty="无" /> },
+    ]} />;
+  }
+  if (active === "evidence-grades") {
+    return <Table<EvaluationEvidenceGradeView>
+      rowKey="family"
+      size="small"
+      pagination={false}
+      dataSource={payload as EvaluationEvidenceGradeView[]}
+      columns={[
+        { title: "Evidence Family", dataIndex: "family" },
+        { title: "Grade", dataIndex: "grade", render: (value: string | null) => <StatusValue value={value} /> },
+        { title: "Reason Codes", dataIndex: "reasonCodes", render: (values: string[]) => <ValueList values={values} /> },
+        { title: "Evidence Refs", dataIndex: "evidenceRefs", render: (values: string[]) => <ReferenceList values={values} /> },
+      ]}
+    />;
+  }
+  if (active === "fatals") {
+    return <Table<EvaluationFatalView>
+      rowKey="id"
+      size="small"
+      pagination={false}
+      dataSource={payload as EvaluationFatalView[]}
+      columns={[
+        { title: "Fatal", dataIndex: "id" },
+        { title: "Matched", dataIndex: "matched", render: (value: boolean | null) => <StatusValue value={value == null ? null : value ? "matched" : "not_matched"} /> },
+        { title: "Proof", dataIndex: "proofStatus", render: (value: string) => <StatusValue value={value} /> },
+        { title: "Evidence Level", dataIndex: "evidenceLevel", render: (value: string | null) => value ?? "—" },
+        { title: "Evidence", dataIndex: "evidenceRefs", render: (values: string[]) => <ReferenceList values={values} /> },
+        { title: "Reasons", dataIndex: "reasonCodes", render: (values: string[]) => <ValueList values={values} /> },
+      ]}
+    />;
+  }
+  if (active === "hard-gates") {
+    return <Table<EvaluationHardGateView>
+      rowKey="id"
+      size="small"
+      pagination={false}
+      dataSource={payload as EvaluationHardGateView[]}
+      columns={[
+        { title: "Hard Gate", dataIndex: "id" },
+        { title: "Result", dataIndex: "result", render: (value: string) => <StatusValue value={value} /> },
+        { title: "Reason", dataIndex: "reason", render: (value: string | null) => value ?? "—" },
+        { title: "Reason Codes", dataIndex: "reasonCodes", render: (values: string[]) => <ValueList values={values} /> },
+        { title: "Evidence", dataIndex: "evidenceRefs", render: (values: string[]) => <ReferenceList values={values} /> },
+      ]}
+    />;
+  }
+  if (active === "metrics") {
+    return <Table<EvaluationMetricView>
+      rowKey="id"
+      size="small"
+      pagination={false}
+      dataSource={payload as EvaluationMetricView[]}
+      columns={[
+        { title: "Metric", dataIndex: "id" },
+        { title: "Status", dataIndex: "status", render: (value: string) => <StatusValue value={value} /> },
+        { title: "Raw", dataIndex: "raw", render: (value: number | null) => displayValue(value) },
+        { title: "Weight", dataIndex: "weight", render: (value: number | null) => displayValue(value) },
+        { title: "Evidence Level", dataIndex: "evidenceLevel", render: (value: string | null) => value ?? "—" },
+        { title: "Summary", dataIndex: "summary", render: (value: string | null) => value ?? "—" },
+        { title: "Reasons", dataIndex: "reasonCodes", render: (values: string[]) => <ValueList values={values} /> },
+      ]}
+    />;
+  }
+  if (active === "dimensions") {
+    return <Table<EvaluationDimensionView>
+      rowKey="id"
+      size="small"
+      pagination={false}
+      dataSource={payload as EvaluationDimensionView[]}
+      columns={[
+        { title: "Dimension", dataIndex: "label", render: (value: string, row) => <><b>{value}</b><br /><code>{row.id}</code></> },
+        { title: "Score", dataIndex: "score", render: (value: number | null) => displayValue(value) },
+        { title: "Threshold", dataIndex: "threshold", render: (value: number | null) => displayValue(value) },
+        { title: "Status", dataIndex: "passed", render: (value: boolean | null, row) => <StatusValue value={!row.applicable ? "not_applicable" : value == null ? "unavailable" : value ? "passed" : "failed"} /> },
+        { title: "Metrics", dataIndex: "metricIds", render: (values: string[]) => <ValueList values={values} /> },
+      ]}
+    />;
+  }
+  if (active === "findings") {
+    return <Table<EvaluationFindingView>
+      rowKey="id"
+      size="small"
+      pagination={false}
+      dataSource={payload as EvaluationFindingView[]}
+      columns={[
+        { title: "Finding", dataIndex: "id" },
+        { title: "Type", dataIndex: "type" },
+        { title: "Severity", dataIndex: "severity", render: (value: string | null) => <StatusValue value={value} /> },
+        { title: "Summary", dataIndex: "summary" },
+        { title: "Priority", dataIndex: "priority", render: (value: string | null) => value ?? "—" },
+        { title: "Evidence", dataIndex: "evidenceRefs", render: (values: string[]) => <ReferenceList values={values} /> },
+      ]}
+    />;
+  }
+  if (active === "evidence-links") {
+    const value = payload as EvaluationEvidenceLinksView;
+    return <>
+      <Descriptions bordered size="small" column={2} items={[
+        { key: "evaluation", label: "Evaluation", children: <code>{value.evaluationId}</code> },
+        { key: "bundle", label: "Bundle", children: <code>{value.bundleSnapshotId}</code> },
+        { key: "bundleHash", label: "Bundle Hash", children: <code>{value.bundleContentHash ?? "—"}</code> },
+        { key: "input", label: "Input Snapshot", children: <code>{value.inputSnapshotId ?? "—"}</code> },
+        { key: "eligible", label: "Formal Input Eligible", children: <StatusValue value={value.formalInputEligible == null ? null : value.formalInputEligible ? "true" : "false"} /> },
+        { key: "readiness", label: "Composite Readiness", children: <StatusValue value={value.compositeReadiness} /> },
+        { key: "watermark", label: "Input Watermark", children: value.inputSourceWatermark ?? "—" },
+        { key: "refs", label: "Evidence Refs", children: <ReferenceList values={value.evidenceRefs} /> },
+      ]} />
+      <SourceReferenceTable values={value.inputSourceRefs} />
+    </>;
+  }
+  if (active === "telemetry-provenance") {
+    const value = payload as TelemetryProvenanceView;
+    return <>
+      <Descriptions bordered size="small" column={2} items={[
+        { key: "evaluation", label: "Evaluation", children: <code>{value.evaluationId}</code> },
+        { key: "origin", label: "Origin", children: value.origin },
+        { key: "snapshot", label: "Input Snapshot", children: <code>{value.inputSnapshotId}</code> },
+        { key: "hash", label: "Snapshot Hash", children: <code>{value.inputSnapshotContentHash}</code> },
+        { key: "readiness", label: "Overall Readiness", children: <StatusValue value={value.overallReadiness} /> },
+        { key: "eligible", label: "Formal Input Eligible", children: <StatusValue value={value.formalInputEligible ? "true" : "false"} /> },
+        { key: "watermark", label: "Effective Watermark", span: 2, children: value.effectiveWatermark },
+      ]} />
+      <SourceReferenceTable values={value.sources} />
+    </>;
+  }
+  return <Empty description="该资源暂无类型化展示" />;
+}
+
+function SourceReferenceTable({ values }: { values: TelemetryProvenanceView["sources"] }) {
+  return <Table
+    className="typed-source-table"
+    rowKey={(row) => `${row.sourceType}:${row.artifactHash ?? row.artifactUri ?? "unavailable"}`}
+    size="small"
+    pagination={false}
+    dataSource={values}
+    columns={[
+      { title: "Source", dataIndex: "sourceType" },
+      { title: "Required", dataIndex: "required", render: (value: boolean | null) => value == null ? "—" : value ? "是" : "否" },
+      { title: "Readiness", dataIndex: "readiness", render: (value: string) => <StatusValue value={value} /> },
+      { title: "Watermark", dataIndex: "watermark", render: (value: string | null) => value ?? "—" },
+      { title: "Artifact", dataIndex: "artifactUri", render: (value: string | null) => value ? <code>{value}</code> : "—" },
+      { title: "Reasons", dataIndex: "reasonCodes", render: (items: string[]) => <ValueList values={items} /> },
+    ]}
+  />;
+}
+
+function StatusValue({ value }: { value: string | null | undefined }) {
+  const normalized = value?.toLowerCase() ?? "unavailable";
+  const positive = ["ready", "passed", "complete", "completed", "formal", "true", "not_matched"].includes(normalized);
+  const negative = ["failed", "blocked", "matched", "false", "fatal"].includes(normalized);
+  return <Tag color={positive ? "green" : negative ? "red" : normalized === "unavailable" || normalized === "not_ready" ? "gold" : "blue"}>{value ?? "unavailable"}</Tag>;
+}
+
+function ValueList({ values, empty = "—" }: { values: string[] | undefined; empty?: string }) {
+  if (!values?.length) return <span>{empty}</span>;
+  return <Space size={[4, 4]} wrap>{values.map((value) => <Tag key={value}>{value}</Tag>)}</Space>;
+}
+
+function ReferenceList({ values }: { values: string[] | undefined }) {
+  if (!values?.length) return <span>—</span>;
+  return <div className="typed-reference-list">{values.map((value) => <code key={value}>{value}</code>)}</div>;
 }

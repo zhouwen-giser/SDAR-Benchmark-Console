@@ -5,6 +5,10 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
+import type { EvaluationMetricStatus } from './evaluationMetricStatus';
+import type { EvaluationMetricValue } from './evaluationMetricValue';
+import type { EvaluationMetricUnit } from './evaluationMetricUnit';
+import type { EvaluationMetricDataClass } from './evaluationMetricDataClass';
 import type { EvaluationMetricRawScore } from './evaluationMetricRawScore';
 import type { EvaluationMetricNormalizedWeight } from './evaluationMetricNormalizedWeight';
 import type { EvaluationMetricWeightedScore } from './evaluationMetricWeightedScore';
@@ -19,6 +23,14 @@ import type { EvaluationMetricSummary } from './evaluationMetricSummary';
 export interface EvaluationMetric {
   /** @pattern ^M(?:[1-9]|1[0-5])$ */
   metricId: string;
+  version: string;
+  label: string;
+  status: EvaluationMetricStatus;
+  value: EvaluationMetricValue;
+  unit: EvaluationMetricUnit;
+  expectation: string;
+  dataClass: EvaluationMetricDataClass;
+  formalEligible: boolean;
   applicable: boolean;
   /**
    * @minimum 0
@@ -29,10 +41,10 @@ export interface EvaluationMetric {
   normalizedWeight?: EvaluationMetricNormalizedWeight;
   weightedScore?: EvaluationMetricWeightedScore;
   evidenceLevel?: EvaluationMetricEvidenceLevel;
-  evidenceRefs?: EvaluationMetricEvidenceRefs;
+  evidenceRefs: EvaluationMetricEvidenceRefs;
   evaluatorType?: EvaluationMetricEvaluatorType;
   formalizationStatus: EvaluationMetricFormalizationStatus;
   notApplicableReason?: EvaluationMetricNotApplicableReason;
-  reasonCodes?: EvaluationMetricReasonCodes;
+  reasonCodes: EvaluationMetricReasonCodes;
   summary?: EvaluationMetricSummary;
 }

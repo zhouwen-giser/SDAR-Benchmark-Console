@@ -5,27 +5,19 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
-import type { AnalyticsQualityTrendMeanScore } from './analyticsQualityTrendMeanScore';
-import type { AnalyticsQualityTrendP10Score } from './analyticsQualityTrendP10Score';
-import type { AnalyticsQualityTrendHighRiskPassRate } from './analyticsQualityTrendHighRiskPassRate';
-import type { AnalyticsQualityTrendCriticalRiskPassRate } from './analyticsQualityTrendCriticalRiskPassRate';
+import type { AnalyticsQualityTrendQualityScore } from './analyticsQualityTrendQualityScore';
+import type { AnalyticsQualityTrendScoreStatus } from './analyticsQualityTrendScoreStatus';
+import type { AnalyticsQualityTrendDiagnosticPassRate } from './analyticsQualityTrendDiagnosticPassRate';
+import type { AnalyticsQualityTrendDataClass } from './analyticsQualityTrendDataClass';
 
 export interface AnalyticsQualityTrend {
-  benchmarkRunId: string;
-  candidateSnapshotId: string;
-  /** @minimum 0 */
-  caseCount: number;
-  /** @minimum 0 */
-  evaluatedCaseCount?: number;
-  passRate?: number;
-  readyRate?: number;
-  notReadyRate?: number;
-  fatalRate?: number;
-  hardGateFailureRate?: number;
-  meanScore?: AnalyticsQualityTrendMeanScore;
-  p10Score?: AnalyticsQualityTrendP10Score;
-  highRiskPassRate?: AnalyticsQualityTrendHighRiskPassRate;
-  criticalRiskPassRate?: AnalyticsQualityTrendCriticalRiskPassRate;
-  evaluatedAt: string;
+  runId: string;
+  completedAt: string;
+  qualityScore: AnalyticsQualityTrendQualityScore;
+  scoreStatus: AnalyticsQualityTrendScoreStatus;
+  diagnosticPassRate: AnalyticsQualityTrendDiagnosticPassRate;
+  dataClass: AnalyticsQualityTrendDataClass;
+  formalEligible?: boolean;
+  evidenceRefs: string[];
   projectedAt?: string;
 }

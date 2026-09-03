@@ -9,18 +9,21 @@ afterEach(() => {
 });
 
 describe("SDAR Benchmark Console integration", () => {
-  it("preflights the four-case Development run before enabling creation", async () => {
+  it("preflights a Server-driven Development catalog run before enabling creation", async () => {
     window.history.replaceState(null, "", "/runs/new");
     render(<App />);
     const user = userEvent.setup();
     expect(await screen.findByRole("heading", { name: "新建 Benchmark Run" })).toBeInTheDocument();
     expect(screen.getByText(/所有结果均为 NOT FORMAL QUALIFICATION/)).toBeInTheDocument();
-    const create = screen.getByRole("button", { name: /创建四 Case Run/ });
+    expect((await screen.findAllByLabelText("Preset")).length).toBeGreaterThan(0);
+    const create = screen.getByRole("button", { name: /创建 Benchmark Run/ });
     expect(create).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: /执行预检/ }));
+    const preflight = screen.getByRole("button", { name: /执行预检/ });
+    await waitFor(() => expect(preflight).toBeEnabled());
+    await user.click(preflight);
     expect(await screen.findByText("ready_with_substitutions")).toBeInTheDocument();
     expect(create).toBeEnabled();
-    expect(screen.getByText("UGV-XCHAIN-003")).toBeInTheDocument();
+    expect(screen.getAllByText("UGV-XCHAIN-003").length).toBeGreaterThan(0);
   });
 
   it("shows the blocked decision and explicit API/demo-data provenance", async () => {
@@ -55,6 +58,20 @@ describe("SDAR Benchmark Console integration", () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "评价结果浏览器" })).toBeInTheDocument();
     expect(screen.queryByText(/设计中/)).not.toBeInTheDocument();
+  });
+
+  it("renders Evaluation resources as typed views with raw data behind Debug", async () => {
+    window.history.replaceState(null, "", "/evaluations/eval-mcp17?tab=readiness");
+    render(<App />);
+    const user = userEvent.setup();
+    expect(await screen.findByRole("heading", { name: /评价结果 eval-mcp17/ })).toBeInTheDocument();
+    expect(await screen.findByText("Source Evidence")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "查看原始数据" })).toBeInTheDocument();
+    expect(document.querySelector(".evaluation-tab-json")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("tab", { name: "M1–M15" }));
+    expect(await screen.findByRole("columnheader", { name: "Metric" })).toBeInTheDocument();
+    expect(document.querySelector(".evaluation-tab-json")).not.toBeInTheDocument();
   });
 
   it("renders Case contract and resource registry detail routes", async () => {

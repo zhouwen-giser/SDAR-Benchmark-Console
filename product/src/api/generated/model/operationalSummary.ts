@@ -5,12 +5,47 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
-import type { OperationalSummarySkillsItem } from './operationalSummarySkillsItem';
-import type { OperationalSummaryProvidersItem } from './operationalSummaryProvidersItem';
+import type { OperationalSummaryDurationMs } from './operationalSummaryDurationMs';
+import type { OperationalSummaryQueueDurationMs } from './operationalSummaryQueueDurationMs';
+import type { OperationalSummaryWorkerDurationMs } from './operationalSummaryWorkerDurationMs';
+import type { OperationalSummaryCandidateDurationMs } from './operationalSummaryCandidateDurationMs';
+import type { OperationalSummaryCleanupDurationMs } from './operationalSummaryCleanupDurationMs';
+import type { OperationalSummaryMissionCount } from './operationalSummaryMissionCount';
+import type { OperationalSummaryNavigationCount } from './operationalSummaryNavigationCount';
+import type { OperationalSummaryReconciliationCount } from './operationalSummaryReconciliationCount';
+import type { OperationalSummaryPositionErrorM } from './operationalSummaryPositionErrorM';
+import type { OperationalSummaryEvidenceFreshnessMs } from './operationalSummaryEvidenceFreshnessMs';
+import type { OperationalSummaryDataClass } from './operationalSummaryDataClass';
+import type { SkillAnalytics } from './skillAnalytics';
+import type { ProviderAnalytics } from './providerAnalytics';
+import type { AnalyticsOperational } from './analyticsOperational';
 
 export interface OperationalSummary {
-  /** @maxItems 200 */
-  skills: OperationalSummarySkillsItem[];
-  /** @maxItems 200 */
-  providers: OperationalSummaryProvidersItem[];
+  runId: string;
+  status: string;
+  durationMs: OperationalSummaryDurationMs;
+  queueDurationMs: OperationalSummaryQueueDurationMs;
+  workerDurationMs: OperationalSummaryWorkerDurationMs;
+  candidateDurationMs: OperationalSummaryCandidateDurationMs;
+  cleanupDurationMs: OperationalSummaryCleanupDurationMs;
+  /** @minimum 0 */
+  taskCount: number;
+  /** @minimum 0 */
+  missionCount: OperationalSummaryMissionCount;
+  /** @minimum 0 */
+  navigationCount: OperationalSummaryNavigationCount;
+  /** @minimum 0 */
+  reconciliationCount: OperationalSummaryReconciliationCount;
+  positionErrorM: OperationalSummaryPositionErrorM;
+  /** @minimum 0 */
+  evidenceFreshnessMs: OperationalSummaryEvidenceFreshnessMs;
+  /** @minimum 0 */
+  substitutionCount: number;
+  dataClasses: string[];
+  operationalWarnings: string[];
+  formalEligible: boolean;
+  dataClass: OperationalSummaryDataClass;
+  skills: SkillAnalytics[];
+  providers: ProviderAnalytics[];
+  operational: AnalyticsOperational[];
 }

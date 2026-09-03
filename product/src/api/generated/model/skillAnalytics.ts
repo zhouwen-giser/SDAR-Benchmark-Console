@@ -5,21 +5,27 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
-import type { SkillAnalyticsExecutionCount } from './skillAnalyticsExecutionCount';
-import type { SkillAnalyticsPassRate } from './skillAnalyticsPassRate';
-import type { SkillAnalyticsDegradedRate } from './skillAnalyticsDegradedRate';
-import type { SkillAnalyticsFailureRate } from './skillAnalyticsFailureRate';
-import type { SkillAnalyticsMeanScore } from './skillAnalyticsMeanScore';
+import type { SkillAnalyticsStatusCounts } from './skillAnalyticsStatusCounts';
+import type { SkillAnalyticsDurationStats } from './skillAnalyticsDurationStats';
+import type { SkillAnalyticsSourceCompleteness } from './skillAnalyticsSourceCompleteness';
+import type { SkillAnalyticsDataClass } from './skillAnalyticsDataClass';
 
 export interface SkillAnalytics {
   benchmarkRunId: string;
   skillId: string;
   skillVersion: string;
-  executionCount: SkillAnalyticsExecutionCount;
-  passRate: SkillAnalyticsPassRate;
-  degradedRate: SkillAnalyticsDegradedRate;
-  failureRate: SkillAnalyticsFailureRate;
-  meanScore: SkillAnalyticsMeanScore;
+  /** @minimum 0 */
+  invocationCount: number;
+  /** @minimum 0 */
+  terminalCount: number;
+  statusCounts: SkillAnalyticsStatusCounts;
+  durationStats: SkillAnalyticsDurationStats;
+  caseCoverage: string[];
+  trackCoverage: string[];
+  sourceCompleteness: SkillAnalyticsSourceCompleteness;
+  dataClass: SkillAnalyticsDataClass;
+  formalEligible: boolean;
+  evidenceRefs: string[];
   evaluatedAt: string;
   projectedAt: string;
 }

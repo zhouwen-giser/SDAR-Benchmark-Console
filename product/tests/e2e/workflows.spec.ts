@@ -19,7 +19,8 @@ test("Vite same-origin proxy exposes the formal live API without mock fallback",
 
   await page.goto("/overview?scenario=ready&dataState=loaded");
   await expect(page.getByRole("heading", { name: "SDAR 基准质量指挥中心" })).toBeVisible();
-  await expect(page.getByText("无法加载当前数据快照")).toBeVisible();
+  await expect(page.getByText("数据快照为空")).toBeVisible();
+  await expect(page.getByText("无法加载当前数据快照")).toHaveCount(0);
   await expect(page.getByLabel("业务场景")).toHaveCount(0);
   await expect(page.getByLabel("数据状态")).toHaveCount(0);
   await expect(page.locator("body")).not.toContainText("演示数据适配器");

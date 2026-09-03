@@ -11,7 +11,7 @@
     "dev": "vite --host 0.0.0.0 --port 4173",
     "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
-    "api:generate": "orval --config ./orval.config.ts",
+    "api:generate": "orval --config ./orval.config.ts && node scripts/normalize-generated.mjs",
     "api:verify": "node scripts/verify-api-binding.mjs",
     "test": "vitest run",
     "test:watch": "vitest",

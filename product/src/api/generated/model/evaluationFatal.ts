@@ -5,17 +5,28 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
+import type { EvaluationFatalStatus } from './evaluationFatalStatus';
+import type { EvaluationFatalUnit } from './evaluationFatalUnit';
+import type { EvaluationFatalDataClass } from './evaluationFatalDataClass';
 import type { EvaluationFatalProofStatus } from './evaluationFatalProofStatus';
 import type { EvaluationFatalEvidenceLevel } from './evaluationFatalEvidenceLevel';
 
 export interface EvaluationFatal {
   /** @pattern ^F[1-7]$ */
   fatalId: string;
+  version: string;
+  label: string;
+  status: EvaluationFatalStatus;
+  value: boolean;
+  unit: EvaluationFatalUnit;
+  expectation: string;
+  dataClass: EvaluationFatalDataClass;
+  formalEligible: boolean;
   applicable: boolean;
   matched: boolean;
   proofStatus: EvaluationFatalProofStatus;
   evidenceLevel?: EvaluationFatalEvidenceLevel;
   evidenceRefs: string[];
-  reasonCodes?: string[];
+  reasonCodes: string[];
   ruleVersion?: string;
 }

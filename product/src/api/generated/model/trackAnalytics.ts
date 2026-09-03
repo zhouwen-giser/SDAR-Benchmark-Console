@@ -5,24 +5,21 @@
  * Unauthenticated SDAR Benchmark Server v0.1 API, including the complete typed Console surface. PostgreSQL is transactional authority, ClickHouse is an allowlisted analytics projection, and ArtifactStore contains immutable bodies.
  * OpenAPI spec version: 0.1.0
  */
-import type { TrackAnalyticsCaseCount } from './trackAnalyticsCaseCount';
-import type { TrackAnalyticsPassRate } from './trackAnalyticsPassRate';
-import type { TrackAnalyticsReadyRate } from './trackAnalyticsReadyRate';
-import type { TrackAnalyticsFatalCount } from './trackAnalyticsFatalCount';
-import type { TrackAnalyticsHardGateFailureCount } from './trackAnalyticsHardGateFailureCount';
-import type { TrackAnalyticsMeanScore } from './trackAnalyticsMeanScore';
-import type { TrackAnalyticsP10Score } from './trackAnalyticsP10Score';
+import type { TrackAnalyticsDataClass } from './trackAnalyticsDataClass';
 
 export interface TrackAnalytics {
-  benchmarkRunId: string;
   track: string;
-  caseCount: TrackAnalyticsCaseCount;
-  passRate: TrackAnalyticsPassRate;
-  readyRate: TrackAnalyticsReadyRate;
-  fatalCount: TrackAnalyticsFatalCount;
-  hardGateFailureCount: TrackAnalyticsHardGateFailureCount;
-  meanScore: TrackAnalyticsMeanScore;
-  p10Score: TrackAnalyticsP10Score;
-  evaluatedAt: string;
-  projectedAt: string;
+  /** @minimum 0 */
+  caseCount: number;
+  /** @minimum 0 */
+  repetitionCount: number;
+  /** @minimum 0 */
+  passCount: number;
+  /** @minimum 0 */
+  failCount: number;
+  /** @minimum 0 */
+  indeterminateCount: number;
+  dataClass: TrackAnalyticsDataClass;
+  formalEligible: boolean;
+  evidenceRefs: string[];
 }
