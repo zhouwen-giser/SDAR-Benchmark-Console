@@ -58,24 +58,25 @@ rerun API. The browser verified parent/child navigation, parent counts remained
 - Frozen Server functional lock:
   `67c912be57a587cc8a86bb03bc138d170be952ea`; OpenAPI SHA-256
   `92edbd609860b2dc8f38c123a10a4faf5d6a97355797ac43c4ae6dae30c5ca15`,
-  125/125 operations implemented. The final Server acceptance report commit is
-  pending this Console handoff.
+  125/125 operations implemented. Final Server acceptance report commit:
+  `09feee3d99a1e50e076e0178d603a700ed7b4730`.
 - Regression Run
   `run_60d914e2507b9973f3227bc082610b4c5cf19cf6d05ebe0cf190738d33db2d4b`
   reached 36/36 terminal repetitions.
 - Demo executed six Runs across three immutable candidate snapshots and reached
   72/72 terminal repetitions.
-- The standard projector converged to 1,469 ClickHouse rows with 1,469 distinct
-  Product identities and zero pending Product outbox rows. A controlled
+- The standard projector converged to 1,803 ClickHouse rows with 1,803 distinct
+  Product identities/content hashes across 29 Runs and zero pending Product
+  outbox rows. A controlled
   ClickHouse outage returned typed 503 only for projection-backed Analytics;
   PostgreSQL Run details and Artifact endpoints remained available, and
   recovery introduced no duplicates.
 - Dataset 0.1 remained byte-for-byte unchanged and passed the legacy
   Server/standard-worker restart E2E. Worker restart also left the v0.2
   regression Run at exactly 36 repetitions with no duplicate authority rows.
-- Server `pnpm verify` passed 656/656 unit and 67/67 contract tests plus build,
+- Server `pnpm verify` passed 657/657 unit and 67/67 contract tests plus build,
   14 migrations, generated assets, architecture, and OpenAPI checks. Real
-  PostgreSQL integration passed 58 with 4 explicit skips; task-owned
+  PostgreSQL integration passed 59 with 4 explicit skips; task-owned
   ClickHouse write coverage passed 8/8. Twenty-three live schema checks cover
   18 Analytics, six completeness sections, and four Evaluation resource types.
 - Preflight/Create parity now rejects an unresolved contract release during

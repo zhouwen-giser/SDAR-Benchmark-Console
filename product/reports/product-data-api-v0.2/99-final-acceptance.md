@@ -2,9 +2,9 @@
 
 ## Decision
 
-PASS for the Console and shared functional gates. The completion marker remains
-withheld only until the Server records this Console handoff in its final
-report-only acceptance commit.
+PASS for the frozen Development Product Data/API v0.2 Goal. This is a
+Development product acceptance, not Formal Qualification or a live-native
+claim.
 
 ## Source locks and contract hashes
 
@@ -12,11 +12,12 @@ report-only acceptance commit.
   `codex/ugv-four-case-diagnostic-vertical-v0.1@1d91138b56eb70e4edebe4c72fd0a824820ccf87`.
 - Server functional lock:
   `feature/benchmark-product-data-api-v0.2@67c912be57a587cc8a86bb03bc138d170be952ea`.
-  Draft PR #5 remains open and stacked on the Development Vertical branch; its
-  final report-only acceptance commit is pending this Console handoff.
-- Console branch: `feature/benchmark-console-product-data-api-v0.2`; the final
-  typed-contract/E2E commit is the commit containing this report. Draft PR #2
-  remains open and stacked on
+  Final Server acceptance report commit:
+  `09feee3d99a1e50e076e0178d603a700ed7b4730`. Draft PR #5 remains open and
+  stacked on the Development Vertical branch.
+- Console functional/E2E lock:
+  `feature/benchmark-console-product-data-api-v0.2@8979f689733c5971001b5f8932089b8df5a66f7a`.
+  Draft PR #2 remains open and stacked on
   `feature/benchmark-control-ugv-diagnostic-v0.1`.
 - OpenAPI SHA-256:
   `92edbd609860b2dc8f38c123a10a4faf5d6a97355797ac43c4ae6dae30c5ca15`.
@@ -61,8 +62,9 @@ report-only acceptance commit.
 PostgreSQL remains Run, registry, and Evaluation authority; ArtifactStore
 remains content authority. The standard projector drains the durable Product
 outbox into the Benchmark-owned ClickHouse projection. The accepted snapshot is
-1,469 rows and 1,469 distinct Product identities with zero pending Product
-outbox rows. Controlled ClickHouse outage/recovery preserved PostgreSQL and
+1,803 rows, 1,803 distinct Product identities, and 1,803 distinct content
+hashes across 29 Runs with zero pending Product outbox rows. Controlled
+ClickHouse outage/recovery preserved PostgreSQL and
 Artifact availability, returned typed 503 for affected Analytics, and recovered
 without duplicate projection identities.
 
@@ -96,9 +98,9 @@ Console verification passed:
   `run_60d914e2507b9973f3227bc082610b4c5cf19cf6d05ebe0cf190738d33db2d4b`:
   36/36 terminal; restart produced no duplicates.
 - Six Demo Runs across three immutable candidates: 72/72 terminal.
-- Server `pnpm verify`: 656/656 unit, 67/67 contract, build, 14 migrations,
+- Server `pnpm verify`: 657/657 unit, 67/67 contract, build, 14 migrations,
   generated assets, architecture, and OpenAPI PASS.
-- Real PostgreSQL integration: 58 PASS / 4 explicit skips. Task-owned
+- Real PostgreSQL integration: 59 PASS / 4 explicit skips. Task-owned
   ClickHouse writes: 8/8 PASS. Twenty-three live response validations cover all
   18 Analytics modules, six completeness sections, and four K7 Evaluation
   resource types against the frozen schemas.
@@ -116,4 +118,4 @@ Console verification passed:
 
 ## Completion marker
 
-Withheld pending final requirement-by-requirement acceptance.
+SDAR_BENCHMARK_PRODUCT_DATA_API_V0_2_COMPLETE

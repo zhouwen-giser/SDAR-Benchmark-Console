@@ -1,7 +1,7 @@
 {
   "schemaVersion": "sdar-benchmark.product-data-api-source-lock/v0.2",
   "goalId": "sdar-benchmark-product-data-api-completion-v0.2",
-  "observedAt": "2026-09-03T08:31:52+08:00",
+  "observedAt": "2026-09-03T08:39:38+08:00",
   "goalPackage": {
     "path": "/home/zhouwen/下载/SDAR_Benchmark_Product_Data_API_Completion_Codex_Goal_Package_V0.2.zip",
     "sha256": "cbda05e69be407ba98789aa96a17b5e6f612bf328120c7e2069f13ffa1d86b2c",
@@ -16,6 +16,7 @@
     "parentPullRequestState": "open_draft",
     "targetBranch": "feature/benchmark-product-data-api-v0.2",
     "targetCommit": "67c912be57a587cc8a86bb03bc138d170be952ea",
+    "acceptanceCommit": "09feee3d99a1e50e076e0178d603a700ed7b4730",
     "targetPullRequest": 5,
     "targetPullRequestState": "open_draft",
     "stackedBase": "codex/ugv-four-case-diagnostic-vertical-v0.1"
