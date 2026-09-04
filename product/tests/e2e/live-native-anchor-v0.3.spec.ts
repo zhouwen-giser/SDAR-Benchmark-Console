@@ -22,16 +22,29 @@ test("Console creates and verifies the four-case live-native anchor", async ({ p
   test.skip(process.env.LIVE_NATIVE_CREATE !== "1", "Set LIVE_NATIVE_CREATE=1 only after four-party native preflight is eligible.");
   test.setTimeout(960_000);
 
+  const verifyRun = process.env.LIVE_NATIVE_VERIFY_RUN;
   const rerunParent = process.env.LIVE_NATIVE_RERUN_PARENT;
   let runId: string;
-  if (rerunParent) {
+  if (verifyRun) {
+    runId = verifyRun;
+    await page.goto(`/runs/${runId}`);
+    await expect(page.getByRole("heading", { name: `Benchmark Run ${runId}` })).toBeVisible();
+  } else if (rerunParent) {
     await page.goto(`/runs/${rerunParent}`);
     await expect(page.getByText("Rerun selected Cases")).toBeVisible();
     await expect(page.locator(".rerun-case-grid input[type=checkbox]")).toHaveCount(4);
     await page.getByRole("radio", { name: "live", exact: true }).click();
+    const rerunResponsePromise = page.waitForResponse((response) =>
+      response.request().method() === "POST"
+      && response.url().includes(`/benchmark-runs/${rerunParent}/reruns`),
+    );
     await page.getByRole("button", { name: "创建子 Run" }).click();
-    await expect(page).toHaveURL(/\/runs\/run_[a-z0-9]+.*parentRunId=/u, { timeout: 30_000 });
-    runId = runIdFromPage(page);
+    const rerunResponse = await rerunResponsePromise;
+    expect(rerunResponse.ok()).toBe(true);
+    const rerunResource = await rerunResponse.json() as { data: { runId: string } };
+    runId = rerunResource.data.runId;
+    expect(runId).not.toBe(rerunParent);
+    await expect(page).toHaveURL(new RegExp(`/runs/${runId}(?:\\?|$)`, "u"), { timeout: 30_000 });
   } else {
     await page.goto("/runs/new");
     await expect(page.getByRole("heading", { name: "新建 Benchmark Run" })).toBeVisible();
