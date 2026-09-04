@@ -37,9 +37,11 @@ joint 18094 runtime and avoids silently sending Playwright to the historical
 Observed at `2026-09-04T06:05:27.553Z` against
 `http://127.0.0.1:18094`:
 
-- `pnpm check`: PASS; 13 Vitest files and 53 tests PASS, strict TypeScript and
+- `pnpm check`: PASS; 13 Vitest files and 54 tests PASS, strict TypeScript and
   production build PASS.
-- Focused real HTTP Playwright: `9/9` PASS.
+- Full real HTTP Playwright: `14/14` PASS. This includes the existing v0.2
+  create/rerun/artifact/analytics/completeness regression and all v0.3
+  operational browser cases.
 - Topology: 15 registry components and 12 edges rendered from PostgreSQL;
   compatibility rows render as typed values.
 - Environment/resource: `ugv-simulator-dev` and `vehicle:ugv1` list/detail
@@ -63,15 +65,25 @@ Observed at `2026-09-04T06:05:27.553Z` against
   `RUN_NATIVE_SNAPSHOT_NOT_CAPTURED` and
   `REPETITION_NATIVE_SNAPSHOT_NOT_CAPTURED`. Durable event revisions are `1`
   (`reconciliation.queued`) and `2` (`reconciliation.completed_partial`).
+- Final v0.2 regression parent
+  `run_601cb117eac22a6d5895c32fb4d19fa47b912f4e1ca96ff73955b4806b25f3fa`
+  reached `completed_with_substitutions` with 3/3 cases. Immutable child
+  `run_a80d4b9154a76b2b3bfc56db1b610683e6437de7a2659159dd0688984ab27945`
+  reached the same authority terminal state with 1/1 case. Both remain
+  `formalEligible=false`, `qualityScore=null`, and `releaseGate=unavailable`.
+- Final UI-created reconcile `reconcile_4c038fbc8d93e739b270f669` reached
+  `completed`; its authority read materialized one Run snapshot and 12
+  Repetition snapshots, with `physicalSideEffectCount=0` and no reason codes.
+- UI-G05 is covered: selecting `live_native` atomically selects
+  `require_native`, `require_full`, `require_source_observed_at`, automatic
+  reconciliation, SSE, and disables Development substitutions in the visible
+  policy summary.
 
 ## Remaining advisories
 
-- The 18094 compatibility preset alias was restored with the exact long immutable
-  contract release and `simulator:192.168.2.63` environment. Dynamic preflight
-  then exposed a Server implementation mismatch: its strict request parser
-  rejected the five optional v0.3 Create fields that are present in the frozen
-  OpenAPI. Server has the exact traced request and is fixing preflight/create
-  parity without contract drift.
+- The 18094 compatibility preset alias and preflight/create parser parity are
+  restored. The five optional frozen Create fields are accepted without OpenAPI
+  drift; dynamic Console create and rerun both pass.
 - Provider/Telemetry readiness is partial/degraded. No M13/M14 native anchor,
   `substitutionCount=0`, or native software readiness is claimed here.
 - Existing simulated Product v0.2 Runs remain diagnostic history only.

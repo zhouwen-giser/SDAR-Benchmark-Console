@@ -9,6 +9,21 @@ async function expectNoFixtureFallback(page: Page) {
 }
 
 test.describe("Live-native Operations Console v0.3", () => {
+  test("selects the complete require-native policy from Run Create v3", async ({ page }) => {
+    await page.goto("/runs/new");
+    await expect(page.getByRole("heading", { name: "新建 Benchmark Run" })).toBeVisible();
+    await expect(page.getByText("UGV Diagnostic Regression").first()).toBeVisible();
+    await page.getByText("Development · simulated", { exact: true }).click();
+    await page.getByText("Development · live native", { exact: true }).click();
+    await expect(page.getByRole("row", { name: /Target.*live_native/u })).toBeVisible();
+    await expect(page.getByRole("row", { name: /Native requirement.*require_native/u }).last()).toBeVisible();
+    await expect(page.getByRole("row", { name: /Telemetry.*require_full/u })).toBeVisible();
+    await expect(page.getByRole("row", { name: /Observation time.*require_source_observed_at/u })).toBeVisible();
+    await expect(page.getByRole("row", { name: /Reconciliation.*automatic/u })).toBeVisible();
+    await expect(page.getByRole("row", { name: /Development substitutions.*禁止/u })).toBeVisible();
+    await expectNoFixtureFallback(page);
+  });
+
   test("renders PostgreSQL-backed topology, environment, and resource authority", async ({ page }) => {
     await page.goto("/system/topology");
     await expect(page.getByRole("heading", { name: "System Topology" })).toBeVisible();

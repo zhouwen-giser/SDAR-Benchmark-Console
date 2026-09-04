@@ -1,10 +1,24 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { RunCatalogConfigurator } from "./RunCatalogConfigurator";
+import { executionTargetDefaults, RunCatalogConfigurator } from "./RunCatalogConfigurator";
 
 afterEach(cleanup);
 
 describe("RunCatalogConfigurator", () => {
+  it("selects the complete accepted native policy when live-native is chosen", () => {
+    expect(executionTargetDefaults("live_native")).toEqual({
+      nativeRequirement: "require_native",
+      telemetryPolicy: "require_full",
+      observationTimePolicy: "require_source_observed_at",
+      reconciliationPolicy: "automatic",
+      streamingEnabled: true,
+    });
+    expect(executionTargetDefaults("simulated")).toEqual(expect.objectContaining({
+      nativeRequirement: "prefer_native",
+      telemetryPolicy: "allow_partial",
+    }));
+  });
+
   it("keeps server-driven subset order editable", () => {
     const onChange = vi.fn();
     render(<RunCatalogConfigurator

@@ -39,6 +39,19 @@ export interface RunCatalogSelection {
   repeatCount: number;
 }
 
+export function executionTargetDefaults(target: RunCatalogSelection["target"]): Pick<
+  RunCatalogSelection,
+  "nativeRequirement" | "telemetryPolicy" | "observationTimePolicy" | "reconciliationPolicy" | "streamingEnabled"
+> {
+  return {
+    nativeRequirement: target === "live_native" ? "require_native" : "prefer_native",
+    telemetryPolicy: target === "live_native" ? "require_full" : "allow_partial",
+    observationTimePolicy: "require_source_observed_at",
+    reconciliationPolicy: "automatic",
+    streamingEnabled: true,
+  };
+}
+
 export function RunCatalogConfigurator({ presets, datasets, candidates, cases, environments = [], resources = [], value, onChange }: {
   presets: RunPresetCatalogOption[];
   datasets: RunCatalogOption[];
@@ -75,7 +88,10 @@ export function RunCatalogConfigurator({ presets, datasets, candidates, cases, e
       <label><span>Preset</span><Select aria-label="Preset" value={value.presetId} onChange={selectPreset} options={presets.map((item) => ({ value: item.id, label: item.label, disabled: item.availability === "unavailable" }))} /></label>
       <label><span>Dataset version</span><Select aria-label="Dataset version" value={value.datasetVersionRef} onChange={(datasetVersionRef) => set({ datasetVersionRef })} options={datasets.map((item) => ({ value: item.id, label: item.label, disabled: item.availability === "unavailable" }))} /></label>
       <label><span>Candidate</span><Select aria-label="Candidate" value={value.candidateSnapshotRef} onChange={(candidateSnapshotRef) => set({ candidateSnapshotRef })} options={candidates.map((item) => ({ value: item.id, label: item.label, disabled: item.availability === "unavailable" }))} /></label>
-      <label><span>Execution target</span><Select aria-label="Execution target" value={value.target} onChange={(target) => set({ target, nativeRequirement: target === "live_native" ? "require_native" : value.nativeRequirement })} options={[{ value: "simulated", label: "Development · simulated" }, { value: "live_native", label: "Development · live native" }]} /></label>
+      <label><span>Execution target</span><Select aria-label="Execution target" value={value.target} onChange={(target) => set({
+        target,
+        ...executionTargetDefaults(target),
+      })} options={[{ value: "simulated", label: "Development · simulated" }, { value: "live_native", label: "Development · live native" }]} /></label>
       <label><span>Native requirement</span><Select aria-label="Native requirement" value={value.nativeRequirement} onChange={(nativeRequirement) => set({ nativeRequirement })} options={[{ value: "prefer_native", label: "Prefer native" }, { value: "require_native", label: "Require native" }]} /></label>
       <label><span>Environment</span><Select aria-label="Environment" allowClear value={value.environmentId} onChange={(environmentId) => set({ environmentId: environmentId ?? null, resourceIds: [] })} options={environments.map((item) => ({ value: item.id, label: item.label, disabled: item.availability === "unavailable" }))} /></label>
       <label><span>Resources</span><Select aria-label="Resources" mode="multiple" value={value.resourceIds} onChange={(resourceIds) => set({ resourceIds })} options={resources.filter((item) => !item.environmentId || item.environmentId === value.environmentId).map((item) => ({ value: item.id, label: item.label, disabled: item.availability === "unavailable" }))} /></label>
