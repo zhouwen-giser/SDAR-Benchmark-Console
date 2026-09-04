@@ -72,7 +72,10 @@ export function RunCreatePage() {
   });
 
   const unavailable = compatibilityPreset.data?.data.availability !== "available" || catalogPresets.length === 0 || request === null;
-  const canCreate = preflight?.canCreateRun === true && preflight.canExecuteRun === true && !(selection?.nativeRequirement === "require_native" && preflight.substitutions.length > 0);
+  const canCreate = canCreateFromPreflight(
+    preflight,
+    selection?.nativeRequirement === "require_native",
+  );
   const currentStep = createMutation.isSuccess ? 3 : createMutation.isPending ? 2 : preflight === null ? 0 : 1;
 
   return (
@@ -272,6 +275,16 @@ function withPreflight(
   const policy = request.executionPolicy as DevelopmentExecutionPolicy;
   policy.developmentPreflight = preflight;
   return request;
+}
+
+export function canCreateFromPreflight(
+  preflight: (Pick<DevelopmentRunPreflight, "canCreateRun" | "canExecuteRun"> & {
+    substitutions: Array<Pick<DevelopmentRunPreflight["substitutions"][number], "implementationKind">>;
+  }) | null,
+  requireNative: boolean,
+) {
+  if (preflight?.canCreateRun !== true || preflight.canExecuteRun !== true) return false;
+  return !requireNative || preflight.substitutions.every((item) => item.implementationKind === "native");
 }
 
 function toCatalogPreset(value: Awaited<ReturnType<typeof consoleApi.listBenchmarkRunPresets>>["data"][number]): RunPresetCatalogOption | null {
