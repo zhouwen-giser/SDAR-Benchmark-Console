@@ -6,6 +6,7 @@
 - Latest pushed Console implementation: `e1904feab14e8a54e3b42aa8a22a997ed6a26a8e`
 - Server contract: `feature/benchmark-live-native-operations-v0.3@e328b09204447e9f9ab367171b30e8a79efe8ccd`
 - Server M4-M10 implementation: `c30d8b2a8ae9e3323a2ef59656ff1f1b196d77ce`
+- Server authority/runtime regression batch: `62b48fbf890860b287cba9087a0827456c0f21ca`
 - OpenAPI SHA-256: `335c50caea64b9ac6aa0aac69c143d73ee802955715ab79218f6f9801b8b81a3`
 
 ## Implemented contracts and code

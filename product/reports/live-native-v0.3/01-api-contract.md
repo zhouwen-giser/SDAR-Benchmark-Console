@@ -61,3 +61,5 @@ snapshot from the frozen contract. M4-M10 implementation head is
 `c30d8b2a8ae9e3323a2ef59656ff1f1b196d77ce`; the contract lock remains M1 commit
 `e328b09204447e9f9ab367171b30e8a79efe8ccd` and SHA-256
 `335c50caea64b9ac6aa0aac69c143d73ee802955715ab79218f6f9801b8b81a3`.
+The authority/runtime regression batch is locked at
+`62b48fbf890860b287cba9087a0827456c0f21ca`.
