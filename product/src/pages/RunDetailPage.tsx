@@ -84,6 +84,10 @@ export function RunDetailPage() {
     () => extractRepetitions(runRepetitions.data?.data ?? dashboard.data?.data.repetitions),
     [dashboard.data?.data.repetitions, runRepetitions.data?.data],
   );
+  const rerunCases = useMemo(
+    () => plannedRerunCases(executionPlan.data?.data.caseOrder ?? [], repetitions),
+    [executionPlan.data?.data.caseOrder, repetitions],
+  );
   const repetitionId = selectedRepetitionId ?? repetitions[0]?.repetitionId;
   const diagnosticOptions = {
     enabled: repetitionId !== undefined,
@@ -345,11 +349,28 @@ export function RunDetailPage() {
         </SectionCard>
       )}
 
-      {repetitions.length > 0 && <SectionCard title="Rerun selected Cases">
-        <RerunRequestPanel cases={repetitions.map((item) => ({ caseId: item.caseId ?? item.repetitionId }))} pending={rerun.isPending} onSubmit={(input) => rerun.mutate(input)} />
+      {rerunCases.length > 0 && <SectionCard title="Rerun selected Cases">
+        <RerunRequestPanel cases={rerunCases} pending={rerun.isPending} onSubmit={(input) => rerun.mutate(input)} />
       </SectionCard>}
     </div>
   );
+}
+
+export function plannedRerunCases(
+  plannedCaseIds: readonly string[],
+  repetitions: readonly { repetitionId: string; caseId: string | null }[],
+) {
+  const materialized = new Map(
+    repetitions.map((item) => [item.caseId ?? item.repetitionId, item]),
+  );
+  const caseIds = [
+    ...plannedCaseIds,
+    ...materialized.keys(),
+  ].filter((caseId, index, values) => values.indexOf(caseId) === index);
+  return caseIds.map((caseId) => ({
+    caseId,
+    terminalState: null,
+  }));
 }
 
 function DashboardProjection({

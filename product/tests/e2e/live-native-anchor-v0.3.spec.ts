@@ -22,34 +22,46 @@ test("Console creates and verifies the four-case live-native anchor", async ({ p
   test.skip(process.env.LIVE_NATIVE_CREATE !== "1", "Set LIVE_NATIVE_CREATE=1 only after four-party native preflight is eligible.");
   test.setTimeout(960_000);
 
-  await page.goto("/runs/new");
-  await expect(page.getByRole("heading", { name: "新建 Benchmark Run" })).toBeVisible();
-  await expect(page.getByText("UGV Diagnostic Regression").first()).toBeVisible();
-  await page.getByText("Development · simulated", { exact: true }).click();
-  await page.getByText("Development · live native", { exact: true }).click();
+  const rerunParent = process.env.LIVE_NATIVE_RERUN_PARENT;
+  let runId: string;
+  if (rerunParent) {
+    await page.goto(`/runs/${rerunParent}`);
+    await expect(page.getByText("Rerun selected Cases")).toBeVisible();
+    await expect(page.locator(".rerun-case-grid input[type=checkbox]")).toHaveCount(4);
+    await page.getByRole("radio", { name: "live", exact: true }).click();
+    await page.getByRole("button", { name: "创建子 Run" }).click();
+    await expect(page).toHaveURL(/\/runs\/run_[a-z0-9]+.*parentRunId=/u, { timeout: 30_000 });
+    runId = runIdFromPage(page);
+  } else {
+    await page.goto("/runs/new");
+    await expect(page.getByRole("heading", { name: "新建 Benchmark Run" })).toBeVisible();
+    await expect(page.getByText("UGV Diagnostic Regression").first()).toBeVisible();
+    await page.getByText("Development · simulated", { exact: true }).click();
+    await page.getByText("Development · live native", { exact: true }).click();
 
-  for (const caseId of [
-    "UGV-NODE-002", "UGV-NODE-003",
-    "UGV-CORE-002", "UGV-CORE-003",
-    "UGV-MCP-001", "UGV-MCP-002",
-    "UGV-XCHAIN-001", "UGV-XCHAIN-002",
-  ]) {
-    await page.getByRole("checkbox", { name: `${caseId} · ${caseId}` }).click();
+    for (const caseId of [
+      "UGV-NODE-002", "UGV-NODE-003",
+      "UGV-CORE-002", "UGV-CORE-003",
+      "UGV-MCP-001", "UGV-MCP-002",
+      "UGV-XCHAIN-001", "UGV-XCHAIN-002",
+    ]) {
+      await page.getByRole("checkbox", { name: `${caseId} · ${caseId}` }).click();
+    }
+    await page.getByRole("spinbutton", { name: "Repeat count" }).fill("1");
+
+    await expect(page.getByRole("row", { name: /Target.*live_native/u })).toBeVisible();
+    await expect(page.getByRole("row", { name: /Native requirement.*require_native/u }).last()).toBeVisible();
+    await expect(page.getByRole("row", { name: /Telemetry.*require_full/u })).toBeVisible();
+    await expect(page.getByRole("row", { name: /Development substitutions.*禁止/u })).toBeVisible();
+
+    await page.getByRole("button", { name: /执行预检/u }).click();
+    await expect(page.getByText("ready", { exact: true })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("ready_with_substitutions", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /创建 Benchmark Run/u })).toBeEnabled();
+    await page.getByRole("button", { name: /创建 Benchmark Run/u }).click();
+    await expect(page).toHaveURL(/\/runs\/run_[a-z0-9]+/u, { timeout: 30_000 });
+    runId = runIdFromPage(page);
   }
-  await page.getByRole("spinbutton", { name: "Repeat count" }).fill("1");
-
-  await expect(page.getByRole("row", { name: /Target.*live_native/u })).toBeVisible();
-  await expect(page.getByRole("row", { name: /Native requirement.*require_native/u }).last()).toBeVisible();
-  await expect(page.getByRole("row", { name: /Telemetry.*require_full/u })).toBeVisible();
-  await expect(page.getByRole("row", { name: /Development substitutions.*禁止/u })).toBeVisible();
-
-  await page.getByRole("button", { name: /执行预检/u }).click();
-  await expect(page.getByText("ready", { exact: true })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText("ready_with_substitutions", { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /创建 Benchmark Run/u })).toBeEnabled();
-  await page.getByRole("button", { name: /创建 Benchmark Run/u }).click();
-  await expect(page).toHaveURL(/\/runs\/run_[a-z0-9]+/u, { timeout: 30_000 });
-  const runId = runIdFromPage(page);
   testInfo.annotations.push({ type: "live-native-run-id", description: runId });
 
   await waitForTerminal(request, runId);
