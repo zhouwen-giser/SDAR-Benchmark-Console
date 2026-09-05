@@ -18,6 +18,7 @@ import { consoleApi } from "../api/consoleApi";
 import { PageHeader, SectionCard } from "../components/common";
 import { RunCatalogConfigurator, type RunCatalogSelection, type RunPresetCatalogOption } from "../components/RunCatalogConfigurator";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
+import { operationalApi } from "../operational/api";
 import type {
   CreateBenchmarkRun,
   DevelopmentExecutionPolicy,
@@ -28,7 +29,7 @@ export function RunCreatePage() {
   const { navigateWithContext } = useAnalysisContext();
   const [selection, setSelection] = useState<RunCatalogSelection | null>(null);
   const [preflight, setPreflight] = useState<DevelopmentRunPreflight | null>(null);
-  const idempotencyKey = useRef(`console-ugv-development-${crypto.randomUUID()}`);
+  const idempotencyKey = useRef(`console-ugv-v0.3-${crypto.randomUUID()}`);
   const compatibilityPreset = useQuery({
     queryKey: ["ugv-development-preset"],
     queryFn: () => consoleApi.getUgvDiagnosticDevelopmentPreset(),
@@ -37,12 +38,16 @@ export function RunCreatePage() {
     queryKey: ["benchmark-run-presets"],
     queryFn: () => consoleApi.listBenchmarkRunPresets(),
   });
+  const environments = useQuery({ queryKey: ["operational", "run-create", "environments"], queryFn: () => operationalApi.listEnvironments() });
+  const resources = useQuery({ queryKey: ["operational", "run-create", "resources"], queryFn: () => operationalApi.listResources() });
   const catalogPresets = useMemo(() => (catalog.data?.data ?? []).map(toCatalogPreset).filter((item): item is RunPresetCatalogOption => item !== null), [catalog.data]);
   useEffect(() => {
     if (selection !== null || catalogPresets.length === 0) return;
     const preset = catalogPresets.find((item) => item.id === "ugv-diagnostic-regression/0.2") ?? catalogPresets[0]!;
-    setSelection({ presetId: preset.id, datasetVersionRef: preset.datasetVersionRef, candidateSnapshotRef: preset.candidateSnapshotRef, target: "simulated", selectedCaseIds: [...preset.selectedCaseIds], repeatCount: preset.repeatCount });
-  }, [catalogPresets, selection]);
+    const environmentId = environments.data?.data[0]?.environmentId ?? null;
+    const resourceIds = resources.data?.data.filter((item) => environmentId === null || item.environmentId === environmentId).map((item) => item.resourceId) ?? [];
+    setSelection({ presetId: preset.id, datasetVersionRef: preset.datasetVersionRef, candidateSnapshotRef: preset.candidateSnapshotRef, target: "simulated", nativeRequirement: "prefer_native", environmentId, resourceIds, telemetryPolicy: "allow_partial", observationTimePolicy: "require_source_observed_at", reconciliationPolicy: "automatic", streamingEnabled: true, selectedCaseIds: [...preset.selectedCaseIds], repeatCount: preset.repeatCount });
+  }, [catalogPresets, environments.data, resources.data, selection]);
   const request = useMemo(() => {
     const template = compatibilityPreset.data?.data.requestTemplate;
     return template === null || template === undefined || selection === null
@@ -67,14 +72,17 @@ export function RunCreatePage() {
   });
 
   const unavailable = compatibilityPreset.data?.data.availability !== "available" || catalogPresets.length === 0 || request === null;
-  const canCreate = preflight?.canCreateRun === true && preflight.canExecuteRun === true;
+  const canCreate = canCreateFromPreflight(
+    preflight,
+    selection?.nativeRequirement === "require_native",
+  );
   const currentStep = createMutation.isSuccess ? 3 : createMutation.isPending ? 2 : preflight === null ? 0 : 1;
 
   return (
     <div className="standard-page run-create-page">
       <PageHeader
         title="新建 Benchmark Run"
-        subtitle="从 Server 可发现的 UGV preset 预检、确认替代计划，再写入 PostgreSQL Run Authority。"
+        subtitle="Run Create v3：选择 simulated / live_native、Environment / Resource、native requirement、Telemetry / time / reconcile / SSE policy，再写入 PostgreSQL Run Authority。"
         meta={catalog.data?.meta ?? compatibilityPreset.data?.meta}
         actions={<Button onClick={() => navigateWithContext("/runs")}>返回运行列表</Button>}
       />
@@ -116,14 +124,22 @@ export function RunCreatePage() {
               datasets={uniqueCatalogOptions(catalogPresets, "datasetVersionRef")}
               candidates={uniqueCatalogOptions(catalogPresets, "candidateSnapshotRef")}
               cases={catalogCaseOptions(catalogPresets, selection.datasetVersionRef)}
+              environments={(environments.data?.data ?? []).map((item) => ({ id: item.environmentId, label: `${item.environmentId} · ${item.environmentVersion}`, availability: item.leaseStatus === "available" ? "available" : "unavailable" }))}
+              resources={(resources.data?.data ?? []).map((item) => ({ id: item.resourceId, label: `${item.resourceId} · ${item.availability}`, availability: item.availability === "available" ? "available" : "unavailable", environmentId: item.environmentId }))}
               value={selection}
               onChange={(value) => { setSelection(value); setPreflight(null); }}
             />}
             <Alert
               type="info"
               showIcon
-              message="开发模式不以 exact commit 作为执行门禁"
-              description="分支、Commit 与 Dirty 状态仍作为 provenance 保存；所有结果均为 NOT FORMAL QUALIFICATION。"
+              message="Development diagnostic boundary"
+              description="simulated 可显式使用 Development substitutions；live_native + require_native 必须 substitutionCount=0、Development Evidence Relay=false。所有结果均为 NOT FORMAL QUALIFICATION。"
+            />
+            <Alert
+              type="info"
+              showIcon
+              message="External environment boundary"
+              description="外部 Simulator 的源码、镜像与部署只读；Console 不据此推断执行资格。只有 Server preflight 的 canCreateRun/canExecuteRun 与 native selection 可以放行创建。"
             />
             <Space wrap>
               <Button
@@ -161,7 +177,14 @@ export function RunCreatePage() {
               { key: "candidate", label: "Candidate", children: selection?.candidateSnapshotRef ?? "—" },
               { key: "cases", label: "Cases × Repeat", children: selection ? `${selection.selectedCaseIds.length} × ${selection.repeatCount}` : "—" },
               { key: "target", label: "Target", children: selection?.target ?? "—" },
-              { key: "substitute", label: "Development substitutions", children: "允许且必须显式记录" },
+              { key: "native", label: "Native requirement", children: selection?.nativeRequirement ?? "—" },
+              { key: "environment", label: "Environment", children: selection?.environmentId ?? "—" },
+              { key: "resources", label: "Resources", children: selection?.resourceIds.join("、") || "—" },
+              { key: "telemetry", label: "Telemetry", children: selection?.telemetryPolicy ?? "—" },
+              { key: "time", label: "Observation time", children: selection?.observationTimePolicy ?? "—" },
+              { key: "reconcile", label: "Reconciliation", children: selection?.reconciliationPolicy ?? "—" },
+              { key: "streaming", label: "Streaming", children: selection?.streamingEnabled ? "SSE + snapshots" : "Snapshots" },
+              { key: "substitute", label: "Development substitutions", children: selection?.nativeRequirement === "require_native" ? "禁止" : "允许且必须显式记录" },
               { key: "formal", label: "Formal Eligible", children: <Tag color="red">FALSE</Tag> },
               { key: "score", label: "Quality Score", children: "—" },
               { key: "gate", label: "Release Gate", children: "Unavailable" },
@@ -218,11 +241,33 @@ function developmentRequest(
   if (policy.runClass !== "development") throw new Error("UGV preset 不是 Development execution policy。");
   request.datasetVersionRef = selection.datasetVersionRef;
   request.candidate.snapshotRef = selection.candidateSnapshotRef;
-  policy.target = selection.target;
-  policy.permit.target = selection.target;
-  policy.allowDevelopmentSubstitutions = true;
-  policy.fallbackToSimulation = true;
-  Object.assign(policy, { selectedCaseIds: selection.selectedCaseIds, repeatCount: selection.repeatCount });
+  const requireNative = selection.target === "live_native" && selection.nativeRequirement === "require_native";
+  Object.assign(policy, {
+    target: requireNative ? "live" : "simulated",
+    executionTarget: selection.target,
+    nativeRequirement: selection.nativeRequirement,
+    selectedCaseIds: selection.selectedCaseIds,
+    repeatCount: selection.repeatCount,
+    environmentRef: selection.environmentId,
+    resourceSelectors: selection.resourceIds.map((resourceId) => ({ resourceId })),
+    telemetryPolicy: selection.telemetryPolicy,
+    observationTimePolicy: selection.observationTimePolicy,
+    reconciliationPolicy: selection.reconciliationPolicy,
+    streamingEnabled: selection.streamingEnabled,
+    allowDevelopmentSubstitutions: !requireNative,
+    fallbackToSimulation: !requireNative,
+  });
+  Object.assign(policy.permit, { target: requireNative ? "live" : "simulated", environmentRef: selection.environmentId ?? policy.permit.environmentRef });
+  request.environment.ref = selection.environmentId ?? request.environment.ref;
+  request.environment.config = {
+    ...(request.environment.config ?? {}),
+    resourceSelectors: selection.resourceIds.map((resourceId) => ({ resourceId })),
+  };
+  request.nativeRequirement = selection.nativeRequirement;
+  request.telemetryPolicy = selection.telemetryPolicy;
+  request.observationTimePolicy = selection.observationTimePolicy;
+  request.reconciliationPolicy = selection.reconciliationPolicy;
+  request.streamingEnabled = selection.streamingEnabled;
   delete policy.developmentPreflight;
   request.idempotencyKey = idempotencyKey;
   return request;
@@ -236,6 +281,16 @@ function withPreflight(
   const policy = request.executionPolicy as DevelopmentExecutionPolicy;
   policy.developmentPreflight = preflight;
   return request;
+}
+
+export function canCreateFromPreflight(
+  preflight: (Pick<DevelopmentRunPreflight, "canCreateRun" | "canExecuteRun"> & {
+    substitutions: Array<Pick<DevelopmentRunPreflight["substitutions"][number], "implementationKind">>;
+  }) | null,
+  requireNative: boolean,
+) {
+  if (preflight?.canCreateRun !== true || preflight.canExecuteRun !== true) return false;
+  return !requireNative || preflight.substitutions.every((item) => item.implementationKind === "native");
 }
 
 function toCatalogPreset(value: Awaited<ReturnType<typeof consoleApi.listBenchmarkRunPresets>>["data"][number]): RunPresetCatalogOption | null {

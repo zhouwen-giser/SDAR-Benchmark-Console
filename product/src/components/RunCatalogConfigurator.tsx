@@ -1,4 +1,4 @@
-import { Button, Checkbox, Descriptions, InputNumber, Select, Space, Table, Tag } from "antd";
+import { Button, Checkbox, Descriptions, InputNumber, Select, Space, Switch, Table, Tag } from "antd";
 import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
 
 export interface RunCatalogOption {
@@ -27,16 +27,38 @@ export interface RunCatalogSelection {
   presetId: string;
   datasetVersionRef: string;
   candidateSnapshotRef: string;
-  target: "simulated" | "live";
+  target: "simulated" | "live_native";
+  nativeRequirement: "prefer_native" | "require_native";
+  environmentId: string | null;
+  resourceIds: string[];
+  telemetryPolicy: "require_full" | "allow_partial" | "development_relay";
+  observationTimePolicy: "require_source_observed_at" | "allow_received_at_fallback";
+  reconciliationPolicy: "automatic" | "manual";
+  streamingEnabled: boolean;
   selectedCaseIds: string[];
   repeatCount: number;
 }
 
-export function RunCatalogConfigurator({ presets, datasets, candidates, cases, value, onChange }: {
+export function executionTargetDefaults(target: RunCatalogSelection["target"]): Pick<
+  RunCatalogSelection,
+  "nativeRequirement" | "telemetryPolicy" | "observationTimePolicy" | "reconciliationPolicy" | "streamingEnabled"
+> {
+  return {
+    nativeRequirement: target === "live_native" ? "require_native" : "prefer_native",
+    telemetryPolicy: target === "live_native" ? "require_full" : "allow_partial",
+    observationTimePolicy: "require_source_observed_at",
+    reconciliationPolicy: "automatic",
+    streamingEnabled: true,
+  };
+}
+
+export function RunCatalogConfigurator({ presets, datasets, candidates, cases, environments = [], resources = [], value, onChange }: {
   presets: RunPresetCatalogOption[];
   datasets: RunCatalogOption[];
   candidates: RunCatalogOption[];
   cases: RunCaseCatalogOption[];
+  environments?: RunCatalogOption[];
+  resources?: Array<RunCatalogOption & { environmentId?: string }>;
   value: RunCatalogSelection;
   onChange: (value: RunCatalogSelection) => void;
 }) {
@@ -66,12 +88,23 @@ export function RunCatalogConfigurator({ presets, datasets, candidates, cases, v
       <label><span>Preset</span><Select aria-label="Preset" value={value.presetId} onChange={selectPreset} options={presets.map((item) => ({ value: item.id, label: item.label, disabled: item.availability === "unavailable" }))} /></label>
       <label><span>Dataset version</span><Select aria-label="Dataset version" value={value.datasetVersionRef} onChange={(datasetVersionRef) => set({ datasetVersionRef })} options={datasets.map((item) => ({ value: item.id, label: item.label, disabled: item.availability === "unavailable" }))} /></label>
       <label><span>Candidate</span><Select aria-label="Candidate" value={value.candidateSnapshotRef} onChange={(candidateSnapshotRef) => set({ candidateSnapshotRef })} options={candidates.map((item) => ({ value: item.id, label: item.label, disabled: item.availability === "unavailable" }))} /></label>
-      <label><span>Environment / Target</span><Select aria-label="Environment / Target" value={value.target} onChange={(target) => set({ target })} options={[{ value: "simulated", label: "Development · simulated" }, { value: "live", label: "Development · live" }]} /></label>
+      <label><span>Execution target</span><Select aria-label="Execution target" value={value.target} onChange={(target) => set({
+        target,
+        ...executionTargetDefaults(target),
+      })} options={[{ value: "simulated", label: "Development · simulated" }, { value: "live_native", label: "Development · live native" }]} /></label>
+      <label><span>Native requirement</span><Select aria-label="Native requirement" value={value.nativeRequirement} onChange={(nativeRequirement) => set({ nativeRequirement })} options={[{ value: "prefer_native", label: "Prefer native" }, { value: "require_native", label: "Require native" }]} /></label>
+      <label><span>Environment</span><Select aria-label="Environment" allowClear value={value.environmentId} onChange={(environmentId) => set({ environmentId: environmentId ?? null, resourceIds: [] })} options={environments.map((item) => ({ value: item.id, label: item.label, disabled: item.availability === "unavailable" }))} /></label>
+      <label><span>Resources</span><Select aria-label="Resources" mode="multiple" value={value.resourceIds} onChange={(resourceIds) => set({ resourceIds })} options={resources.filter((item) => !item.environmentId || item.environmentId === value.environmentId).map((item) => ({ value: item.id, label: item.label, disabled: item.availability === "unavailable" }))} /></label>
+      <label><span>Telemetry policy</span><Select aria-label="Telemetry policy" value={value.telemetryPolicy} onChange={(telemetryPolicy) => set({ telemetryPolicy })} options={[{ value: "require_full", label: "Require full" }, { value: "allow_partial", label: "Allow partial" }, { value: "development_relay", label: "Development relay" }]} /></label>
+      <label><span>Observation time</span><Select aria-label="Observation time policy" value={value.observationTimePolicy} onChange={(observationTimePolicy) => set({ observationTimePolicy })} options={[{ value: "require_source_observed_at", label: "Require sourceObservedAt" }, { value: "allow_received_at_fallback", label: "Allow receivedAt fallback" }]} /></label>
+      <label><span>Reconciliation</span><Select aria-label="Reconciliation policy" value={value.reconciliationPolicy} onChange={(reconciliationPolicy) => set({ reconciliationPolicy })} options={[{ value: "automatic", label: "Automatic" }, { value: "manual", label: "Manual" }]} /></label>
+      <label><span>Streaming</span><Switch aria-label="Streaming enabled" checked={value.streamingEnabled} onChange={(streamingEnabled) => set({ streamingEnabled })} checkedChildren="SSE" unCheckedChildren="Snapshot" /></label>
       <label><span>Repeat count</span><InputNumber aria-label="Repeat count" min={1} max={20} value={value.repeatCount} onChange={(repeatCount) => set({ repeatCount: repeatCount ?? 1 })} /></label>
     </div>
     <Descriptions size="small" column={3} items={[
       { key: "preset", label: "Preset ID", children: <code>{value.presetId}</code> },
       { key: "cases", label: "Selected Cases", children: value.selectedCaseIds.length },
+      { key: "native", label: "Native requirement", children: <Tag color={value.nativeRequirement === "require_native" ? "cyan" : "blue"}>{value.nativeRequirement}</Tag> },
       { key: "formal", label: "Boundary", children: <Tag color="red">NOT FORMAL</Tag> },
     ]} />
     <div className="run-catalog-case-selector">

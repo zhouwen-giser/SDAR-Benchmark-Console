@@ -15,6 +15,8 @@ describe("SDAR Benchmark Console integration", () => {
     const user = userEvent.setup();
     expect(await screen.findByRole("heading", { name: "新建 Benchmark Run" })).toBeInTheDocument();
     expect(screen.getByText(/所有结果均为 NOT FORMAL QUALIFICATION/)).toBeInTheDocument();
+    expect(screen.getByText("External environment boundary")).toBeInTheDocument();
+    expect(screen.getByText(/只有 Server preflight/)).toBeInTheDocument();
     expect((await screen.findAllByLabelText("Preset")).length).toBeGreaterThan(0);
     const create = screen.getByRole("button", { name: /创建 Benchmark Run/ });
     expect(create).toBeDisabled();
@@ -88,5 +90,32 @@ describe("SDAR Benchmark Console integration", () => {
     await user.click(await screen.findByRole("button", { name: /新建发布评审草稿/ }));
     expect(await screen.findByText(/报告预览 · DRAFT-001/)).toBeInTheDocument();
     expect(screen.getByText("DRAFT-001")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["/system/topology", "System Topology", "Native execution"],
+    ["/environments", "Environments", "Environment registry"],
+    ["/environments/ugv-simulator-dev", "Environment · ugv-simulator-dev", "Lease and cleanup history"],
+    ["/resources", "Resources", "Resource registry and live status"],
+    ["/resources/vehicle%3Augv1", "Resource · vehicle:ugv1", "Four time domains"],
+    ["/runs/run-fixture-native-001/identity", "Identity Closure · run-fixture-native-001", "Exact identity graph"],
+    ["/runs/run-fixture-native-001/repetitions/repetition-fixture-core-001/trajectory", "Trajectory · repetition-fixture-core-001", "Physical proof summary"],
+    ["/telemetry", "Telemetry Workspace", "Telemetry source registry"],
+    ["/reconciliation", "Reconciliation Center", "Side-effect policy"],
+    ["/analytics/native", "Native Analytics", "Non-formal boundary"],
+  ])("renders typed v0.3 operational workspace %s", async (path, heading, landmark) => {
+    window.history.replaceState(null, "", path);
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: heading })).toBeInTheDocument();
+    expect(await screen.findByText(landmark, { exact: false })).toBeInTheDocument();
+    expect(screen.getByText(/FORMAL ELIGIBLE: FALSE/)).toBeInTheDocument();
+  });
+
+  it("keeps external source/deployment read-only separate from Server execution admission", async () => {
+    window.history.replaceState(null, "", "/environments/ugv-simulator-dev");
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "Environment · ugv-simulator-dev" })).toBeInTheDocument();
+    expect(screen.getByText("External source and deployment are read-only")).toBeInTheDocument();
+    expect(screen.getByText(/lease 与 preflight authority 独立决定/)).toBeInTheDocument();
   });
 });
