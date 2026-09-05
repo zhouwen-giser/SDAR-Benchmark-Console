@@ -24,7 +24,7 @@
     "authorityRuntimeCommit": "62b48fbf890860b287cba9087a0827456c0f21ca",
     "implementationCommit": "39ab56dc71fe3e1c66a4e28025741b17601c3c29",
     "sourceLockRefreshCommit": "64755439c41a55d8432ff0562d4732a7ec9900f6",
-    "finalReportCommit": "0b2e5bb801e0bf264c9d5b083e7464b5534ba486",
+    "finalReportCommit": "312e627bd8818b756f14f71d3172aed07284895f",
     "targetPullRequest": 6,
     "targetPullRequestState": "open_draft",
     "targetBranchOwner": "server-session",
@@ -138,14 +138,18 @@
     "createAndRerunGate": "closed"
   },
   "acceptance": {
-    "serverFinalReportCommit": "0b2e5bb801e0bf264c9d5b083e7464b5534ba486",
+    "serverFinalReportCommit": "312e627bd8818b756f14f71d3172aed07284895f",
     "serverDeferredArtifact": {
       "path": "reports/live-native-v0.3/07-four-case-native-run.json",
       "sha256": "01f4ad46fa21e562c26daa5d858b8aead2256c93fb791fcd159d2e365629ec63"
     },
     "serverDeferredReport": {
       "path": "reports/live-native-v0.3/18-live-native-deferred.md",
-      "sha256": "ca7cfae3cac8567d02f4984c98e2434586da25f5c4c2f816fa08a5f1e94e69b0"
+      "sha256": "123c748e9b03dae2c5248f0c4e661d8d164e9abdf5c92f3cc19bf08f7d2d2be0"
+    },
+    "serverFinalAcceptance": {
+      "path": "reports/live-native-v0.3/99-final-acceptance.md",
+      "sha256": "039587aff2313e31e89a93d912fda7e64cfb4e9512529559e14d5585a6695533"
     },
     "markers": {
       "operationalApi": "SDAR_BENCHMARK_V0_3_OPERATIONAL_API_COMPLETE",

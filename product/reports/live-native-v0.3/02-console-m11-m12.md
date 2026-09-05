@@ -13,7 +13,7 @@
 - Server existing-contract implementation:
   `39ab56dc71fe3e1c66a4e28025741b17601c3c29`
 - Server final acceptance report:
-  `0b2e5bb801e0bf264c9d5b083e7464b5534ba486`
+  `312e627bd8818b756f14f71d3172aed07284895f`
 - OpenAPI SHA-256: `335c50caea64b9ac6aa0aac69c143d73ee802955715ab79218f6f9801b8b81a3`
 
 ## Implemented contracts and code

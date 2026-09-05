@@ -10,7 +10,7 @@ Status: complete for `SDAR_BENCHMARK_V0_3_OPERATIONAL_CONSOLE_COMPLETE`.
 - Console final implementation commit:
   `f98b8e77750fedc594770ed1bc24ed8e10d71ed0`
 - Server final report commit:
-  `0b2e5bb801e0bf264c9d5b083e7464b5534ba486`
+  `312e627bd8818b756f14f71d3172aed07284895f`
 - Server endpoint: `http://127.0.0.1:18094`
 - OpenAPI SHA-256:
   `335c50caea64b9ac6aa0aac69c143d73ee802955715ab79218f6f9801b8b81a3`

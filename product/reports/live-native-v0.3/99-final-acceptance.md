@@ -10,7 +10,7 @@ eligible environment window.
   `f98b8e77750fedc594770ed1bc24ed8e10d71ed0`
 - Console Draft PR: [#3](https://github.com/zhouwen-giser/SDAR-Benchmark-Console/pull/3)
 - Server final report commit:
-  `0b2e5bb801e0bf264c9d5b083e7464b5534ba486`
+  `312e627bd8818b756f14f71d3172aed07284895f`
 - Server existing-contract implementation:
   `39ab56dc71fe3e1c66a4e28025741b17601c3c29`
 - Server Draft PR: [#6](https://github.com/zhouwen-giser/sdar-benchmark-server/pull/6)
@@ -21,7 +21,7 @@ eligible environment window.
 
 | Result | Decision | Evidence |
 | --- | --- | --- |
-| Operational API | COMPLETE | Server `99-final-acceptance.md` at `0b2e5bb`; 172-operation frozen contract and operational runtime. |
+| Operational API | COMPLETE | Server `99-final-acceptance.md` at `312e627`; 172-operation frozen contract and operational runtime. |
 | Operational Console | COMPLETE | This report and `06-console-e2e.md`; `pnpm check`, all five focused live HTTP cases, and 1920/1600/1440 inspection. |
 | Native software contracts/adapters | READY | Server `03-native-software-readiness.md` and final acceptance; existing public Simulator contract, no external deployment modification. |
 | Console-created four-anchor live-native Run | PENDING ENVIRONMENT | Server canonical `07-four-case-native-run.json` and `18-live-native-deferred.md`. |
@@ -49,9 +49,9 @@ Canonical deferred evidence is owned by the Server repository:
 - `reports/live-native-v0.3/07-four-case-native-run.json`, SHA-256
   `01f4ad46fa21e562c26daa5d858b8aead2256c93fb791fcd159d2e365629ec63`;
 - `reports/live-native-v0.3/18-live-native-deferred.md`, SHA-256
-  `ca7cfae3cac8567d02f4984c98e2434586da25f5c4c2f816fa08a5f1e94e69b0`;
+  `123c748e9b03dae2c5248f0c4e661d8d164e9abdf5c92f3cc19bf08f7d2d2be0`;
 - `reports/live-native-v0.3/99-final-acceptance.md`, SHA-256
-  `d5360251e8f6a77526151891d9d149b3c18e7d28969d5d40d57647fa525c7971`.
+  `039587aff2313e31e89a93d912fda7e64cfb4e9512529559e14d5585a6695533`.
 
 ## Console delivery decision
 
