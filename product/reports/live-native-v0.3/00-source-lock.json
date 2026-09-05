@@ -1,7 +1,7 @@
 {
   "schemaVersion": "sdar-benchmark.live-native-source-lock/v0.3",
   "goalId": "sdar-benchmark-live-native-operations-console-v0.3",
-  "observedAt": "2026-09-03T12:23:56+08:00",
+  "observedAt": "2026-09-05T03:30:03.720Z",
   "goalPackage": {
     "path": "/home/zhouwen/下载/SDAR_Benchmark_Live_Native_Operations_Console_Codex_Goal_Package_V0.3.zip",
     "sha256": "8fe540b36b7960d21b54230b31e0c4cfba8a8b2b130d342e5241416ba27d1f28",
@@ -19,13 +19,16 @@
     "parentPullRequestState": "open_draft",
     "parentPullRequestBase": "codex/ugv-four-case-diagnostic-vertical-v0.1",
     "targetBranch": "feature/benchmark-live-native-operations-v0.3",
-    "targetCommit": "e328b09204447e9f9ab367171b30e8a79efe8ccd",
+    "contractCommit": "e328b09204447e9f9ab367171b30e8a79efe8ccd",
     "m4M10Commit": "c30d8b2a8ae9e3323a2ef59656ff1f1b196d77ce",
-    "implementationCommit": "62b48fbf890860b287cba9087a0827456c0f21ca",
+    "authorityRuntimeCommit": "62b48fbf890860b287cba9087a0827456c0f21ca",
+    "implementationCommit": "39ab56dc71fe3e1c66a4e28025741b17601c3c29",
+    "sourceLockRefreshCommit": "64755439c41a55d8432ff0562d4732a7ec9900f6",
+    "finalReportCommit": "0b2e5bb801e0bf264c9d5b083e7464b5534ba486",
     "targetPullRequest": 6,
     "targetPullRequestState": "open_draft",
     "targetBranchOwner": "server-session",
-    "worktreeAtObservation": "clean"
+    "worktreeAtObservation": "tracked-clean; pre-existing untracked historical harness evidence preserved"
   },
   "benchmarkConsole": {
     "repository": "zhouwen-giser/SDAR-Benchmark-Console",
@@ -37,7 +40,8 @@
     "parentPullRequestBase": "feature/benchmark-control-ugv-diagnostic-v0.1",
     "targetBranch": "feature/benchmark-operational-console-v0.3",
     "targetBranchCreatedFrom": "99b67f1be3d9d2e20dbe98fc24ca93248b9f7e1c",
-    "latestPushedCommit": "7e57a91233a25bd11a4e6e78d0a7f3466aa2df3c",
+    "boundaryCommit": "2f5e467cfb2d9a0cd78a191964e0c86d7e338625",
+    "latestPushedImplementationCommit": "f98b8e77750fedc594770ed1bc24ed8e10d71ed0",
     "baseAncestry": "passed",
     "worktreeBeforeBranch": "clean"
   },
@@ -110,15 +114,18 @@
       "assetIdentityStatus": "exact-combined-js-css-hash-match",
       "runtimeDeploymentStatus": "bare-metal-remote-build-identity-unresolved",
       "discoveryOwner": "server-and-simulator-support-session",
-      "blocks": [
-        "native-software-readiness",
-        "live-native-execution"
-      ],
+      "sourceDeploymentBoundary": "external-read-only",
+      "historicalCompanionMr": "!1 retained as provenance only; not adopted and not deployed",
+      "blocks": [],
       "doesNotBlock": [
         "M0-M12 functional implementation",
         "operational API development",
-        "operational Console development"
-      ]
+        "operational Console development",
+        "native software readiness",
+        "v0.3 software delivery"
+      ],
+      "executionAdmissionAuthority": "benchmark-server-preflight",
+      "liveNativeExecutionStatus": "deferred by Runtime Provider Binding authority mismatch and Telemetry ENOSPC, not by Simulator write access"
     }
   },
   "scope": {
@@ -126,6 +133,27 @@
     "formalEligible": false,
     "qualityScore": null,
     "releaseGate": "unavailable",
-    "sitesUsed": false
+    "sitesUsed": false,
+    "externalSimulatorSourceAndDeployment": "read_only",
+    "createAndRerunGate": "closed"
+  },
+  "acceptance": {
+    "serverFinalReportCommit": "0b2e5bb801e0bf264c9d5b083e7464b5534ba486",
+    "serverDeferredArtifact": {
+      "path": "reports/live-native-v0.3/07-four-case-native-run.json",
+      "sha256": "01f4ad46fa21e562c26daa5d858b8aead2256c93fb791fcd159d2e365629ec63"
+    },
+    "serverDeferredReport": {
+      "path": "reports/live-native-v0.3/18-live-native-deferred.md",
+      "sha256": "ca7cfae3cac8567d02f4984c98e2434586da25f5c4c2f816fa08a5f1e94e69b0"
+    },
+    "markers": {
+      "operationalApi": "SDAR_BENCHMARK_V0_3_OPERATIONAL_API_COMPLETE",
+      "operationalConsole": "SDAR_BENCHMARK_V0_3_OPERATIONAL_CONSOLE_COMPLETE",
+      "nativeSoftware": "SDAR_BENCHMARK_V0_3_NATIVE_SOFTWARE_READY",
+      "liveNativeExecution": "SDAR_BENCHMARK_V0_3_LIVE_NATIVE_EXECUTION_PENDING_ENVIRONMENT",
+      "liveNativeVerticalComplete": false,
+      "overallComplete": false
+    }
   }
 }

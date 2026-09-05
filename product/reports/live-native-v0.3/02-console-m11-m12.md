@@ -3,10 +3,17 @@
 ## Source locks
 
 - Console branch: `feature/benchmark-operational-console-v0.3`
-- Latest pushed Console implementation: `e1904feab14e8a54e3b42aa8a22a997ed6a26a8e`
+- Console boundary implementation:
+  `2f5e467cfb2d9a0cd78a191964e0c86d7e338625`
+- Latest Console implementation:
+  `f98b8e77750fedc594770ed1bc24ed8e10d71ed0`
 - Server contract: `feature/benchmark-live-native-operations-v0.3@e328b09204447e9f9ab367171b30e8a79efe8ccd`
 - Server M4-M10 implementation: `c30d8b2a8ae9e3323a2ef59656ff1f1b196d77ce`
 - Server authority/runtime regression batch: `62b48fbf890860b287cba9087a0827456c0f21ca`
+- Server existing-contract implementation:
+  `39ab56dc71fe3e1c66a4e28025741b17601c3c29`
+- Server final acceptance report:
+  `0b2e5bb801e0bf264c9d5b083e7464b5534ba486`
 - OpenAPI SHA-256: `335c50caea64b9ac6aa0aac69c143d73ee802955715ab79218f6f9801b8b81a3`
 
 ## Implemented contracts and code
@@ -80,17 +87,27 @@ Observed at `2026-09-04T06:05:27.553Z` against
   reconciliation, SSE, and disables Development substitutions in the visible
   policy summary.
 
-## Remaining advisories
+## Final boundary clarification
 
 - The 18094 compatibility preset alias and preflight/create parser parity are
   restored. The five optional frozen Create fields are accepted without OpenAPI
   drift; dynamic Console create and rerun both pass.
-- Provider/Telemetry readiness is partial/degraded. No M13/M14 native anchor,
-  `substitutionCount=0`, or native software readiness is claimed here.
+- External Simulator source, image, deployment, and configuration are read-only.
+  That boundary is displayed by the Console but does not override runtime
+  availability and does not disable a policy that Server preflight admits.
+- The final task-owned XCHAIN harness failed before Provider dispatch because
+  Runtime Provider Binding authority did not match the admitted Capability;
+  Telemetry simultaneously entered an ENOSPC write-failed latch. The attempt
+  created no Benchmark Run, Provider Task/Execution/Mission, navigation, or
+  Simulator control command. No retry was made.
 - Existing simulated Product v0.2 Runs remain diagnostic history only.
 
 ## Marker eligibility
 
-M11 UI and the implemented portions of M12 are verified. The v0.3 completion
-marker is not eligible until M13-M16 produce and verify the required live-native
-anchors, recovery evidence, and final acceptance artifacts.
+The four task-package results are independent. M11/M12 plus final M16 Console
+verification make `SDAR_BENCHMARK_V0_3_OPERATIONAL_CONSOLE_COMPLETE` eligible;
+the Server independently records Operational API and Native Software Ready.
+The environment window does not qualify the four-anchor marker, so the joint
+delivery records `SDAR_BENCHMARK_V0_3_LIVE_NATIVE_EXECUTION_PENDING_ENVIRONMENT`
+and does not emit `SDAR_BENCHMARK_V0_3_LIVE_NATIVE_VERTICAL_COMPLETE` or
+`SDAR_BENCHMARK_V0_3_COMPLETE`.
