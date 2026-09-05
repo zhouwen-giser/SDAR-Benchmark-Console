@@ -15,6 +15,8 @@ describe("SDAR Benchmark Console integration", () => {
     const user = userEvent.setup();
     expect(await screen.findByRole("heading", { name: "新建 Benchmark Run" })).toBeInTheDocument();
     expect(screen.getByText(/所有结果均为 NOT FORMAL QUALIFICATION/)).toBeInTheDocument();
+    expect(screen.getByText("External environment boundary")).toBeInTheDocument();
+    expect(screen.getByText(/只有 Server preflight/)).toBeInTheDocument();
     expect((await screen.findAllByLabelText("Preset")).length).toBeGreaterThan(0);
     const create = screen.getByRole("button", { name: /创建 Benchmark Run/ });
     expect(create).toBeDisabled();
@@ -107,5 +109,13 @@ describe("SDAR Benchmark Console integration", () => {
     expect(await screen.findByRole("heading", { name: heading })).toBeInTheDocument();
     expect(await screen.findByText(landmark, { exact: false })).toBeInTheDocument();
     expect(screen.getByText(/FORMAL ELIGIBLE: FALSE/)).toBeInTheDocument();
+  });
+
+  it("keeps external source/deployment read-only separate from Server execution admission", async () => {
+    window.history.replaceState(null, "", "/environments/ugv-simulator-dev");
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "Environment · ugv-simulator-dev" })).toBeInTheDocument();
+    expect(screen.getByText("External source and deployment are read-only")).toBeInTheDocument();
+    expect(screen.getByText(/lease 与 preflight authority 独立决定/)).toBeInTheDocument();
   });
 });

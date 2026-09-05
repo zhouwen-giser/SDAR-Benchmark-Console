@@ -21,6 +21,8 @@ test.describe("Live-native Operations Console v0.3", () => {
     await expect(page.getByRole("row", { name: /Observation time.*require_source_observed_at/u })).toBeVisible();
     await expect(page.getByRole("row", { name: /Reconciliation.*automatic/u })).toBeVisible();
     await expect(page.getByRole("row", { name: /Development substitutions.*禁止/u })).toBeVisible();
+    await expect(page.getByText("External environment boundary", { exact: true })).toBeVisible();
+    await expect(page.getByText(/只有 Server preflight/u)).toBeVisible();
     await expectNoFixtureFallback(page);
   });
 
@@ -40,6 +42,7 @@ test.describe("Live-native Operations Console v0.3", () => {
 
     await page.goto("/environments/ugv-simulator-dev");
     await expect(page.getByRole("heading", { name: "Environment · ugv-simulator-dev" })).toBeVisible();
+    await expect(page.getByText("External source and deployment are read-only", { exact: true })).toBeVisible();
     await expect(page.getByText("REMOTE_DEPLOYMENT_IDENTITY_UNRESOLVED", { exact: true })).toBeVisible();
 
     await page.goto("/resources");

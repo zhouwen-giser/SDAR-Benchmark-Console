@@ -246,6 +246,12 @@ export function RunDetailPage() {
         extra={<Space wrap><OperationalStatusTag value={stream.state} /><Tag>Last-Event-ID {stream.lastEventId ?? "—"}</Tag><Tag>buffer {stream.events.length}/200</Tag></Space>}
       >
         <NativeBoundaryNotice dataClass={nativeCoverage.data?.meta.dataClass} />
+        <Alert
+          type="info"
+          showIcon
+          message="Run terminal is not the Live-Native completion marker"
+          description="Live-Native 仍须四个 anchor、零 Benchmark substitutions、完整 identity/Telemetry/physical evidence 全部通过；单个 completed 或 failed Run 不会提升 marker。"
+        />
         {executionPlan.data && <OperationalMetaStrip meta={executionPlan.data.meta} />}
         <div className="operational-kpi-grid">
           <article><span>Execution target</span><strong>{executionPlan.data?.data.executionTarget ?? "—"}</strong><small>{executionPlan.data?.data.nativeRequirement ?? "unavailable"}</small></article>

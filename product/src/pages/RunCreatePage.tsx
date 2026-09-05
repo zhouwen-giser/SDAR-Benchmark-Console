@@ -135,6 +135,12 @@ export function RunCreatePage() {
               message="Development diagnostic boundary"
               description="simulated 可显式使用 Development substitutions；live_native + require_native 必须 substitutionCount=0、Development Evidence Relay=false。所有结果均为 NOT FORMAL QUALIFICATION。"
             />
+            <Alert
+              type="info"
+              showIcon
+              message="External environment boundary"
+              description="外部 Simulator 的源码、镜像与部署只读；Console 不据此推断执行资格。只有 Server preflight 的 canCreateRun/canExecuteRun 与 native selection 可以放行创建。"
+            />
             <Space wrap>
               <Button
                 type="primary"

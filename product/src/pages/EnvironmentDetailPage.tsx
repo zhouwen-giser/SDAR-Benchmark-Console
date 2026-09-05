@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Descriptions, Space, Table, Tag, message } from "antd";
+import { Alert, Button, Descriptions, Space, Table, Tag, message } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { PageHeader, SectionCard } from "../components/common";
@@ -24,6 +24,12 @@ export function EnvironmentDetailPage() {
     <PageHeader title={`Environment · ${data.environmentId}`} subtitle="冻结的 source/build identity 与点时 probe、resource、fault、lease、cleanup 事实分开显示。" actions={<><Button onClick={() => navigate("/environments")}>返回</Button><Button type="primary" icon={<ReloadOutlined />} loading={probe.isPending} onClick={() => probe.mutate()}>只读 Probe</Button></>} />
     <OperationalMetaStrip meta={query.data.meta} />
     <NativeBoundaryNotice dataClass={query.data.meta.dataClass} />
+    <Alert
+      type="info"
+      showIcon
+      message="External source and deployment are read-only"
+      description="Console 只读取 source/build identity 并执行只读 Probe；是否允许受控运行由 Benchmark Server 的 lease 与 preflight authority 独立决定。"
+    />
     <SectionCard title="Identity and readiness">
       <SourceIdentity values={[
         { label: "Environment ID", value: data.environmentId }, { label: "Version", value: data.environmentVersion }, { label: "Kind", value: data.kind },

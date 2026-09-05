@@ -81,8 +81,8 @@ export function NativeBoundaryNotice({ dataClass }: { dataClass?: NativeDataClas
     <Alert
       type="info"
       showIcon
-      message="Diagnostic native evidence only"
-      description={`dataClass=${dataClass ?? "unavailable"} · formalEligible=false · qualityScore=null · releaseGate=unavailable`}
+      message="Diagnostic operational data boundary"
+      description={`dataClass=${dataClass ?? "unavailable"} · availability and evidence remain explicit · formalEligible=false · qualityScore=null · releaseGate=unavailable`}
     />
   );
 }

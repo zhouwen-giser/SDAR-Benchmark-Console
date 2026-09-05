@@ -18,13 +18,13 @@ export function EnvironmentsPage() {
   const rows = query.data.data;
   return <div className="standard-page operational-page environments-page">
     {contextHolder}
-    <PageHeader title="Environments" subtitle="版本化环境、资源容量、lease、fault profile 与 cleanup 状态；Probe 不 reserve/reset/fault。" actions={<Button icon={<ReloadOutlined />} onClick={() => void query.refetch()}>刷新</Button>} />
+    <PageHeader title="Environments" subtitle="版本化环境、资源容量、lease、fault profile 与 cleanup 状态；外部源码/镜像/部署只读，Probe 不 reserve/reset/fault。" actions={<Button icon={<ReloadOutlined />} onClick={() => void query.refetch()}>刷新</Button>} />
     <OperationalMetaStrip meta={query.data.meta} />
     <NativeBoundaryNotice dataClass={query.data.meta.dataClass} />
     <div className="operational-kpi-grid">
       <SectionCard><span>Environments</span><strong>{rows.length}</strong><small>registry versions</small></SectionCard>
-      <SectionCard><span>Available</span><strong>{rows.filter((item) => item.leaseStatus === "available").length}</strong><small>point-in-time lease status</small></SectionCard>
-      <SectionCard><span>Active missions</span><strong>{rows.reduce((total, item) => total + (item.activeMissionCount ?? 0), 0)}</strong><small>must be zero before deployment</small></SectionCard>
+      <SectionCard><span>Lease available</span><strong>{rows.filter((item) => item.leaseStatus === "available").length}</strong><small>point-in-time execution admission</small></SectionCard>
+      <SectionCard><span>Active missions</span><strong>{rows.reduce((total, item) => total + (item.activeMissionCount ?? 0), 0)}</strong><small>must be zero before controlled execution</small></SectionCard>
       <SectionCard><span>Quarantine / cleanup</span><strong>{rows.filter((item) => item.leaseStatus === "quarantined" || item.leaseStatus === "cleanup_required").length}</strong><small>explicit operational state</small></SectionCard>
     </div>
     <SectionCard title="Environment registry">
@@ -35,6 +35,7 @@ export function EnvironmentsPage() {
         { title: "Resources", dataIndex: "resourceCount" }, { title: "Missions", dataIndex: "activeMissionCount" }, { title: "Uncertain tasks", dataIndex: "uncertainTaskCount" },
         { title: "Last probe", dataIndex: "lastProbeAt", render: compactTimestamp },
         { title: "Fault profiles", dataIndex: "supportedFaultProfiles", render: (values: string[]) => values.map((value) => <Tag color="purple" key={value}>{value}</Tag>) },
+        { title: "Reasons", dataIndex: "reasonCodes", render: (values: string[]) => values.map((value) => <Tag key={value}>{value}</Tag>) },
         { title: "Actions", key: "actions", fixed: "right", render: (_: unknown, row) => <Space><Button size="small" icon={<EyeOutlined />} onClick={() => navigate(`/environments/${encodeURIComponent(row.environmentId)}`)}>详情</Button><Button size="small" loading={probe.isPending} onClick={() => probe.mutate(row.environmentId)}>Probe</Button></Space> },
       ]} />
     </SectionCard>
