@@ -9,6 +9,36 @@ async function expectNoFixtureFallback(page: Page) {
 }
 
 test.describe("Live-native Operations Console v0.3", () => {
+  test("keeps the existing real-chain Run case matrix on its actual HTTP provenance", async ({ page, request }) => {
+    const runId = process.env.LIVE_NATIVE_READ_ONLY_RUN_ID;
+    test.skip(!runId, "Requires an existing completed Run; this test never creates one.");
+    const response = await request.get(`${api}/benchmark-runs/${encodeURIComponent(runId!)}`);
+    expect(response.status()).toBe(200);
+    expect(await response.json()).toMatchObject({
+      runId,
+      status: "completed",
+      totalCaseCount: 2,
+      completedCaseCount: 2,
+      substitutionCount: 0,
+      formalEligible: false,
+      qualityScore: null,
+      releaseGate: "unavailable",
+    });
+    const mutations: string[] = [];
+    page.on("request", (event) => {
+      if (event.url().includes("/benchmark-api/") && !["GET", "HEAD"].includes(event.method())) {
+        mutations.push(`${event.method()} ${event.url()}`);
+      }
+    });
+    await page.goto(`/runs/${encodeURIComponent(runId!)}`);
+    await expect(page.getByRole("heading", { name: `Benchmark Run ${runId}` })).toBeVisible();
+    const matrix = page.locator(".section-card").filter({ has: page.getByText("用例矩阵", { exact: true }) });
+    await expect(matrix.getByText("HTTP", { exact: true })).toBeVisible();
+    await expect(matrix.getByText("MOCK", { exact: true })).toHaveCount(0);
+    await expectNoFixtureFallback(page);
+    expect(mutations).toEqual([]);
+  });
+
   test("selects the complete require-native policy from Run Create v3", async ({ page }) => {
     await page.goto("/runs/new");
     await expect(page.getByRole("heading", { name: "新建 Benchmark Run" })).toBeVisible();

@@ -4,7 +4,6 @@ import { Alert, Button, Descriptions, Popconfirm, Progress, Select, Space, Table
 import { ArrowRightOutlined, LinkOutlined, StopOutlined, SyncOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import { consoleApi } from "../api/consoleApi";
-import { capabilityMeta } from "../api/capability-map";
 import { ApiStatusTag, DebugPayloadDrawer, PageHeader, SectionCard } from "../components/common";
 import { DataClassTag } from "../components/TypedAnalyticsModule";
 import { RerunRequestPanel, type BenchmarkRunRerunRequestView } from "../components/RerunRequestPanel";
@@ -346,6 +345,7 @@ export function RunDetailPage() {
       {dashboard.data && (
         <DashboardProjection
           data={dashboard.data.data}
+          meta={dashboard.data.meta}
           navigateWithContext={navigateWithContext}
         />
       )}
@@ -381,16 +381,13 @@ export function plannedRerunCases(
 
 function DashboardProjection({
   data,
+  meta,
   navigateWithContext,
 }: {
   data: Awaited<ReturnType<typeof consoleApi.getRun>>["data"];
+  meta: Awaited<ReturnType<typeof consoleApi.getRun>>["meta"];
   navigateWithContext: (path: string) => void;
 }) {
-  const caseMeta = capabilityMeta("runCases", {
-    mocked: true,
-    watermark: data.snapshot.watermark,
-    projectionLagMs: data.snapshot.projectionLagMs,
-  });
   const columns = [
     { title: "用例编号", dataIndex: "caseId", key: "caseId", render: (value: string, row: CaseResult) => <button className="link-button" onClick={() => navigateWithContext(`/cases/${row.caseId}`)}>{value}</button> },
     { title: "分轨", dataIndex: "track", key: "track", render: (value: string) => trackName(value) },
@@ -406,7 +403,7 @@ function DashboardProjection({
       <SectionCard title="Evidence Funnel / Release Gate 投影" className="detail-span-12" extra={<DebugPayloadDrawer payload={{ evidenceFunnel: data.evidenceFunnel, releaseGate: data.releaseGateDetail }} />}>
         <ProjectionSummary evidenceFunnel={data.evidenceFunnel} releaseGate={data.releaseGateDetail} />
       </SectionCard>
-      <SectionCard title="用例矩阵" extra={<ApiStatusTag compact meta={caseMeta} />} className="detail-span-12 table-card">
+      <SectionCard title="用例矩阵" extra={<ApiStatusTag compact meta={meta} />} className="detail-span-12 table-card">
         <Table<CaseResult> rowKey="caseId" columns={columns} dataSource={data.cases} pagination={false} scroll={{ x: 980 }} />
       </SectionCard>
     </div>
