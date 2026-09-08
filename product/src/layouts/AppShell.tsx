@@ -2,8 +2,11 @@ import { useState, type ReactNode } from "react";
 import { Button, Tooltip } from "antd";
 import {
   AlertOutlined,
+  ApartmentOutlined,
   AreaChartOutlined,
   BarChartOutlined,
+  CarOutlined,
+  CloudServerOutlined,
   DatabaseOutlined,
   ExperimentOutlined,
   FileTextOutlined,
@@ -13,6 +16,7 @@ import {
   MenuUnfoldOutlined,
   RadarChartOutlined,
   SettingOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import { NavLink, useLocation } from "react-router-dom";
 import { MockCornerBadge } from "../components/common";
@@ -20,11 +24,17 @@ import { currentApiMode } from "../api/consoleApi";
 
 const navigation = [
   { path: "/overview", label: "总览", icon: FundProjectionScreenOutlined },
+  { path: "/system/topology", label: "系统拓扑", icon: ApartmentOutlined },
+  { path: "/environments", label: "运行环境", icon: CloudServerOutlined },
+  { path: "/resources", label: "运行资源", icon: CarOutlined },
   { path: "/runs", label: "评测运行", icon: ExperimentOutlined },
   { path: "/cases", label: "测试用例", icon: FileTextOutlined },
   { path: "/evaluations", label: "评价结果", icon: RadarChartOutlined },
   { path: "/evidence-bundles", label: "证据浏览", icon: AreaChartOutlined },
   { path: "/analytics", label: "指标中心", icon: BarChartOutlined },
+  { path: "/analytics/native", label: "Native 分析", icon: RadarChartOutlined },
+  { path: "/telemetry", label: "遥测中心", icon: AreaChartOutlined },
+  { path: "/reconciliation", label: "重协调", icon: SyncOutlined },
   { path: "/data-completeness", label: "数据完整性", icon: DatabaseOutlined },
   { path: "/reports", label: "报告中心", icon: FileTextOutlined },
   { path: "/alerts", label: "关注队列", icon: AlertOutlined },

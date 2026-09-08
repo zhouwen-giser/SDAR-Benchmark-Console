@@ -5,6 +5,10 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
+  const benchmarkApiUpstream =
+    process.env.VITE_BENCHMARK_API_UPSTREAM || env.VITE_BENCHMARK_API_UPSTREAM || "http://127.0.0.1:18090";
+  const telemetryQueryUpstream =
+    process.env.VITE_TELEMETRY_QUERY_UPSTREAM || env.VITE_TELEMETRY_QUERY_UPSTREAM || "http://127.0.0.1:18080";
   return {
     plugins: [react()],
     resolve: {
@@ -18,12 +22,12 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       proxy: {
         "/benchmark-api": {
-          target: env.VITE_BENCHMARK_API_UPSTREAM || "http://127.0.0.1:18090",
+          target: benchmarkApiUpstream,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/benchmark-api/, ""),
         },
         "/telemetry-api": {
-          target: env.VITE_TELEMETRY_QUERY_UPSTREAM || "http://127.0.0.1:18080",
+          target: telemetryQueryUpstream,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/telemetry-api/, ""),
         },
@@ -35,12 +39,12 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       proxy: {
         "/benchmark-api": {
-          target: env.VITE_BENCHMARK_API_UPSTREAM || "http://127.0.0.1:18090",
+          target: benchmarkApiUpstream,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/benchmark-api/, ""),
         },
         "/telemetry-api": {
-          target: env.VITE_TELEMETRY_QUERY_UPSTREAM || "http://127.0.0.1:18080",
+          target: telemetryQueryUpstream,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/telemetry-api/, ""),
         },

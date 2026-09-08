@@ -66,7 +66,9 @@ test.describe.serial("Product Data API v0.2 live HTTP workflow", () => {
     await page.getByRole("button", { name: "UGV-NODE-001 down" }).click();
     await expect(page.locator(".run-catalog-configurator .ant-table-wrapper tbody tr").first()).toContainText("UGV-NODE-002");
 
-    await page.getByRole("button", { name: /执行预检/u }).click();
+    const preflightButton = page.getByRole("button", { name: /执行预检/u });
+    await expect(preflightButton, "Server must expose an executable compatibility requestTemplate").toBeEnabled({ timeout: 15_000 });
+    await preflightButton.click();
     await expect(page.getByText("ready_with_substitutions", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: /创建 Benchmark Run/u }).click();
     await expect(page).toHaveURL(/\/runs\/run_[a-z0-9]+/u);
