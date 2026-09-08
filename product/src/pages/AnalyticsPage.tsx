@@ -1,9 +1,11 @@
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { Button, Empty, Select, Tag } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import { capabilityMeta } from "../api/capability-map";
 import { consoleApi } from "../api/consoleApi";
 import { ApiStatusTag, PageHeader, SectionCard } from "../components/common";
+import { TypedAnalyticsModule } from "../components/TypedAnalyticsModule";
+import { DiagnosticOutcomeDistributionPanel } from "../components/DiagnosticOutcomeDistributionPanel";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
 
 const modules = [
@@ -23,6 +25,7 @@ export function AnalyticsPage() {
       retry: false,
     })),
   });
+  const diagnosticOutcomes = useQuery({ queryKey: ["diagnostic-outcome-distribution"], queryFn: ({ signal }) => consoleApi.getDiagnosticOutcomeDistribution({ signal }), retry: false });
   const metas = queries.flatMap((query) => query.data ? [query.data.meta] : []);
   const unavailable = queries.filter((query) => query.isError || query.data?.meta.availability === "unavailable").length;
   const partial = queries.filter((query) => query.data?.meta.availability === "partial").length;
@@ -49,6 +52,9 @@ export function AnalyticsPage() {
       <div className="analytics-context-strip">
         <span>候选版本 <b>{filters.candidateId}</b></span><span>评测运行 <b>{filters.runId}</b></span><span>数据集 <b>{filters.datasetVersion}</b></span>
       </div>
+      <SectionCard title="Development Diagnostic Outcome Distribution" extra={diagnosticOutcomes.data && <ApiStatusTag compact meta={diagnosticOutcomes.data.meta} />}>
+        {diagnosticOutcomes.isLoading ? <div className="page-loading">正在加载诊断结果分布…</div> : diagnosticOutcomes.isError ? <div className="unavailable-card"><span>UNAVAILABLE · {diagnosticOutcomes.error instanceof Error ? diagnosticOutcomes.error.message : "请求失败"}</span></div> : diagnosticOutcomes.data ? <DiagnosticOutcomeDistributionPanel rows={diagnosticOutcomes.data.data} /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+      </SectionCard>
       <div className="analytics-grid">
         {modules.map(([key, title], index) => {
           const query = queries[index];
@@ -56,7 +62,7 @@ export function AnalyticsPage() {
           const rows = resource?.data.rows ?? [];
           return (
             <SectionCard key={key} title={title} extra={resource && <ApiStatusTag compact meta={resource.meta} />} className={key === "metrics" || key === "quality-trend" ? "analytics-span-6" : "analytics-span-4"}>
-              {query.isLoading ? <div className="page-loading">正在加载 {key}…</div> : query.isError ? <div className="unavailable-card"><span>UNAVAILABLE · {query.error instanceof Error ? query.error.message : "请求失败"}</span></div> : rows.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={`${resource?.meta.availability ?? "unavailable"} · ${resource?.meta.reasonCodes.join("、") || "无数据"}`} /> : <pre className="analytics-module-json">{JSON.stringify(rows.slice(0, 8), null, 2)}</pre>}
+              {query.isLoading ? <div className="page-loading">正在加载 {key}…</div> : query.isError ? <div className="unavailable-card"><span>UNAVAILABLE · {query.error instanceof Error ? query.error.message : "请求失败"}</span></div> : rows.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={`${resource?.meta.availability ?? "unavailable"} · ${resource?.meta.reasonCodes.join("、") || "无数据"}`} /> : <TypedAnalyticsModule moduleKey={key} rows={rows} />}
             </SectionCard>
           );
         })}

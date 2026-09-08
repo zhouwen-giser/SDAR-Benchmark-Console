@@ -19,10 +19,22 @@ import { CaseDetailPage } from "./pages/CaseDetailPage";
 import { EvaluationsPage } from "./pages/EvaluationsPage";
 import { EvidenceBundlesPage } from "./pages/EvidenceBundlesPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { DataCompletenessPage } from "./pages/DataCompletenessPage";
+import { ArtifactViewerPage } from "./pages/ArtifactViewerPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { AlertsPage } from "./pages/AlertsPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { ResourceDetailPage } from "./pages/ResourceDetailPage";
+import { SystemTopologyPage } from "./pages/SystemTopologyPage";
+import { EnvironmentsPage } from "./pages/EnvironmentsPage";
+import { EnvironmentDetailPage } from "./pages/EnvironmentDetailPage";
+import { NativeResourcesPage } from "./pages/NativeResourcesPage";
+import { NativeResourceDetailPage } from "./pages/NativeResourceDetailPage";
+import { IdentityClosurePage } from "./pages/IdentityClosurePage";
+import { TrajectoryPage } from "./pages/TrajectoryPage";
+import { TelemetryWorkspacePage } from "./pages/TelemetryWorkspacePage";
+import { ReconciliationCenterPage } from "./pages/ReconciliationCenterPage";
+import { NativeAnalyticsPage } from "./pages/NativeAnalyticsPage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { darkTheme } from "./theme/theme";
 
@@ -82,6 +94,10 @@ function ApplicationRoutes() {
         <Route path="/runs" element={<RunsPage />} />
         <Route path="/runs/new" element={<RunCreatePage />} />
         <Route path="/runs/:runId" element={<RunDetailPage />} />
+        <Route path="/runs/:runId/identity" element={<IdentityClosurePage />} />
+        <Route path="/runs/:runId/repetitions/:repetitionId/identity" element={<IdentityClosurePage />} />
+        <Route path="/runs/:runId/repetitions/:repetitionId/trajectory" element={<TrajectoryPage />} />
+        <Route path="/runs/:runId/repetitions/:repetitionId/artifacts/:artifactId" element={<ArtifactViewerPage />} />
         <Route path="/benchmark-runs/:runId" element={<RunDetailPage />} />
         <Route path="/compare/:comparisonId" element={<ComparePage />} />
         <Route path="/cases" element={<CasesPage />} />
@@ -93,6 +109,15 @@ function ApplicationRoutes() {
         <Route path="/evidence-bundles/:bundleId" element={<EvidencePage />} />
         <Route path="/evidence/:bundleId" element={<LegacyEvidenceRedirect />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/analytics/native" element={<NativeAnalyticsPage />} />
+        <Route path="/system/topology" element={<SystemTopologyPage />} />
+        <Route path="/environments" element={<EnvironmentsPage />} />
+        <Route path="/environments/:environmentId" element={<EnvironmentDetailPage />} />
+        <Route path="/resources" element={<NativeResourcesPage />} />
+        <Route path="/resources/:resourceId" element={<NativeResourceDetailPage />} />
+        <Route path="/telemetry" element={<TelemetryWorkspacePage />} />
+        <Route path="/reconciliation" element={<ReconciliationCenterPage />} />
+        <Route path="/data-completeness" element={<DataCompletenessPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/settings" element={<SettingsPage />} />

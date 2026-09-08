@@ -2,7 +2,12 @@ import type {
   AttentionItemListEnvelope,
   AttentionItemEnvelope,
   AttentionStateEnvelope,
+  ArtifactContentEnvelope,
   BenchmarkRunStatus,
+  BenchmarkRunPresetEnvelope,
+  BenchmarkRunPresetListEnvelope,
+  BenchmarkRunRerunEnvelope,
+  BenchmarkRunRerunRequest,
   BenchmarkCaseEnvelope,
   BenchmarkCaseListEnvelope,
   BenchmarkRunListEnvelope,
@@ -15,12 +20,15 @@ import type {
   ContextOptionsEnvelope,
   CreateBenchmarkRun,
   DashboardOverviewResponse,
+  DataCompletenessEnvelope,
   DevelopmentRunPreflight,
   DevelopmentRunPreset,
   DiagnosticArtifactEnvelope,
   DiagnosticArtifactListEnvelope,
+  DiagnosticOutcomeDistributionEnvelope,
   DiagnosticQualificationEnvelope,
   DiagnosticRepetitionEnvelope,
+  DiagnosticSummaryEnvelope,
   EvaluationBindingEnvelope,
   EvaluationDimensionListEnvelope,
   EvaluationEvidenceGradeListEnvelope,
@@ -44,14 +52,18 @@ import type {
   EvidenceRecordListEnvelope,
   EvidenceUsageEnvelope,
   ExpectedContractEnvelope,
+  ProductArtifactEnvelope,
   ReportContentEnvelope,
   ReportDownloadEnvelope,
   ReportEnvelope,
   ReportListEnvelope,
   Ready,
+  RepetitionEvaluationEnvelope,
   RunDashboardEnvelope,
   RunEventListEnvelope,
   RunRepetitionListEnvelope,
+  RunTimelineEnvelope,
+  SubstitutionListEnvelope,
   SystemContractsEnvelope,
   SystemProjectionsEnvelope,
   SystemStatusEnvelope,
@@ -62,6 +74,7 @@ import type {
   ApiResource,
   CaseDetail,
   ComparisonDetail,
+  DataCompletenessView,
   EvaluationDetail,
   EvaluationEvidenceLinksView,
   EvidenceDetail,
@@ -154,9 +167,20 @@ export class LiveHttpConsoleApi implements ConsoleApi {
     };
   }
 
+  async getDataCompleteness(options?: TransportRequestOptions): Promise<ApiResource<DataCompletenessView>> {
+    const envelope = await this.transport.get<DataCompletenessEnvelope>("/v1/data-completeness", options);
+    return mapEnvelope("dataCompleteness", envelope, (data) => data);
+  }
+
+  async getDiagnosticOutcomeDistribution(options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<DiagnosticOutcomeDistributionEnvelope>("/v1/analytics/diagnostic-outcome-distribution", options);
+    return mapEnvelope("diagnosticOutcomeDistribution", envelope, (data) => data);
+  }
+
   async listRuns(options?: TransportRequestOptions) {
     const envelope = await this.transport.get<BenchmarkRunListEnvelope>("/v1/benchmark-runs", options);
-    return mapEnvelope("runs", envelope, (rows) => rows.map(mapRunSummary));
+    const resource = mapEnvelope("runs", envelope, (rows) => rows.map(mapRunSummary));
+    return { ...resource, data: resource.data.map((row) => ({ ...row, projectionStatus: resource.meta.availability })) };
   }
 
   async getRun(runId: string, options?: TransportRequestOptions): Promise<ApiResource<RunDashboard>> {
@@ -180,6 +204,16 @@ export class LiveHttpConsoleApi implements ConsoleApi {
       options,
     );
     return { data, meta: capabilityMeta("runPreset", { mocked: false, mode: "http", generatedAt: data.generatedAt }) };
+  }
+
+  async listBenchmarkRunPresets(options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<BenchmarkRunPresetListEnvelope>("/v1/benchmark-run-presets", options);
+    return mapEnvelope("runPresets", envelope, (data) => data);
+  }
+
+  async getBenchmarkRunPreset(presetId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<BenchmarkRunPresetEnvelope>(`/v1/benchmark-run-presets/${part(presetId)}`, options);
+    return mapEnvelope("runPresetDetail", envelope, (data) => data);
   }
 
   async preflightBenchmarkRun(input: CreateBenchmarkRun, options?: TransportRequestOptions) {
@@ -234,6 +268,41 @@ export class LiveHttpConsoleApi implements ConsoleApi {
       options,
     );
     return mapEnvelope("runEvents", envelope, (data) => data);
+  }
+
+  async createBenchmarkRunRerun(runId: string, input: BenchmarkRunRerunRequest, options?: TransportRequestOptions) {
+    const envelope = await this.transport.post<BenchmarkRunRerunEnvelope>(`/v1/benchmark-runs/${part(runId)}/reruns`, input, options);
+    return mapEnvelope("runRerun", envelope, (data) => data);
+  }
+
+  async getBenchmarkRunDiagnosticSummary(runId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<DiagnosticSummaryEnvelope>(`/v1/benchmark-runs/${part(runId)}/diagnostic-summary`, options);
+    return mapEnvelope("runDiagnosticSummary", envelope, (data) => data);
+  }
+
+  async getBenchmarkRunSubstitutions(runId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<SubstitutionListEnvelope>(`/v1/benchmark-runs/${part(runId)}/substitutions`, options);
+    return mapEnvelope("runSubstitutions", envelope, (data) => data);
+  }
+
+  async getBenchmarkRunTimeline(runId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<RunTimelineEnvelope>(`/v1/benchmark-runs/${part(runId)}/timeline`, options);
+    return mapEnvelope("runTimeline", envelope, (data) => data);
+  }
+
+  async getBenchmarkRunRepetitionEvaluation(runId: string, repetitionId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<RepetitionEvaluationEnvelope>(`/v1/benchmark-runs/${part(runId)}/repetitions/${part(repetitionId)}/evaluation`, options);
+    return mapEnvelope("repetitionEvaluation", envelope, (data) => data);
+  }
+
+  async getBenchmarkRunRepetitionArtifact(runId: string, repetitionId: string, artifactId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<ProductArtifactEnvelope>(`/v1/benchmark-runs/${part(runId)}/repetitions/${part(repetitionId)}/artifacts/${part(artifactId)}`, options);
+    return mapEnvelope("productArtifact", envelope, (data) => data);
+  }
+
+  async getBenchmarkRunRepetitionArtifactContent(runId: string, repetitionId: string, artifactId: string, options?: TransportRequestOptions) {
+    const envelope = await this.transport.get<ArtifactContentEnvelope>(`/v1/benchmark-runs/${part(runId)}/repetitions/${part(repetitionId)}/artifacts/${part(artifactId)}/content`, options);
+    return mapEnvelope("productArtifactContent", envelope, (data) => data);
   }
 
   async getDiagnosticRunQualification(runId: string, options?: TransportRequestOptions) {
@@ -392,7 +461,7 @@ export class LiveHttpConsoleApi implements ConsoleApi {
   async getEvaluationMetrics(evaluationId: string, options?: TransportRequestOptions) { const e = await this.transport.get<EvaluationMetricListEnvelope>(evalPath(evaluationId, "metrics"), options); return mapEnvelope("evaluationMetrics", e, (rows) => rows.map(mapMetric)); }
   async getEvaluationDimensions(evaluationId: string, options?: TransportRequestOptions) { const e = await this.transport.get<EvaluationDimensionListEnvelope>(evalPath(evaluationId, "dimensions"), options); return mapEnvelope("evaluation", e, (rows) => rows.map(mapDimension)); }
   async getEvaluationFindings(evaluationId: string, options?: TransportRequestOptions) { const e = await this.transport.get<EvaluationFindingListEnvelope>(evalPath(evaluationId, "findings"), options); return mapEnvelope("evaluation", e, (rows) => rows.map(mapFinding)); }
-  async getEvaluationEvidenceLinks(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<Record<string, unknown>>> { const e = await this.transport.get<EvaluationEvidenceLinksEnvelope>(evalPath(evaluationId, "evidence-links"), options); return mapEnvelope("evaluation", e, (data) => data as unknown as EvaluationEvidenceLinksView as unknown as Record<string, unknown>); }
+  async getEvaluationEvidenceLinks(evaluationId: string, options?: TransportRequestOptions): Promise<ApiResource<EvaluationEvidenceLinksView>> { const e = await this.transport.get<EvaluationEvidenceLinksEnvelope>(evalPath(evaluationId, "evidence-links"), options); return mapEnvelope("evaluation", e, (data) => data as unknown as EvaluationEvidenceLinksView); }
   async getTelemetryProvenance(evaluationId: string, options?: TransportRequestOptions) { const e = await this.transport.get<TelemetryProvenanceEnvelope>(evalPath(evaluationId, "telemetry-provenance"), options); return mapEnvelope("evaluationProvenance", e, mapTelemetryProvenance); }
 
   async listInputSnapshots(episodeId: string, options?: TransportRequestOptions) { const e = await this.transport.get<EvaluationInputSnapshotListEnvelope>(`/v1/episodes/${part(episodeId)}/evaluation-input-snapshots`, options); return mapEnvelope("evaluationInput", e, (rows) => rows.map(mapInputSnapshot)); }

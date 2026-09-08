@@ -4,9 +4,9 @@ import { apiCapabilityMap } from "../api/capability-map";
 import { buildOverview } from "./mockData";
 
 describe("mock adapter normalization", () => {
-  it("pins the formal 114-operation server contract", () => {
-    expect(sourceLock.operationCount).toBe(114);
-    expect(sourceLock.openapiSha256).toBe("e6e675aa1245f7f4e530046a4cb03d6e890aabc37f60afb5372119191f32cd00");
+  it("pins the frozen v0.3 172-operation server contract", () => {
+    expect(sourceLock.operationCount).toBe(172);
+    expect(sourceLock.openapiSha256).toBe("335c50caea64b9ac6aa0aac69c143d73ee802955715ab79218f6f9801b8b81a3");
     expect(apiCapabilityMap.overview.operationId).toBe("getDashboardOverview");
     expect(apiCapabilityMap.evidenceUsage.operationId).toBe("getEvidenceBundlesByBundleIdUsage");
     expect(apiCapabilityMap.reportDownload.operationId).toBe("getReportsByReportIdDownload");

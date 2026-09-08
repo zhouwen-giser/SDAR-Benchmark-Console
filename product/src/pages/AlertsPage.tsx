@@ -7,6 +7,8 @@ import { PageHeader, SectionCard } from "../components/common";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
 import type { AlertRecord } from "../types";
 import { actorName, compactTime, severityName, sourceName, statusName, targetTypeName } from "../utils/format";
+import { operationalApi } from "../operational/api";
+import { OperationalMetaStrip, OperationalStatusTag } from "../operational/components";
 
 const severityColor: Record<AlertRecord["severity"], string> = { critical: "red", high: "orange", medium: "gold" };
 const statusColor: Record<AlertRecord["status"], string> = { open: "red", acknowledged: "blue", resolved: "green", ignored: "default" };
@@ -22,6 +24,8 @@ export function AlertsPage() {
   const [messageApi, contextHolder] = message.useMessage();
   const live = currentApiMode() === "http";
   const detailQuery = useQuery({ queryKey: ["attention-item", selectedId], queryFn: ({ signal }) => consoleApi.getAttention(selectedId!, { signal }), enabled: live && Boolean(selectedId) });
+  const timelineQuery = useQuery({ queryKey: ["operational-attention-timeline", selectedId], queryFn: ({ signal }) => operationalApi.getAttentionTimeline(selectedId!, { signal }), enabled: Boolean(selectedId), retry: false });
+  const evidenceQuery = useQuery({ queryKey: ["operational-attention-evidence", selectedId], queryFn: ({ signal }) => operationalApi.getAttentionEvidence(selectedId!, { signal }), enabled: Boolean(selectedId), retry: false });
   const records = useMemo(() => (query.data?.data ?? []).map((item) => ({ ...item, ...overrides[item.alertId] })).filter((item) => {
     if (status !== "all" && item.status !== status) return false;
     if (severity !== "all" && item.severity !== severity) return false;
@@ -51,6 +55,17 @@ export function AlertsPage() {
   const openTarget = (alert: AlertRecord) => {
     const path = alert.targetType === "case" ? `/cases/${alert.targetId}` : alert.targetType === "evaluation" ? `/evaluations/${alert.targetId}` : alert.targetType === "run" ? `/runs/${alert.targetId}` : "/analytics";
     navigateWithContext(path);
+  };
+
+  const openSubject = (kind: string, id: string) => {
+    const path = kind === "run" ? `/runs/${encodeURIComponent(id)}`
+      : kind === "resource" ? `/resources/${encodeURIComponent(id)}`
+        : kind === "environment" ? `/environments/${encodeURIComponent(id)}`
+          : kind === "evaluation" ? `/evaluations/${encodeURIComponent(id)}`
+            : kind === "telemetry_source" ? "/telemetry"
+              : kind === "reconciliation_job" ? `/reconciliation?jobId=${encodeURIComponent(id)}`
+                : null;
+    if (path) navigateWithContext(path);
   };
 
   const columns = [
@@ -101,7 +116,18 @@ export function AlertsPage() {
             { color: "#ef4444", label: compactTime(selected.createdAt), children: <b>{sourceName(selected.source)}创建告警</b> },
             ...(selected.acknowledgedAt ? [{ color: "#3b82f6", label: compactTime(selected.acknowledgedAt), children: <b>已确认 · {actorName(selected.owner)}</b> }] : []),
             ...(selected.resolvedAt ? [{ color: "#28c76f", label: compactTime(selected.resolvedAt), children: <b>已解决 · {actorName(selected.owner)}</b> }] : []),
+            ...(timelineQuery.data?.data ?? []).map((event) => ({ color: "#64748b", label: compactTime(event.occurredAt), children: <span><b>{event.eventType}</b> · {event.source} · {event.dataClass}</span> })),
           ]} />
+          {timelineQuery.data && <OperationalMetaStrip meta={timelineQuery.data.meta} />}
+          {evidenceQuery.data && <SectionCard title="Native attention evidence">
+            <Space wrap>{evidenceQuery.data.data.subjects.map((subject) => <Button key={`${subject.kind}:${subject.id}`} type="link" onClick={() => openSubject(subject.kind, subject.id)}>{subject.kind} · {subject.id} <ArrowRightOutlined /></Button>)}</Space>
+            <Descriptions size="small" bordered column={1} items={[
+              { key: "class", label: "Data class", children: <OperationalStatusTag value={evidenceQuery.data.meta.dataClass} /> },
+              { key: "evidence", label: "Evidence refs", children: evidenceQuery.data.data.evidenceRefs.join(" · ") || "—" },
+              { key: "timeline", label: "Timeline refs", children: evidenceQuery.data.data.timelineRefs.join(" · ") || "—" },
+              { key: "reasons", label: "Reason codes", children: evidenceQuery.data.data.reasonCodes.join(" · ") || "—" },
+            ]} />
+          </SectionCard>}
           <Button block type="primary" onClick={() => openTarget(selected)}>打开关联对象 <ArrowRightOutlined /></Button>
         </div>}
       </Drawer>

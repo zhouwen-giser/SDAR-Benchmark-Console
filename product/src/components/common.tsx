@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Alert,
   Button,
+  Drawer,
   Empty,
   Result,
   Skeleton,
@@ -203,6 +204,39 @@ export function PageHeader({
       </div>
       {actions && <Space wrap>{actions}</Space>}
     </header>
+  );
+}
+
+export function DebugPayloadDrawer({
+  payload,
+  label = "查看原始数据",
+}: {
+  payload: unknown;
+  label?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button size="small" type="link" onClick={() => setOpen(true)}>
+        {label}
+      </Button>
+      <Drawer
+        title="Debug Payload"
+        placement="right"
+        width={680}
+        open={open}
+        onClose={() => setOpen(false)}
+        destroyOnHidden
+      >
+        <Alert
+          type="info"
+          showIcon
+          message="仅用于开发诊断"
+          description="产品主视图使用类型化卡片、表格和时间轴；此处保留服务端原始响应便于排障。"
+        />
+        <pre className="debug-payload-json">{JSON.stringify(payload, null, 2)}</pre>
+      </Drawer>
+    </>
   );
 }
 

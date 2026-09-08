@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "sdar-benchmark.product-data-api-source-lock/v0.2",
+  "goalId": "sdar-benchmark-product-data-api-completion-v0.2",
+  "observedAt": "2026-09-03T08:39:38+08:00",
+  "goalPackage": {
+    "path": "/home/zhouwen/下载/SDAR_Benchmark_Product_Data_API_Completion_Codex_Goal_Package_V0.2.zip",
+    "sha256": "cbda05e69be407ba98789aa96a17b5e6f612bf328120c7e2069f13ffa1d86b2c",
+    "checksumEntries": 52,
+    "checksumStatus": "passed"
+  },
+  "server": {
+    "repository": "zhouwen-giser/sdar-benchmark-server",
+    "baseBranch": "codex/ugv-four-case-diagnostic-vertical-v0.1",
+    "baseCommit": "1d91138b56eb70e4edebe4c72fd0a824820ccf87",
+    "parentPullRequest": 4,
+    "parentPullRequestState": "open_draft",
+    "targetBranch": "feature/benchmark-product-data-api-v0.2",
+    "targetCommit": "67c912be57a587cc8a86bb03bc138d170be952ea",
+    "acceptanceCommit": "09feee3d99a1e50e076e0178d603a700ed7b4730",
+    "targetPullRequest": 5,
+    "targetPullRequestState": "open_draft",
+    "stackedBase": "codex/ugv-four-case-diagnostic-vertical-v0.1"
+  },
+  "console": {
+    "repository": "zhouwen-giser/SDAR-Benchmark-Console",
+    "baseBranch": "feature/benchmark-control-ugv-diagnostic-v0.1",
+    "baseCommit": "633c4d4d714246199d14675f85d1e65d910082ef",
+    "parentPullRequest": 1,
+    "parentPullRequestState": "open_draft",
+    "targetBranch": "feature/benchmark-console-product-data-api-v0.2",
+    "stackedBase": "feature/benchmark-control-ugv-diagnostic-v0.1"
+  },
+  "serverOpenApi": {
+    "path": "/home/zhouwen/web-download/sdar-benchmark-server/openapi/benchmark-server.openapi.yaml",
+    "sha256": "92edbd609860b2dc8f38c123a10a4faf5d6a97355797ac43c4ae6dae30c5ca15",
+    "verifiedOperationCount": 125,
+    "verifiedRouteCount": 125,
+    "uniqueOperationIdCount": 125,
+    "contractState": "frozen-final-commit",
+    "targetOperationCount": 125
+  },
+  "parentRetargetRequired": false,
+  "historicalDevelopmentVerticalPreserved": true
+}
