@@ -3,5 +3,6 @@ dist/
 coverage/
 playwright-report/
 test-results/
-.env
+# The checked-in .env contains only public debug endpoints.
+# Private overrides remain ignored by the root .env* rule.
 *.log

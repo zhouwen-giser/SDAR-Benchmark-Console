@@ -440,6 +440,8 @@ export class LiveHttpConsoleApi implements ConsoleApi {
         profile: header.data.profileVersionId, bundleId: header.data.bundleSnapshotId,
         readiness: { source: readiness.data.sourceEvidenceReadiness ?? "unavailable", evaluation: readiness.data.evaluationReadiness, missing: readiness.data.missingFamilies, conflicts: readiness.data.conflictingFamilies },
         scoreStatus: header.data.scoreStatus, qualityScore: header.data.qualityScore, level: header.data.level, passed: header.data.passed === true,
+        observedEvaluation: header.data.observedEvaluation,
+        caseDiagnosticEvaluation: header.data.caseDiagnosticEvaluation,
         fatals: fatals.data.map((item) => ({ id: item.id, matched: item.matched === true, proofStatus: item.proofStatus, evidenceLevel: item.evidenceLevel ?? "unavailable" })),
         gates: gates.data.map((item) => ({ id: item.id, result: item.result, reason: item.reason ?? undefined, evidenceRefs: item.evidenceRefs })),
         metrics: metrics.data.map((item) => ({ id: item.id, raw: item.raw, weight: item.weight ?? 0, evidenceLevel: item.evidenceLevel ?? "unavailable", status: item.status, summary: item.summary ?? item.reasonCodes.join(", ") })),

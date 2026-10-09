@@ -702,6 +702,8 @@ export class MockConsoleApi {
         readiness: detail.readiness.evaluation,
         scoreStatus: detail.scoreStatus,
         qualityScore: detail.qualityScore,
+        observedEvaluation: detail.observedEvaluation,
+        caseDiagnosticEvaluation: detail.caseDiagnosticEvaluation,
         level: detail.level,
         passed: detail.passed,
         createdAt: "2026-08-15T20:31:42Z",

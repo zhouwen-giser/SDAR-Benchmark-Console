@@ -34,6 +34,7 @@ import {
   TrackRiskHeatmap,
 } from "../components/charts";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
+import { useContextOptions } from "../hooks/useContextOptions";
 import type { AnalysisConclusion, CaseResult, ContextOptionsView, OverviewSnapshot } from "../types";
 import {
   changeName,
@@ -66,9 +67,15 @@ const dataStateOptions = [
   { label: "数据不完整", value: "partial" },
 ];
 
-function ContextBar({ data, options, onRefresh }: { data: OverviewSnapshot; options?: ContextOptionsView; onRefresh: () => void }) {
+export function ContextBar({ data, options, onRefresh }: { data?: OverviewSnapshot; options?: ContextOptionsView; onRefresh: () => void }) {
   const { filters, setFilters, navigateWithContext } = useAnalysisContext();
-  const context = data.context;
+  const contextQuery = useContextOptions();
+  const http = currentApiMode() === "http";
+  const selectionState = (items?: unknown[]) => !http ? "未选择"
+    : contextQuery.isPending ? "加载中…"
+    : contextQuery.isError ? "读取失败"
+    : items?.length ? "未选择" : "暂无可选数据";
+  const context = data?.context;
   const localFilters = [
     filters.track !== "all" && { key: "track", label: `分轨：${trackName(filters.track)}` },
     filters.risk !== "all" && { key: "risk", label: `风险：${riskName(filters.risk)}` },
@@ -80,57 +87,77 @@ function ContextBar({ data, options, onRefresh }: { data: OverviewSnapshot; opti
         <h1>SDAR 基准质量指挥中心</h1>
         <div className="context-selectors" aria-label="全局分析上下文">
           <div className="context-selector-field">
-            <button type="button" className="context-resource-link" onClick={() => navigateWithContext(`/candidates/${filters.candidateId}`)}>候选版本 ↗</button>
+            <button type="button" className="context-resource-link" disabled={!filters.candidateId} onClick={() => navigateWithContext(`/candidates/${encodeURIComponent(filters.candidateId)}`)}>候选版本 ↗</button>
             <Select
               aria-label="候选版本"
               size="small"
-              value={filters.candidateId}
-              options={(options?.candidates ?? [{ id: context.candidate.id, label: `SDAR ${context.candidate.runtimeVersion} (${context.candidate.commit})` }]).map((item) => ({ value: item.id, label: item.label }))}
+              value={filters.candidateId || undefined}
+              allowClear
+              loading={http && contextQuery.isPending}
+              placeholder={selectionState(options?.candidates)}
+              notFoundContent={selectionState(options?.candidates)}
+              options={(options?.candidates ?? (http || !context ? [] : [{ id: context.candidate.id, label: `SDAR ${context.candidate.runtimeVersion} (${context.candidate.commit})` }])).map((item) => ({ value: item.id, label: item.label }))}
               onChange={(candidateId) => setFilters({ candidateId }, { clearLocal: true })}
             />
           </div>
           <div className="context-selector-field">
-            <button type="button" className="context-resource-link" onClick={() => navigateWithContext(`/baselines/${filters.baselineId}`)}>基准版本 ↗</button>
+            <button type="button" className="context-resource-link" disabled={!filters.baselineId} onClick={() => navigateWithContext(`/baselines/${encodeURIComponent(filters.baselineId)}`)}>基准版本 ↗</button>
             <Select
               aria-label="基准版本"
               size="small"
-              value={filters.baselineId}
-              options={(options?.baselines ?? [{ id: context.baseline.id, label: context.baseline.id }]).map((item) => ({ value: item.id, label: item.label }))}
+              value={filters.baselineId || undefined}
+              allowClear
+              loading={http && contextQuery.isPending}
+              placeholder={selectionState(options?.baselines)}
+              notFoundContent={selectionState(options?.baselines)}
+              options={(options?.baselines ?? (http || !context ? [] : [{ id: context.baseline.id, label: context.baseline.id }])).map((item) => ({ value: item.id, label: item.label }))}
               onChange={(baselineId) => setFilters({ baselineId }, { clearLocal: true })}
             />
           </div>
           <div className="context-selector-field">
-            <button type="button" className="context-resource-link" onClick={() => navigateWithContext(`/datasets/${filters.datasetVersion}`)}>数据集 ↗</button>
+            <button type="button" className="context-resource-link" disabled={!filters.datasetVersion} onClick={() => navigateWithContext(`/datasets/${encodeURIComponent(filters.datasetVersion)}`)}>数据集 ↗</button>
             <Select
               aria-label="数据集"
               size="small"
-              value={filters.datasetVersion}
-              options={(options?.datasets ?? [{ id: context.dataset.id, label: context.dataset.id }]).map((item) => ({ value: item.id, label: item.label }))}
+              value={filters.datasetVersion || undefined}
+              allowClear
+              loading={http && contextQuery.isPending}
+              placeholder={selectionState(options?.datasets)}
+              notFoundContent={selectionState(options?.datasets)}
+              options={(options?.datasets ?? (http || !context ? [] : [{ id: context.dataset.id, label: context.dataset.id }])).map((item) => ({ value: item.id, label: item.label }))}
               onChange={(datasetVersion) => setFilters({ datasetVersion }, { clearLocal: true })}
             />
           </div>
           <div className="context-selector-field">
-            <button type="button" className="context-resource-link" onClick={() => navigateWithContext(`/profiles/${filters.profileVersionId}`)}>评价配置 ↗</button>
+            <button type="button" className="context-resource-link" disabled={!filters.profileVersionId} onClick={() => navigateWithContext(`/profiles/${encodeURIComponent(filters.profileVersionId)}`)}>评价配置 ↗</button>
             <Select
               aria-label="评价配置"
               size="small"
-              value={filters.profileVersionId}
-              options={(options?.profiles ?? [{ id: context.profile.id, label: context.profile.id }]).map((item) => ({ value: item.id, label: item.label }))}
+              value={filters.profileVersionId || undefined}
+              allowClear
+              loading={http && contextQuery.isPending}
+              placeholder={selectionState(options?.profiles)}
+              notFoundContent={selectionState(options?.profiles)}
+              options={(options?.profiles ?? (http || !context ? [] : [{ id: context.profile.id, label: context.profile.id }])).map((item) => ({ value: item.id, label: item.label }))}
               onChange={(profileVersionId) => setFilters({ profileVersionId }, { clearLocal: true })}
             />
           </div>
           <div className="context-selector-field">
-            <button type="button" className="context-resource-link" onClick={() => navigateWithContext(`/runs/${filters.runId}`)}>评测运行 ↗</button>
+            <button type="button" className="context-resource-link" disabled={!filters.runId} onClick={() => navigateWithContext(`/runs/${encodeURIComponent(filters.runId)}`)}>评测运行 ↗</button>
             <Select
               aria-label="评测运行"
               size="small"
-              value={filters.runId}
-              options={(options?.runs ?? [{ id: context.run.id, label: context.run.id }]).map((item) => ({ value: item.id, label: item.label }))}
+              value={filters.runId || undefined}
+              allowClear
+              loading={http && contextQuery.isPending}
+              placeholder={selectionState(options?.runs)}
+              notFoundContent={selectionState(options?.runs)}
+              options={(options?.runs ?? (http || !context ? [] : [{ id: context.run.id, label: context.run.id }])).map((item) => ({ value: item.id, label: item.label }))}
               onChange={(runId) => setFilters({ runId }, { clearLocal: true })}
             />
           </div>
-          <span className="context-watermark">数据水位 <b>{data.snapshot.watermark?.slice(11, 19) ?? "—"}</b></span>
-          <span className="context-watermark">投影延迟 <b>{data.snapshot.projectionLagMs == null ? "—" : `${(data.snapshot.projectionLagMs / 1000).toFixed(1)} 秒`}</b></span>
+          <span className="context-watermark">数据水位 <b>{data?.snapshot.watermark?.slice(11, 19) ?? "—"}</b></span>
+          <span className="context-watermark">投影延迟 <b>{data?.snapshot.projectionLagMs == null ? "—" : `${(data.snapshot.projectionLagMs / 1000).toFixed(1)} 秒`}</b></span>
         </div>
       </div>
       <div className="context-actions">
@@ -410,12 +437,7 @@ export function OverviewPage() {
     queryFn: () => consoleApi.getOverview(filters),
     retry: false,
   });
-  const contextQuery = useQuery({
-    queryKey: ["context-options"],
-    queryFn: ({ signal }) => consoleApi.getContextOptions({ signal }),
-    enabled: currentApiMode() === "http",
-    staleTime: 300_000,
-  });
+  const contextQuery = useContextOptions();
 
   const data = query.data?.data;
   const meta = query.data?.meta;
@@ -447,7 +469,7 @@ export function OverviewPage() {
     const fallback = query.isError || filters.dataState === "error" ? "error" : "loading";
     return (
       <div className="overview-page">
-        <div className="overview-loading-header"><h1>SDAR 基准质量指挥中心</h1></div>
+        <ContextBar data={data} options={contextQuery.data?.data} onRefresh={() => { void query.refetch(); void contextQuery.refetch(); }} />
         <OperationalOverviewSummary navigate={navigateWithContext} />
         <DataStatePanel state={fallback} onRetry={() => { if (currentApiMode() === "http") void query.refetch(); else setFilters({ dataState: "loaded" }); }}><span /></DataStatePanel>
       </div>

@@ -77,6 +77,17 @@ export function RunCreatePage() {
     selection?.nativeRequirement === "require_native",
   );
   const currentStep = createMutation.isSuccess ? 3 : createMutation.isPending ? 2 : preflight === null ? 0 : 1;
+  const refreshCatalog = () => {
+    setPreflight(null);
+    void catalog.refetch();
+    void compatibilityPreset.refetch();
+    void environments.refetch();
+    void resources.refetch();
+  };
+  const requestErrors = [
+    ["Preset 目录", catalog.error], ["执行模板", compatibilityPreset.error],
+    ["环境", environments.error], ["资源", resources.error],
+  ].filter(([, error]) => error).map(([label, error]) => `${label}: ${error instanceof Error ? error.message : String(error)}`);
 
   return (
     <div className="standard-page run-create-page">
@@ -84,7 +95,7 @@ export function RunCreatePage() {
         title="新建 Benchmark Run"
         subtitle="Run Create v3：选择 simulated / live_native、Environment / Resource、native requirement、Telemetry / time / reconcile / SSE policy，再写入 PostgreSQL Run Authority。"
         meta={catalog.data?.meta ?? compatibilityPreset.data?.meta}
-        actions={<Button onClick={() => navigateWithContext("/runs")}>返回运行列表</Button>}
+        actions={<Space><Button onClick={refreshCatalog} loading={catalog.isFetching || compatibilityPreset.isFetching || environments.isFetching || resources.isFetching}>刷新执行配置</Button><Button onClick={() => navigateWithContext("/runs")}>返回运行列表</Button></Space>}
       />
 
       <Steps
@@ -98,23 +109,24 @@ export function RunCreatePage() {
         ]}
       />
 
-      {(catalog.isError || compatibilityPreset.isError) && (
+      {requestErrors.length > 0 && (
         <Alert
           type="error"
           showIcon
-          message="无法读取 Benchmark Catalog / Development execution template"
-          description="HTTP 模式不会回退到 Mock。请恢复 Benchmark Server 后重试。"
-          action={<Button onClick={() => { void catalog.refetch(); void compatibilityPreset.refetch(); }}>重试</Button>}
+          message="执行配置请求失败"
+          description={requestErrors.join("；")}
+          action={<Button onClick={refreshCatalog}>重试</Button>}
         />
       )}
-      {compatibilityPreset.data && unavailable && (
+      {compatibilityPreset.data && (compatibilityPreset.data.data.availability !== "available" || !compatibilityPreset.data.data.requestTemplate) && (
         <Alert
           type="warning"
           showIcon
-          message="Server 尚未配置可执行 preset"
+          message="执行模板未配置"
           description={compatibilityPreset.data.data.reasonCodes.join("、") || "DEV_PRESET_NOT_CONFIGURED"}
         />
       )}
+      {catalog.isSuccess && catalogPresets.length === 0 && <Alert type="warning" showIcon message="Preset 目录为空" description={catalog.data.meta.reasonCodes.join("、") || "Server 尚未提供可用于创建 Run 的版本化 preset。请初始化目录后刷新执行配置。"} />}
 
       <div className="run-create-grid">
         <SectionCard title="Server-driven Benchmark Catalog" className="run-create-main-card">

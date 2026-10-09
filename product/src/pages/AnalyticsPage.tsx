@@ -20,7 +20,7 @@ export function AnalyticsPage() {
   const { filters, setFilters } = useAnalysisContext();
   const queries = useQueries({
     queries: modules.map(([key]) => ({
-      queryKey: ["analytics-module", key, filters.candidateId, filters.datasetVersion, filters.profileVersionId, filters.runId, filters.track, filters.risk, filters.period],
+      queryKey: ["analytics-module", key, filters.candidateId, filters.baselineId, filters.datasetVersion, filters.profileVersionId, filters.runId, filters.track, filters.risk, filters.period],
       queryFn: ({ signal }: { signal: AbortSignal }) => consoleApi.getAnalyticsModule(key, filters, { signal }),
       retry: false,
     })),
@@ -50,7 +50,7 @@ export function AnalyticsPage() {
         actions={<><Tag color={unavailable ? "gold" : "green"}>UNAVAILABLE {unavailable} · PARTIAL {partial}</Tag><Select value={filters.period} options={[{ value: "7d", label: "最近 7 天" }, { value: "14d", label: "最近 14 天" }, { value: "30d", label: "最近 30 天" }]} onChange={(period) => setFilters({ period })} /><Button icon={<ReloadOutlined />} onClick={() => queries.forEach((query) => void query.refetch())}>刷新</Button></>}
       />
       <div className="analytics-context-strip">
-        <span>候选版本 <b>{filters.candidateId}</b></span><span>评测运行 <b>{filters.runId}</b></span><span>数据集 <b>{filters.datasetVersion}</b></span>
+        <span>候选版本 <b>{filters.candidateId || "未选择"}</b></span><span>评测运行 <b>{filters.runId || "未选择"}</b></span><span>数据集 <b>{filters.datasetVersion || "未选择"}</b></span>
       </div>
       <SectionCard title="Development Diagnostic Outcome Distribution" extra={diagnosticOutcomes.data && <ApiStatusTag compact meta={diagnosticOutcomes.data.meta} />}>
         {diagnosticOutcomes.isLoading ? <div className="page-loading">正在加载诊断结果分布…</div> : diagnosticOutcomes.isError ? <div className="unavailable-card"><span>UNAVAILABLE · {diagnosticOutcomes.error instanceof Error ? diagnosticOutcomes.error.message : "请求失败"}</span></div> : diagnosticOutcomes.data ? <DiagnosticOutcomeDistributionPanel rows={diagnosticOutcomes.data.data} /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}

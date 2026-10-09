@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   const benchmarkApiUpstream =
     process.env.VITE_BENCHMARK_API_UPSTREAM || env.VITE_BENCHMARK_API_UPSTREAM || "http://127.0.0.1:18090";
   const telemetryQueryUpstream =
-    process.env.VITE_TELEMETRY_QUERY_UPSTREAM || env.VITE_TELEMETRY_QUERY_UPSTREAM || "http://127.0.0.1:18080";
+    process.env.VITE_TELEMETRY_QUERY_UPSTREAM || env.VITE_TELEMETRY_QUERY_UPSTREAM || "http://17.26.1.20:28081";
   return {
     plugins: [react()],
     resolve: {

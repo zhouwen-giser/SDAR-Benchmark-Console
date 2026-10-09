@@ -1,4 +1,5 @@
 import { caseResults, evaluationDetail, evidenceDetail } from "./mockData";
+import { mockObservedSummary } from "./observedEvaluation";
 import type {
   AlertRecord,
   CaseDetail,
@@ -13,6 +14,7 @@ import type {
 } from "../types";
 
 export const evaluationSummaries: EvaluationSummary[] = [
+  mockObservedSummary,
   {
     evaluationId: "eval-mcp17",
     caseId: "MCP-RESTART-017",
@@ -240,10 +242,12 @@ export function buildEvaluationDetail(evaluationId: string): EvaluationDetail {
   if (evaluationId === "eval-mcp17") return data;
 
   const summary = evaluationSummaries.find((item) => item.evaluationId === evaluationId);
+  if (summary?.observedEvaluation) data.observedEvaluation = structuredClone(summary.observedEvaluation);
+  if (summary?.caseDiagnosticEvaluation) data.caseDiagnosticEvaluation = structuredClone(summary.caseDiagnosticEvaluation);
   data.evaluationId = evaluationId;
   data.caseId = summary?.caseId ?? "CORE-AMB-012";
   data.bundleId = summary?.bundleId ?? data.bundleId;
-  data.qualityScore = summary?.qualityScore ?? 88;
+  data.qualityScore = summary ? summary.qualityScore : 88;
   data.level = summary?.verdict === "—" ? "NR" : (summary?.verdict ?? "A");
   data.passed = (summary?.failedGates.length ?? 0) === 0 && summary?.readiness !== "not_ready";
   data.scoreStatus = summary?.scoreStatus ?? "formal";

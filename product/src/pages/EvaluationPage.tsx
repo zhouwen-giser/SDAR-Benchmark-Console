@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Button, Descriptions, Empty, Space, Table, Tabs, Tag } from "antd";
+import { Alert, Button, Collapse, Descriptions, Empty, Space, Table, Tabs, Tag } from "antd";
 import { LinkOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import { consoleApi } from "../api/consoleApi";
 import { ApiStatusTag, DebugPayloadDrawer, PageHeader, SectionCard } from "../components/common";
 import { useAnalysisContext } from "../hooks/useAnalysisContext";
+import { ObservedEvaluationPanel } from "../components/ObservedEvaluationPanel";
+import { CaseDiagnosticEvaluationPanel } from "../components/CaseDiagnosticEvaluationPanel";
 import type {
   EvaluationDimensionView,
   EvaluationEvidenceGradeView,
@@ -33,7 +35,7 @@ export function EvaluationPage() {
   const links = useQuery({ queryKey: ["evaluation-evidence-links", evaluationId], queryFn: ({ signal }) => consoleApi.getEvaluationEvidenceLinks(evaluationId, { signal }), enabled: active === "evidence-links" });
   const provenance = useQuery({ queryKey: ["evaluation-provenance", evaluationId], queryFn: ({ signal }) => consoleApi.getTelemetryProvenance(evaluationId, { signal }), enabled: active === "telemetry-provenance" || active === "evaluation-input", staleTime: Infinity });
 
-  if (!header.data) return <div className="standard-page"><SectionCard><div className="page-loading">正在加载评价 Header…</div></SectionCard></div>;
+  if (!header.data) return <div className="standard-page"><SectionCard>{header.isError ? <Alert type="error" showIcon message="评价读取失败" description={header.error.message} action={<Button onClick={() => void header.refetch()}>重试</Button>} /> : <div className="page-loading">正在加载评价 Header…</div>}</SectionCard></div>;
   const data = header.data.data;
   const resource = { readiness, "evidence-grades": grades, fatals, "hard-gates": gates, metrics, dimensions, findings, "evidence-links": links, "telemetry-provenance": provenance, "evaluation-input": provenance }[active];
 
@@ -70,18 +72,25 @@ export function EvaluationPage() {
     ["telemetry-provenance", "Telemetry Provenance"], ["evaluation-input", "评价输入"],
   ].map(([key, label]) => ({ key, label, children: <SectionCard className="evaluation-tab-card">{renderResource()}</SectionCard> }));
 
-  return (
-    <div className="standard-page evaluation-page">
-      <PageHeader title={`评价结果 ${data.evaluationId}`} subtitle={`${data.caseId} · ${sourceName(data.origin)} · ${data.profileVersionId}`} meta={header.data.meta} actions={<Button icon={<LinkOutlined />} onClick={() => navigateWithContext(`/evidence-bundles/${data.bundleSnapshotId}`)}>打开证据包</Button>} />
+  const strictContent = <>
       <div className="evaluation-hero">
         <SectionCard className={`evaluation-verdict verdict-${data.level.toLowerCase()}`}><span>评价结论</span><strong>{verdictName(data.level)}</strong><small>{data.passed == null ? "unavailable" : data.passed ? "已通过" : "未通过"}</small></SectionCard>
-        <SectionCard className="evaluation-score"><span>质量得分</span><strong>{displayValue(data.qualityScore)}</strong><Tag color={data.scoreStatus === "formal" ? "green" : "gold"}>{scoreStatusName(data.scoreStatus)}</Tag></SectionCard>
+        <SectionCard className="evaluation-score"><span>{data.observedEvaluation || data.caseDiagnosticEvaluation ? "严格评分 · qualityScore" : "质量得分"}</span><strong>{displayValue(data.qualityScore)}</strong><Tag color={data.scoreStatus === "formal" ? "green" : "gold"}>{scoreStatusName(data.scoreStatus)}</Tag></SectionCard>
         <SectionCard className="evaluation-summary-card"><Descriptions size="small" column={4} items={[
           { key: "origin", label: "评价来源", children: sourceName(data.origin) }, { key: "readiness", label: "评价就绪度", children: readinessName(data.readiness) },
           { key: "episode", label: "Episode", children: data.episodeId ?? "—" }, { key: "bundle", label: "Bundle", children: data.bundleSnapshotId },
         ]} /></SectionCard>
       </div>
       <Tabs activeKey={active} items={tabs} onChange={(tab) => setQueryParams({ tab })} />
+    </>;
+  return (
+    <div className="standard-page evaluation-page">
+      <PageHeader title={`评价结果 ${data.evaluationId}`} subtitle={data.projectionStatus === "pending" ? "投影等待中 · 普通评分来自 PostgreSQL 权威结果；缺失的严格评分字段保持不可用。" : `${data.caseId} · ${sourceName(data.origin)} · ${data.profileVersionId}`} meta={header.data.meta} actions={<Button icon={<LinkOutlined />} disabled={!data.bundleSnapshotId || data.bundleSnapshotId === "unavailable"} onClick={() => navigateWithContext(`/evidence-bundles/${data.bundleSnapshotId}`)}>打开证据包</Button>} />
+      {data.caseDiagnosticEvaluation && <CaseDiagnosticEvaluationPanel key={`case:${evaluationId}`} value={data.caseDiagnosticEvaluation} observed={data.observedEvaluation} strictPassed={data.passed} />}
+      {data.observedEvaluation && <ObservedEvaluationPanel key={`observed:${evaluationId}`} value={data.observedEvaluation} secondary={Boolean(data.caseDiagnosticEvaluation)} />}
+      {data.observedEvaluation || data.caseDiagnosticEvaluation ? <>
+        <Collapse className="strict-evaluation" defaultActiveKey={searchParams.has("tab") ? ["strict"] : []} items={[{ key: "strict", label: "严格评分 / 专家诊断：qualityScore、level、scoreStatus、Fatal、HG、五维", children: strictContent }]} />
+      </> : strictContent}
     </div>
   );
 }

@@ -25,6 +25,16 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
 describe("LiveHttpConsoleApi contract adapter", () => {
+  it("omits empty identities rather than sending fixture or cleared filters", async () => {
+    const seen: URL[] = [];
+    server.use(http.get(`${base}/v1/dashboard/overview`, ({ request }) => {
+      seen.push(new URL(request.url));
+      return HttpResponse.json({ context: {}, snapshot: { dataStatus: "empty", moduleErrors: [] } });
+    }));
+    await api.getOverview({ scenario: "blocked", dataState: "loaded", candidateId: "", baselineId: "", datasetVersion: "", profileVersionId: "", runId: "", track: "all", risk: "all", period: "7d" });
+    expect([...seen[0]!.searchParams.entries()]).toEqual([["period", "7d"]]);
+  });
+
   it("uses the Server preset request unchanged for Development preflight", async () => {
     const requestTemplate = {
       datasetVersionRef: "sdar-ugv-agent-diagnostic/0.1",

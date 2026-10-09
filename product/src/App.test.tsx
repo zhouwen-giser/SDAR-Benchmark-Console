@@ -9,6 +9,27 @@ afterEach(() => {
 });
 
 describe("SDAR Benchmark Console integration", () => {
+  it("shows ordinary Move score separately from strict diagnostics", async () => {
+    window.history.replaceState(null, "", "/evaluations/mock-observed-move");
+    render(<App />);
+    expect(await screen.findByTestId("observed-score")).toHaveTextContent("100.0");
+    expect(screen.getByTestId("observed-coverage")).toHaveTextContent("6%");
+    expect(screen.getByText("NOT_GRANTED")).toBeInTheDocument();
+    expect(screen.getByTestId("observed-raw-M2")).toHaveTextContent("—");
+    expect(screen.queryByText("严格评分 · qualityScore")).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByText(/严格评分 \/ 专家诊断/));
+    expect(await screen.findByText("严格评分 · qualityScore")).toBeInTheDocument();
+  });
+
+  it("lists observed score with partial coverage and no score progress bar", async () => {
+    window.history.replaceState(null, "", "/evaluations?search=mock-observed-move");
+    const { container } = render(<App />);
+    expect(await screen.findByText("100.0")).toBeInTheDocument();
+    expect(screen.getByText("覆盖 6%")).toBeInTheDocument();
+    expect(screen.getByText(/部分评分 · PARTIAL_SCORED/)).toBeInTheDocument();
+    expect(container.querySelector(".ant-progress")).toBeNull();
+  });
+
   it("preflights a Server-driven Development catalog run before enabling creation", async () => {
     window.history.replaceState(null, "", "/runs/new");
     render(<App />);

@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import type { AnalysisFilters, Scenario, UiDataState } from "../types";
+import { currentApiMode } from "../api/consoleApi";
+import { useContextOptions } from "./useContextOptions";
 
 const defaults: AnalysisFilters = {
   candidateId: "cand-142-def456",
@@ -15,25 +17,30 @@ const defaults: AnalysisFilters = {
   dataState: "loaded",
 };
 
+const identityKeys = new Set(["candidateId", "baselineId", "datasetVersion", "profileVersionId", "runId"]);
+
 export function useAnalysisContext() {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const contextQuery = useContextOptions();
+  const http = currentApiMode() === "http";
+  const remote = contextQuery.data?.data.defaults;
 
   const filters = useMemo<AnalysisFilters>(
     () => ({
-      candidateId: searchParams.get("candidateId") ?? defaults.candidateId,
-      baselineId: searchParams.get("baselineId") ?? defaults.baselineId,
-      datasetVersion: searchParams.get("datasetVersion") ?? defaults.datasetVersion,
-      profileVersionId: searchParams.get("profileVersionId") ?? defaults.profileVersionId,
-      runId: searchParams.get("runId") ?? defaults.runId,
+      candidateId: searchParams.get("candidateId") ?? (http ? remote?.candidateSnapshotId ?? "" : defaults.candidateId),
+      baselineId: searchParams.get("baselineId") ?? (http ? remote?.baselineId ?? "" : defaults.baselineId),
+      datasetVersion: searchParams.get("datasetVersion") ?? (http ? remote?.datasetVersionRef ?? "" : defaults.datasetVersion),
+      profileVersionId: searchParams.get("profileVersionId") ?? (http ? remote?.profileVersionId ?? "" : defaults.profileVersionId),
+      runId: searchParams.get("runId") ?? (http ? "" : defaults.runId),
       track: searchParams.get("track") ?? defaults.track,
       risk: searchParams.get("risk") ?? defaults.risk,
       period: searchParams.get("period") ?? defaults.period,
       scenario: (searchParams.get("scenario") ?? defaults.scenario) as Scenario,
       dataState: (searchParams.get("dataState") ?? defaults.dataState) as UiDataState,
     }),
-    [searchParams],
+    [searchParams, http, remote],
   );
 
   const setFilters = useCallback(
@@ -43,24 +50,26 @@ export function useAnalysisContext() {
         ["metric", "change", "gate", "drawer", "caseId", "tab"].forEach((key) => next.delete(key));
       }
       Object.entries(patch).forEach(([key, value]) => {
-        if (value === undefined || value === null || value === "") next.delete(key);
+        if (http && identityKeys.has(key) && (value === undefined || value === null || value === "")) next.set(key, "");
+        else if (value === undefined || value === null || value === "") next.delete(key);
         else next.set(key, String(value));
       });
       setSearchParams(next, { replace: options?.replace ?? false });
     },
-    [searchParams, setSearchParams],
+    [searchParams, setSearchParams, http],
   );
 
   const navigateWithContext = useCallback(
     (pathname: string, extra: Record<string, string | undefined> = {}) => {
       const next = new URLSearchParams(searchParams);
       Object.entries(extra).forEach(([key, value]) => {
-        if (value === undefined || value === "") next.delete(key);
+        if (http && identityKeys.has(key) && (value === undefined || value === "")) next.set(key, "");
+        else if (value === undefined || value === "") next.delete(key);
         else next.set(key, value);
       });
       navigate({ pathname, search: next.toString() });
     },
-    [navigate, searchParams],
+    [navigate, searchParams, http],
   );
 
   const setQueryParams = useCallback(
@@ -70,12 +79,13 @@ export function useAnalysisContext() {
     ) => {
       const next = new URLSearchParams(searchParams);
       Object.entries(patch).forEach(([key, value]) => {
-        if (value === undefined || value === null || value === "") next.delete(key);
+        if (http && identityKeys.has(key) && (value === undefined || value === null || value === "")) next.set(key, "");
+        else if (value === undefined || value === null || value === "") next.delete(key);
         else next.set(key, value);
       });
       setSearchParams(next, { replace: options?.replace ?? false });
     },
-    [searchParams, setSearchParams],
+    [searchParams, setSearchParams, http],
   );
 
   return {

@@ -1271,6 +1271,19 @@ pre {
 
 /* Evaluation */
 
+.observed-evaluation { display: grid; gap: 16px; margin-bottom: 20px; }
+.observed-policy { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: #a8b4c8; }
+.observed-hero { display: grid; grid-template-columns: 1fr 1fr 1.35fr; gap: 16px; }
+.observed-hero .section-card-body { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.observed-hero strong { font-size: 42px; line-height: 1.15; color: #e7edf6; }
+.observed-hero small { color: #9aabc3; overflow-wrap: anywhere; }
+.observed-codes { display: grid; gap: 4px; font-size: 11px; overflow-wrap: anywhere; }
+.observed-limitations { padding-left: 20px; margin: 0; }
+.observed-limitations li { margin-bottom: 10px; overflow-wrap: anywhere; }
+.observed-list-score { font-size: 20px; font-weight: 600; color: #e7edf6; }
+.strict-evaluation { margin-top: 18px; }
+@media (max-width: 1000px) { .observed-hero { grid-template-columns: 1fr; } }
+
 .evaluation-hero {
   display: grid;
   grid-template-columns: 150px 170px minmax(0, 1fr);

@@ -36,7 +36,7 @@ pnpm api:generate
 pnpm dev
 ```
 
-Vite 将 `/benchmark-api/*` 代理到 `VITE_BENCHMARK_API_UPSTREAM`，并去掉前缀。默认上游为 `http://127.0.0.1:18090`。
+Vite 将 `/benchmark-api/*` 代理到 `VITE_BENCHMARK_API_UPSTREAM`，并去掉前缀。本次 Observed Evaluation goal 默认上游为本机 `http://127.0.0.1:18090`；sz-gowm 仍可覆盖为 `http://17.26.1.20:38090`。`/telemetry-api` 默认代理到 `http://17.26.1.20:28081`。开发与构建预览均支持进程环境变量和 `product/.env.local` 覆盖，优先级高于 `product/.env`。
 
 ## Internal deployment
 

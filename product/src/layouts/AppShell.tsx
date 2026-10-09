@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Button, Tooltip } from "antd";
+import { Alert, Button, Tooltip } from "antd";
 import {
   AlertOutlined,
   ApartmentOutlined,
@@ -21,6 +21,7 @@ import {
 import { NavLink, useLocation } from "react-router-dom";
 import { MockCornerBadge } from "../components/common";
 import { currentApiMode } from "../api/consoleApi";
+import { useContextOptions } from "../hooks/useContextOptions";
 
 const navigation = [
   { path: "/overview", label: "总览", icon: FundProjectionScreenOutlined },
@@ -52,6 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const mode = currentApiMode();
+  const context = useContextOptions();
 
   return (
     <div className={`app-shell ${collapsed ? "sidebar-collapsed" : ""}`}>
@@ -105,6 +107,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="desktop-width-notice">
           <LeftOutlined /> 推荐使用 1440px 以上桌面分辨率
         </div>
+        {mode === "http" && context.isError && <Alert type="error" showIcon message="分析上下文读取失败" description={context.error.message} action={<Button onClick={() => void context.refetch()}>重试上下文</Button>} />}
         {children}
       </main>
       {mode !== "http" && <MockCornerBadge />}

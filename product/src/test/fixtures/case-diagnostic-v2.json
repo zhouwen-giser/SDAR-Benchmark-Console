@@ -1,0 +1,441 @@
+{
+  "rules": [
+    {
+      "scope": "ARCHIVED_TASK_EXECUTION",
+      "result": "pass",
+      "ruleId": "UGV-DG-IDENTITY-01",
+      "clockBasis": null,
+      "limitations": [
+        "GLOBAL_ABSENCE_NOT_PROVEN"
+      ],
+      "reasonCodes": [
+        "RECORDED_TASK_IDENTITY_CHAIN_MATCHES"
+      ],
+      "evidenceRefs": [
+        "archive:/source/bodies/runtimeTask:sha256:f0f984dbcc46c08c93675080b7049daecfe816ad9edbe852cc62e5aff5e4dfac",
+        "archive:/source/bodies/runtimeInvocations:sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22"
+      ],
+      "confidenceBasis": "RECORDED_SOURCE",
+      "evaluationBasis": "TASK_OBSERVABLE",
+      "provenanceStatus": "SUPPORTED",
+      "observationCoverage": "BOUNDED_RECORDED_ONLY",
+      "missingEvidencePaths": []
+    },
+    {
+      "scope": "ARCHIVED_TASK_EXECUTION",
+      "result": "pass",
+      "ruleId": "UGV-DG-READINESS-01",
+      "clockBasis": "REFEREE_AND_RUNTIME_RECORDED_CLOCKS_UNSYNCHRONIZED",
+      "limitations": [
+        "GLOBAL_ABSENCE_NOT_PROVEN"
+      ],
+      "reasonCodes": [
+        "RECORDED_TASK_PREFLIGHT_PASS"
+      ],
+      "evidenceRefs": [
+        "archive:/diagnostic/nativeCase/preflightObservation:sha256:878b247465fccba22c9b72b7a06233c9d719786c9ef915de671ab22474e40829",
+        "archive:/source/bodies/runtimeInvocations:sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22"
+      ],
+      "confidenceBasis": "RECORDED_SOURCE",
+      "evaluationBasis": "TASK_OBSERVABLE",
+      "provenanceStatus": "SUPPORTED",
+      "observationCoverage": "BOUNDED_RECORDED_ONLY",
+      "missingEvidencePaths": []
+    },
+    {
+      "scope": "ARCHIVED_TASK_EXECUTION",
+      "result": "pass",
+      "ruleId": "UGV-DG-CONFIRM-01",
+      "clockBasis": "sdar.management.recorded-at/1",
+      "limitations": [
+        "GLOBAL_ABSENCE_NOT_PROVEN"
+      ],
+      "reasonCodes": [
+        "RECORDED_CONFIRMATION_HASH_AND_WINDOW_VALID"
+      ],
+      "evidenceRefs": [
+        "archive:/planning/plan/definition:sha256:55f1e5285e9184a7e949ad87d16db4e1a2147ba6f9bbdc8b4688e8b03f541bcf",
+        "archive:/source/bodies/runtimeConfirmations:sha256:beb9a6864620f990476f9c5e258d8a6ed2b342b851eddec6950005fe806a5af8"
+      ],
+      "confidenceBasis": "RECORDED_SOURCE",
+      "evaluationBasis": "TASK_OBSERVABLE",
+      "provenanceStatus": "SUPPORTED",
+      "observationCoverage": "BOUNDED_RECORDED_ONLY",
+      "missingEvidencePaths": []
+    },
+    {
+      "scope": "RECORDED_PROVIDER_TASK",
+      "result": "pass",
+      "ruleId": "UGV-DG-DISPATCH-01",
+      "clockBasis": "RECORDED_CLOCKS_NOT_CROSS_CALIBRATED",
+      "limitations": [
+        "GLOBAL_ABSENCE_NOT_PROVEN"
+      ],
+      "reasonCodes": [
+        "RECORDED_NAVIGATION_LINKED_TO_PROVIDER_MISSION_AND_MOTION"
+      ],
+      "evidenceRefs": [
+        "archive:/source/bodies/runtimeTask:sha256:f0f984dbcc46c08c93675080b7049daecfe816ad9edbe852cc62e5aff5e4dfac",
+        "archive:/source/bodies/runtimeInvocations:sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22"
+      ],
+      "confidenceBasis": "RECORDED_SOURCE",
+      "evaluationBasis": "TASK_OBSERVABLE",
+      "provenanceStatus": "SUPPORTED",
+      "observationCoverage": "BOUNDED_RECORDED_ONLY",
+      "missingEvidencePaths": []
+    },
+    {
+      "scope": "RECORDED_PROVIDER_TASK",
+      "result": "pass",
+      "ruleId": "UGV-DG-BINDING-01",
+      "clockBasis": null,
+      "limitations": [
+        "GLOBAL_ABSENCE_NOT_PROVEN"
+      ],
+      "reasonCodes": [
+        "RECORDED_REMOTE_PROVIDER_MISSION_BINDING_MATCHES"
+      ],
+      "evidenceRefs": [
+        "archive:/source/bodies/runtimeTask:sha256:f0f984dbcc46c08c93675080b7049daecfe816ad9edbe852cc62e5aff5e4dfac",
+        "archive:/source/bodies/runtimeInvocations:sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22"
+      ],
+      "confidenceBasis": "RECORDED_SOURCE",
+      "evaluationBasis": "TASK_OBSERVABLE",
+      "provenanceStatus": "SUPPORTED",
+      "observationCoverage": "BOUNDED_RECORDED_ONLY",
+      "missingEvidencePaths": []
+    },
+    {
+      "scope": "ARCHIVED_TASK_EXECUTION",
+      "result": "not_applicable",
+      "ruleId": "UGV-DG-RECONCILE-01",
+      "clockBasis": null,
+      "limitations": [],
+      "reasonCodes": [
+        "UGV-DG-RECONCILE-01_NOT_APPLICABLE"
+      ],
+      "evidenceRefs": [],
+      "confidenceBasis": "RECORDED_SOURCE",
+      "evaluationBasis": "TASK_OBSERVABLE",
+      "provenanceStatus": "NOT_APPLICABLE",
+      "observationCoverage": "BOUNDED_RECORDED_ONLY",
+      "missingEvidencePaths": []
+    },
+    {
+      "scope": "ARCHIVED_TASK_EXECUTION",
+      "result": "not_applicable",
+      "ruleId": "UGV-DG-CONTINUATION-01",
+      "clockBasis": null,
+      "limitations": [],
+      "reasonCodes": [
+        "UGV-DG-CONTINUATION-01_NOT_APPLICABLE"
+      ],
+      "evidenceRefs": [],
+      "confidenceBasis": "RECORDED_SOURCE",
+      "evaluationBasis": "TASK_OBSERVABLE",
+      "provenanceStatus": "NOT_APPLICABLE",
+      "observationCoverage": "BOUNDED_RECORDED_ONLY",
+      "missingEvidencePaths": []
+    },
+    {
+      "scope": "RECORDED_PHYSICAL_END_STATE",
+      "result": "pass",
+      "ruleId": "UGV-DG-PHYSICAL-01",
+      "clockBasis": "REFEREE_RECEIVED_AT",
+      "limitations": [
+        "GLOBAL_ABSENCE_NOT_PROVEN"
+      ],
+      "reasonCodes": [
+        "RECORDED_REFEREE_END_STATE_SATISFIES_CALIBRATION"
+      ],
+      "evidenceRefs": [
+        "archive:/source/bodies/trajectory:sha256:422afb86fd3fe697842dd53a6ce6230ba0922999cc61b72391ffca6e38d16edc",
+        "archive:/diagnostic/physicalTrajectory:sha256:c7298a25ada10b17fe049a2b556319e6dfa7a326f9ef3248a79c5be61d0ff77e"
+      ],
+      "confidenceBasis": "DERIVED_SAME_ORIGIN",
+      "evaluationBasis": "TASK_OBSERVABLE",
+      "provenanceStatus": "SUPPORTED",
+      "observationCoverage": "BOUNDED_RECORDED_ONLY",
+      "missingEvidencePaths": []
+    },
+    {
+      "scope": "ARCHIVED_TASK_EXECUTION",
+      "result": "pass",
+      "ruleId": "UGV-DG-OUTCOME-01",
+      "clockBasis": "sdar.management.recorded-at/1",
+      "limitations": [
+        "GLOBAL_ABSENCE_NOT_PROVEN"
+      ],
+      "reasonCodes": [
+        "RECORDED_A2A_AND_RUNTIME_SUCCESS_DECLARATIONS_AGREE"
+      ],
+      "evidenceRefs": [
+        "archive:/diagnostic/nativeCase/a2aTerminal:sha256:baaee8e159d5bf346b7cef88208e347a9ccfbe638a2b7543794beebf757b170b",
+        "archive:/planning/goal:sha256:cae3b455a00fe1191405c24839a891c012be834e8df488592ea652b33d1496a0"
+      ],
+      "confidenceBasis": "RECORDED_SOURCE",
+      "evaluationBasis": "TASK_OBSERVABLE",
+      "provenanceStatus": "SUPPORTED",
+      "observationCoverage": "BOUNDED_RECORDED_ONLY",
+      "missingEvidencePaths": []
+    },
+    {
+      "scope": "ARCHIVED_TASK_EXECUTION",
+      "result": "pass",
+      "ruleId": "UGV-DG-FIRE-01",
+      "clockBasis": "sdar.management.recorded-at/1",
+      "limitations": [
+        "GLOBAL_ABSENCE_NOT_PROVEN"
+      ],
+      "reasonCodes": [
+        "NO_PROHIBITED_FIRE_OBSERVED_IN_ARCHIVED_TASK_CALLS"
+      ],
+      "evidenceRefs": [
+        "archive:/source/bodies/runtimeInvocations:sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22",
+        "archive:/diagnostic/nativeCase/providerObservation:sha256:ab070753ff84fc6b1e605eb5a7e1b64edf33b7609aeb6280e235750e878bfff5"
+      ],
+      "confidenceBasis": "RECORDED_SOURCE",
+      "evaluationBasis": "TASK_OBSERVABLE",
+      "provenanceStatus": "SUPPORTED",
+      "observationCoverage": "BOUNDED_RECORDED_ONLY",
+      "missingEvidencePaths": []
+    }
+  ],
+  "caseId": "UGV-CORE-001",
+  "fields": [
+    {
+      "ruleId": "UGV-DG-IDENTITY-01",
+      "status": "DERIVED_VERIFIED",
+      "sourceRefs": [
+        {
+          "sourceRef": "archive:/source/bodies/runtimeTask:sha256:f0f984dbcc46c08c93675080b7049daecfe816ad9edbe852cc62e5aff5e4dfac",
+          "clockBasis": null,
+          "originalHash": "sha256:f0f984dbcc46c08c93675080b7049daecfe816ad9edbe852cc62e5aff5e4dfac",
+          "originalSourcePointer": "/source/bodies/runtimeTask"
+        },
+        {
+          "sourceRef": "archive:/source/bodies/runtimeInvocations:sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22",
+          "clockBasis": null,
+          "originalHash": "sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22",
+          "originalSourcePointer": "/source/bodies/runtimeInvocations"
+        }
+      ],
+      "reasonCodes": [
+        "RECORDED_TASK_IDENTITY_CHAIN_MATCHES"
+      ],
+      "targetPointer": "/taskObservable/UGV-DG-IDENTITY-01"
+    },
+    {
+      "ruleId": "UGV-DG-READINESS-01",
+      "status": "DERIVED_VERIFIED",
+      "sourceRefs": [
+        {
+          "sourceRef": "archive:/diagnostic/nativeCase/preflightObservation:sha256:878b247465fccba22c9b72b7a06233c9d719786c9ef915de671ab22474e40829",
+          "clockBasis": "REFEREE_AND_RUNTIME_RECORDED_CLOCKS_UNSYNCHRONIZED",
+          "originalHash": "sha256:878b247465fccba22c9b72b7a06233c9d719786c9ef915de671ab22474e40829",
+          "originalSourcePointer": "/diagnostic/nativeCase/preflightObservation"
+        },
+        {
+          "sourceRef": "archive:/source/bodies/runtimeInvocations:sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22",
+          "clockBasis": "REFEREE_AND_RUNTIME_RECORDED_CLOCKS_UNSYNCHRONIZED",
+          "originalHash": "sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22",
+          "originalSourcePointer": "/source/bodies/runtimeInvocations"
+        }
+      ],
+      "reasonCodes": [
+        "RECORDED_TASK_PREFLIGHT_PASS"
+      ],
+      "targetPointer": "/taskObservable/UGV-DG-READINESS-01"
+    },
+    {
+      "ruleId": "UGV-DG-CONFIRM-01",
+      "status": "DERIVED_VERIFIED",
+      "sourceRefs": [
+        {
+          "sourceRef": "archive:/planning/plan/definition:sha256:55f1e5285e9184a7e949ad87d16db4e1a2147ba6f9bbdc8b4688e8b03f541bcf",
+          "clockBasis": "sdar.management.recorded-at/1",
+          "originalHash": "sha256:55f1e5285e9184a7e949ad87d16db4e1a2147ba6f9bbdc8b4688e8b03f541bcf",
+          "originalSourcePointer": "/planning/plan/definition"
+        },
+        {
+          "sourceRef": "archive:/source/bodies/runtimeConfirmations:sha256:beb9a6864620f990476f9c5e258d8a6ed2b342b851eddec6950005fe806a5af8",
+          "clockBasis": "sdar.management.recorded-at/1",
+          "originalHash": "sha256:beb9a6864620f990476f9c5e258d8a6ed2b342b851eddec6950005fe806a5af8",
+          "originalSourcePointer": "/source/bodies/runtimeConfirmations"
+        }
+      ],
+      "reasonCodes": [
+        "RECORDED_CONFIRMATION_HASH_AND_WINDOW_VALID"
+      ],
+      "targetPointer": "/taskObservable/UGV-DG-CONFIRM-01"
+    }
+  ],
+  "caseRef": {
+    "id": "UGV-CORE-001",
+    "version": "0.1.0",
+    "contentHash": "sha256:97ebfbdbae8255402eb3453ac2e1e2a2877e60feb1910b0bca442af7b71ca7f1"
+  },
+  "coverage": {
+    "numerator": "1",
+    "denominator": "1"
+  },
+  "failCount": 0,
+  "passCount": 8,
+  "policyRef": {
+    "id": "ugv-native-case-diagnostic",
+    "version": "2",
+    "contentHash": "sha256:70c80c084cb3c11572da0bd97976f36e5bfab22f08c3b8e33a760763f8672bb5"
+  },
+  "ruleScore": {
+    "numerator": "100",
+    "denominator": "1"
+  },
+  "datasetRef": {
+    "id": "sdar-ugv-agent-diagnostic",
+    "version": "0.2"
+  },
+  "ruleSetRef": {
+    "id": "sdar-ugv-diagnostic-ruleset",
+    "version": "0.1.0",
+    "contentHash": "sha256:be199e181f0a5044929458b93212a5fd729902463ab151989a4280588b5353b4"
+  },
+  "sourceHash": "sha256:c8ed1c9e427c9a4c12fa7dd3dda1b1e87f9f690449279bda4e9c3e8187de3594",
+  "caseVerdict": "PASS",
+  "limitations": [
+    "ARCHIVED_LIST_IS_NOT_GLOBAL_EXECUTION_COVERAGE",
+    "CLEANUP_START_NOT_ARCHIVED",
+    "CONFIGURED_NOT_MEASURED",
+    "CROSS_SERVICE_CLOCKS_NOT_CALIBRATED",
+    "EXACT_ACTION_CENSUS_NOT_ARCHIVED",
+    "GLOBAL_ABSENCE_NOT_PROVEN",
+    "HISTORICAL_COORDINATE_TRANSFORM_UNRESOLVED",
+    "MEASURED_POSITION_ACCURACY_MISSING",
+    "NAVIGATION_EFFECT_CENSUS_NOT_ARCHIVED",
+    "NAVIGATION_SIDE_EFFECT_WINDOW_NOT_PROVEN",
+    "PHYSICAL_SOURCE_TIME_ACCURACY_OR_BUSINESS_WINDOW_MISSING",
+    "PREFLIGHT_FULL_ADMISSION_OPERANDS_NOT_ARCHIVED",
+    "PRODUCER_AUTHORITY_NOT_VERIFIED",
+    "PROVIDER_FIRST_DEVICE_INGRESS_NOT_ARCHIVED",
+    "PROVIDER_MIRRORS_ARE_ONE_ORIGIN",
+    "RAW_SOCKET_PAYLOAD_BODY_NOT_ARCHIVED",
+    "REFEREE_END_STATE_NOT_AGENT_TERMINAL_VERIFICATION",
+    "RETROSPECTIVE_COORDINATE_REGISTRATION",
+    "RETROSPECTIVE_DIAGNOSTIC",
+    "SOURCE_OBSERVED_AT_MISSING",
+    "UNPROVEN_ZERO_CENSUS:dispatch_before_confirmation",
+    "UNPROVEN_ZERO_CENSUS:fire",
+    "UNPROVEN_ZERO_CENSUS:wrong_episode"
+  ],
+  "scoredCount": 8,
+  "displayScore": "100.000000",
+  "evidenceRefs": [
+    "archive:/diagnostic/calibrationBinding:sha256:d907adbf77c2450e1c26098bb2d0d6331b8659b24e08f23c1df33a9c3a3bfed4",
+    "archive:/diagnostic/nativeCase/a2aTerminal:sha256:baaee8e159d5bf346b7cef88208e347a9ccfbe638a2b7543794beebf757b170b"
+  ],
+  "resultStatus": "SCORED",
+  "schemaVersion": "sdar-benchmark.ugv-native-case-diagnostic-evaluation/2",
+  "diagnosticOnly": true,
+  "formalEligible": false,
+  "applicableCount": 8,
+  "evaluationBasis": "TASK_OBSERVABLE",
+  "evidenceQuality": {
+    "scope": "ARCHIVED_TASK_EXECUTION",
+    "timeBases": [
+      "sdar.management.recorded-at/1",
+      "REFEREE_RECEIVED_AT"
+    ],
+    "sourceRefs": [
+      {
+        "sourceRef": "archive:/source/bodies/runtimeTask:sha256:f0f984dbcc46c08c93675080b7049daecfe816ad9edbe852cc62e5aff5e4dfac",
+        "clockBasis": null,
+        "originalHash": "sha256:f0f984dbcc46c08c93675080b7049daecfe816ad9edbe852cc62e5aff5e4dfac",
+        "originalSourcePointer": "/source/bodies/runtimeTask"
+      },
+      {
+        "sourceRef": "archive:/source/bodies/runtimeInvocations:sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22",
+        "clockBasis": null,
+        "originalHash": "sha256:14c0a5aab90b0c40eb8088b45718fe1a4af971c857d02f16463784eb5b4a1d22",
+        "originalSourcePointer": "/source/bodies/runtimeInvocations"
+      }
+    ],
+    "limitations": [
+      "ARCHIVED_LIST_IS_NOT_GLOBAL_EXECUTION_COVERAGE",
+      "CLEANUP_START_NOT_ARCHIVED",
+      "CONFIGURED_NOT_MEASURED",
+      "CROSS_SERVICE_CLOCKS_NOT_CALIBRATED",
+      "EXACT_ACTION_CENSUS_NOT_ARCHIVED",
+      "GLOBAL_ABSENCE_NOT_PROVEN",
+      "HISTORICAL_COORDINATE_TRANSFORM_UNRESOLVED",
+      "MEASURED_POSITION_ACCURACY_MISSING",
+      "NAVIGATION_EFFECT_CENSUS_NOT_ARCHIVED",
+      "NAVIGATION_SIDE_EFFECT_WINDOW_NOT_PROVEN",
+      "PHYSICAL_SOURCE_TIME_ACCURACY_OR_BUSINESS_WINDOW_MISSING",
+      "PREFLIGHT_FULL_ADMISSION_OPERANDS_NOT_ARCHIVED",
+      "PRODUCER_AUTHORITY_NOT_VERIFIED",
+      "PROVIDER_FIRST_DEVICE_INGRESS_NOT_ARCHIVED",
+      "PROVIDER_MIRRORS_ARE_ONE_ORIGIN",
+      "RAW_SOCKET_PAYLOAD_BODY_NOT_ARCHIVED",
+      "REFEREE_END_STATE_NOT_AGENT_TERMINAL_VERIFICATION",
+      "RETROSPECTIVE_COORDINATE_REGISTRATION",
+      "RETROSPECTIVE_DIAGNOSTIC",
+      "SOURCE_OBSERVED_AT_MISSING",
+      "UNPROVEN_ZERO_CENSUS:dispatch_before_confirmation",
+      "UNPROVEN_ZERO_CENSUS:fire",
+      "UNPROVEN_ZERO_CENSUS:wrong_episode"
+    ],
+    "accuracyBasis": "CONFIGURED_NOT_MEASURED",
+    "missingProofs": [
+      "ARCHIVED_LIST_IS_NOT_GLOBAL_EXECUTION_COVERAGE",
+      "CLEANUP_START_NOT_ARCHIVED",
+      "EXACT_ACTION_CENSUS_NOT_ARCHIVED",
+      "HISTORICAL_COORDINATE_TRANSFORM_UNRESOLVED",
+      "MEASURED_POSITION_ACCURACY_MISSING",
+      "NAVIGATION_EFFECT_CENSUS_NOT_ARCHIVED",
+      "NAVIGATION_SIDE_EFFECT_WINDOW_NOT_PROVEN",
+      "PHYSICAL_SOURCE_TIME_ACCURACY_OR_BUSINESS_WINDOW_MISSING",
+      "PREFLIGHT_FULL_ADMISSION_OPERANDS_NOT_ARCHIVED",
+      "PRODUCER_AUTHORITY_NOT_VERIFIED",
+      "PROVIDER_MIRRORS_ARE_ONE_ORIGIN",
+      "RAW_SOCKET_PAYLOAD_BODY_NOT_ARCHIVED",
+      "RETROSPECTIVE_DIAGNOSTIC",
+      "SOURCE_OBSERVED_AT_MISSING",
+      "UNPROVEN_ZERO_CENSUS:dispatch_before_confirmation",
+      "UNPROVEN_ZERO_CENSUS:fire",
+      "UNPROVEN_ZERO_CENSUS:wrong_episode"
+    ],
+    "sourceIndependence": "SAME_ORIGIN_MIRRORS_NOT_INDEPENDENT",
+    "observationCoverage": "BOUNDED_RECORDED_ONLY"
+  },
+  "rankingPermitted": false,
+  "scoringInputHash": "sha256:932d465fa1828676e11305d95e9e7e1327bef9d0bdee46ad243fae7cfa532b9d",
+  "insufficientCount": 0,
+  "notApplicableCount": 2,
+  "observedPhysicalEndState": {
+    "result": "pass",
+    "dwellMs": 7015,
+    "timeBasis": "REFEREE_RECEIVED_AT",
+    "clockDomain": "referee_ingress_clock",
+    "reasonCodes": [
+      "RECORDED_REFEREE_END_STATE_SATISFIES_CALIBRATION"
+    ],
+    "sampleCount": 125,
+    "accuracyBasis": "CONFIGURED_NOT_MEASURED",
+    "finalPosition": {
+      "latitude": 29.72041766010945,
+      "altitudeM": 500.00999080669135,
+      "longitude": 106.8134205182058
+    },
+    "finalSampleAt": "2026-09-10T02:45:37.741Z",
+    "finalSpeedMps": 0,
+    "firstSampleAt": "2026-09-10T02:44:35.571Z",
+    "finalDistanceM": 0.8472018268554912,
+    "calibrationHash": "sha256:ee1c21d00dd03a64564557a4bc10c8deca7e88349296ebae2d4fe100a02e8285",
+    "maximumTailGapMs": 505,
+    "observedEndState": true,
+    "targetToleranceM": 2,
+    "consecutiveSamples": 15,
+    "movedInRecordedWindow": true,
+    "taskAchievedAtTerminal": null,
+    "configuredPositionAccuracyM": 0.25
+  }
+}

@@ -268,7 +268,141 @@ export interface ComparisonDetail {
   cases: ComparisonCase[];
 }
 
+/** Wire shape from Benchmark evidence-aware/1; never replaces strict scores. */
+export interface EvaluationFraction { numerator: string; denominator: string }
+export interface ObservedEvaluation {
+  schemaVersion: "sdar-benchmark.observed-evaluation/1";
+  evaluationPolicyRef: { id: string; version: string; contentHash: string };
+  observedScore: EvaluationFraction | null;
+  displayScore?: string | null;
+  coverage: EvaluationFraction | null;
+  scoreStatus: "SCORED" | "PARTIAL_SCORED" | "NO_DATA" | "NOT_APPLICABLE" | "INVALID_INPUT";
+  applicableMetrics: string[];
+  scoredMetrics: string[];
+  applicableWeight: number;
+  scoredWeight: number;
+  metrics: Array<{
+    metricId: string; weight: number;
+    status: "SCORED" | "UNKNOWN" | "BLOCKED" | "NOT_APPLICABLE";
+    rawScore: 0 | 1 | 2 | null;
+    reasonCodes: string[]; evidenceRefs: string[];
+  }>;
+  dimensions?: Record<string, { observedScore: EvaluationFraction | null; coverage: EvaluationFraction | null; applicableWeight: number; scoredWeight: number }>;
+  taskOutcome: "FAIL" | "INCONCLUSIVE";
+  findings: Array<{ ruleId: string; result: string; reasonCodes: string[]; evidenceRefs: string[] }>;
+  limitations: string[];
+  formalQualification: { status: "NOT_GRANTED" | "GRANTED"; reason?: string };
+  comparisonKey: string;
+  rankingPermitted: false;
+}
+
+/** Additive, Server-owned ordinary Case result. v1 and v2 have different policies. */
+export interface CaseDiagnosticSourceRef {
+  sourceRef: string;
+  originalSourcePointer: string;
+  originalHash: string;
+  clockBasis: string | null;
+}
+
+export interface CaseDiagnosticRule {
+  ruleId: string;
+  result: "pass" | "fail" | "insufficient_evidence" | "not_applicable";
+  reasonCodes: string[];
+  evidenceRefs: string[];
+  missingEvidencePaths: string[];
+  provenanceStatus: "SUPPORTED" | "INSUFFICIENT" | "CONFLICT" | "NOT_APPLICABLE";
+}
+
+interface CaseDiagnosticEvaluationBase {
+  policyRef: { id: string; version: string; contentHash: string };
+  ruleSetRef: { id: string; version: string; contentHash: string };
+  caseId: string;
+  caseRef: { id: string; version: string; contentHash: string };
+  datasetRef: { id: string; version: string };
+  sourceHash: string;
+  scoringInputHash: string;
+  resultStatus: ObservedEvaluation["scoreStatus"];
+  caseVerdict: "PASS" | "FAIL" | "INCONCLUSIVE";
+  ruleScore: EvaluationFraction | null;
+  displayScore: string | null;
+  coverage: EvaluationFraction | null;
+  applicableCount: number;
+  scoredCount: number;
+  passCount: number;
+  failCount: number;
+  insufficientCount: number;
+  notApplicableCount: number;
+  fields: Array<{
+    ruleId: string;
+    targetPointer: string;
+    status: "DERIVED_VERIFIED" | "ORIGINAL_GAP" | "CONFLICT";
+    sourceRefs: CaseDiagnosticSourceRef[];
+    reasonCodes: string[];
+  }>;
+  evidenceRefs: string[];
+  limitations: string[];
+  diagnosticOnly: true;
+  formalEligible: false;
+  rankingPermitted: false;
+}
+
+export interface CaseDiagnosticEvaluationV1 extends CaseDiagnosticEvaluationBase {
+  schemaVersion: "sdar-benchmark.ugv-native-case-diagnostic-evaluation/1";
+  rules: CaseDiagnosticRule[];
+}
+
+export interface ObservableCaseDiagnosticRule extends CaseDiagnosticRule {
+  evaluationBasis: "TASK_OBSERVABLE";
+  scope: "ARCHIVED_TASK_EXECUTION" | "RECORDED_PROVIDER_TASK" | "RECORDED_PHYSICAL_END_STATE";
+  observationCoverage: "BOUNDED_RECORDED_ONLY";
+  limitations: string[];
+  clockBasis: string | null;
+  confidenceBasis: "RECORDED_SOURCE" | "DERIVED_SAME_ORIGIN" | "LIMITED_OR_UNVERIFIED";
+}
+
+export interface CaseDiagnosticEvaluationV2 extends CaseDiagnosticEvaluationBase {
+  schemaVersion: "sdar-benchmark.ugv-native-case-diagnostic-evaluation/2";
+  evaluationBasis: "TASK_OBSERVABLE";
+  rules: ObservableCaseDiagnosticRule[];
+  evidenceQuality: {
+    scope: "ARCHIVED_TASK_EXECUTION";
+    observationCoverage: "BOUNDED_RECORDED_ONLY";
+    limitations: string[];
+    timeBases: string[];
+    missingProofs: string[];
+    accuracyBasis: "CONFIGURED_NOT_MEASURED";
+    sourceIndependence: "SAME_ORIGIN_MIRRORS_NOT_INDEPENDENT";
+    sourceRefs: CaseDiagnosticSourceRef[];
+  };
+  observedPhysicalEndState: {
+    result: "pass" | "fail" | "insufficient_evidence";
+    reasonCodes: string[];
+    sampleCount: number;
+    finalPosition: { longitude: number; latitude: number; altitudeM: number } | null;
+    timeBasis: "REFEREE_RECEIVED_AT" | null;
+    clockDomain: "referee_ingress_clock" | null;
+    accuracyBasis: "CONFIGURED_NOT_MEASURED";
+    configuredPositionAccuracyM: number;
+    calibrationHash: string | null;
+    observedEndState: boolean | null;
+    taskAchievedAtTerminal: null;
+    movedInRecordedWindow: boolean | null;
+    finalDistanceM: number | null;
+    finalSpeedMps: number | null;
+    dwellMs: number | null;
+    maximumTailGapMs: number | null;
+    targetToleranceM: number | null;
+    consecutiveSamples: number | null;
+    firstSampleAt: string | null;
+    finalSampleAt: string | null;
+  };
+}
+
+export type CaseDiagnosticEvaluation = CaseDiagnosticEvaluationV1 | CaseDiagnosticEvaluationV2;
+
 export interface EvaluationDetail {
+  observedEvaluation?: ObservedEvaluation;
+  caseDiagnosticEvaluation?: CaseDiagnosticEvaluation;
   evaluationId: string;
   caseId: string;
   episodeId: string;
@@ -327,6 +461,9 @@ export interface ContextOptionsView {
 }
 
 export interface EvaluationHeaderView {
+  observedEvaluation?: ObservedEvaluation;
+  caseDiagnosticEvaluation?: CaseDiagnosticEvaluation;
+  projectionStatus?: string;
   evaluationId: string;
   caseId: string;
   episodeId: string | null;
@@ -563,6 +700,8 @@ export interface AnalysisFilters {
 }
 
 export interface EvaluationSummary {
+  observedEvaluation?: ObservedEvaluation;
+  caseDiagnosticEvaluation?: CaseDiagnosticEvaluation;
   evaluationId: string;
   caseId: string;
   track: string;

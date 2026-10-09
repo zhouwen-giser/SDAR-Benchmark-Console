@@ -48,3 +48,5 @@ product/node_modules/
 
 # checked-in formal frontend environment template
 !product/.env.example
+!product/.env
+!product/.env.test

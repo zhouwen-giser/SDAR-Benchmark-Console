@@ -1,3 +1,5 @@
+import { observedEvaluationFrom } from "./observedEvaluation";
+import { caseDiagnosticEvaluationFrom } from "./caseDiagnosticEvaluation";
 import type {
   AttentionItem,
   BenchmarkCase,
@@ -313,8 +315,11 @@ function mapComparisonCase(data: ComparisonCase | unknown): ComparisonCaseView {
 }
 
 export function mapEvaluationSummary(data: EvaluationSummary): EvaluationSummaryView {
+  const caseDiagnosticEvaluation = caseDiagnosticEvaluationFrom(record(data).caseDiagnosticEvaluation);
   return {
-    evaluationId: data.evaluationId, caseId: data.subjectId, track: "—", risk: "—", verdict: data.level,
+    observedEvaluation: observedEvaluationFrom(record(data).observedEvaluation),
+    caseDiagnosticEvaluation,
+    evaluationId: data.evaluationId, caseId: caseDiagnosticEvaluation?.caseId ?? data.subjectId, track: "—", risk: "—", verdict: data.level,
     qualityScore: data.qualityScore ?? null, readiness: data.evaluationReadiness === "ready" ? "ready" : "not_ready",
     scoreStatus: data.scoreStatus === "unavailable" ? "not_ready" : data.scoreStatus,
     fatalCount: data.provenFatalCount ?? 0, failedGates: data.hardGateFailedCount ? [`${data.hardGateFailedCount} failed`] : [],
@@ -324,8 +329,12 @@ export function mapEvaluationSummary(data: EvaluationSummary): EvaluationSummary
 
 export function mapEvaluationHeader(data: EvaluationSummary | unknown): EvaluationHeaderView {
   const row = record(data);
+  const caseDiagnosticEvaluation = caseDiagnosticEvaluationFrom(row.caseDiagnosticEvaluation);
   return {
-    evaluationId: text(row.evaluationId, "unavailable"), caseId: text(row.caseId ?? row.subjectId, "unavailable"), episodeId: nullableText(row.episodeId),
+    observedEvaluation: observedEvaluationFrom(row.observedEvaluation),
+    caseDiagnosticEvaluation,
+    projectionStatus: optionalText(row.projectionStatus),
+    evaluationId: text(row.evaluationId, "unavailable"), caseId: text(row.caseId ?? caseDiagnosticEvaluation?.caseId ?? row.subjectId, "unavailable"), episodeId: nullableText(row.episodeId),
     origin: text(row.origin, "unavailable"), profileVersionId: text(row.profileVersionId, "unavailable"), bundleSnapshotId: text(row.bundleSnapshotId, "unavailable"),
     readiness: text(row.evaluationReadiness ?? row.status, "not_ready"), scoreStatus: text(row.scoreStatus, "unavailable"), qualityScore: nullableNumber(row.qualityScore),
     level: text(row.level, "NR"), passed: nullableBoolean(row.passed), createdAt: nullableText(row.evaluatedAt ?? row.createdAt),

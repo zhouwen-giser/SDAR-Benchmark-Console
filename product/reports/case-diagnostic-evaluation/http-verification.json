@@ -1,0 +1,81 @@
+{
+  "checkedAt": "2026-10-09T03:18:30.508Z",
+  "base": "http://127.0.0.1:4173/benchmark-api",
+  "evaluationId": "operational-evaluation-c9f51fafc9c3a4c6c1cd99ad8d7a9d3cf1c72367da9a845cc9830336df3ae52c",
+  "status": "PASS",
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/v1/evaluations/operational-evaluation-c9f51fafc9c3a4c6c1cd99ad8d7a9d3cf1c72367da9a845cc9830336df3ae52c",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/evaluations",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/evaluations/operational-evaluation-c9f51fafc9c3a4c6c1cd99ad8d7a9d3cf1c72367da9a845cc9830336df3ae52c/readiness",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/evaluations/operational-evaluation-c9f51fafc9c3a4c6c1cd99ad8d7a9d3cf1c72367da9a845cc9830336df3ae52c/evidence-links",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "status": 200
+    }
+  ],
+  "policy": {
+    "id": "ugv-native-case-diagnostic",
+    "version": "2",
+    "contentHash": "sha256:70c80c084cb3c11572da0bd97976f36e5bfab22f08c3b8e33a760763f8672bb5"
+  },
+  "sourceHash": "sha256:c8ed1c9e427c9a4c12fa7dd3dda1b1e87f9f690449279bda4e9c3e8187de3594",
+  "scoringInputHash": "sha256:932d465fa1828676e11305d95e9e7e1327bef9d0bdee46ad243fae7cfa532b9d",
+  "case": {
+    "score": {
+      "numerator": "100",
+      "denominator": "1"
+    },
+    "coverage": {
+      "numerator": "1",
+      "denominator": "1"
+    },
+    "verdict": "PASS",
+    "applicable": 8,
+    "scored": 8,
+    "pass": 8,
+    "fail": 0,
+    "unknown": 0,
+    "notApplicable": 2
+  },
+  "observed": {
+    "policy": {
+      "id": "evidence-aware",
+      "version": "1",
+      "contentHash": "sha256:a2f777d5fa2ed3780cceeda65806f999aff2390dff2fd6f802d301bc2de025eb"
+    },
+    "score": {
+      "numerator": "100",
+      "denominator": "1"
+    },
+    "coverage": {
+      "numerator": "3",
+      "denominator": "50"
+    },
+    "taskOutcome": "INCONCLUSIVE",
+    "formalQualification": "NOT_GRANTED"
+  },
+  "projectionStatus": "pending",
+  "strictPassed": null,
+  "health": {
+    "status": "ok",
+    "executionMode": "active"
+  },
+  "sideEffects": "GET only; no Run, Move, Candidate or scoring execution"
+}

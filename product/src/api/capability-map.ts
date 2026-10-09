@@ -93,8 +93,9 @@ export const apiCapabilityMap = {
   comparison: { endpoint: "GET /v1/comparisons/{comparisonId}/dashboard", operationId: "getComparisonsByComparisonIdDashboard", status: "existing", sourceOfTruth: ch },
   comparisonCases: { endpoint: "GET /v1/comparisons/{comparisonId}/cases", operationId: "listComparisonCases", status: "existing", sourceOfTruth: ch },
   comparisonEvidenceDiffs: { endpoint: "GET /v1/comparisons/{comparisonId}/evidence-diffs", operationId: "getComparisonsByComparisonIdEvidenceDiffs", status: "existing", sourceOfTruth: `${ch} + ${artifact}` },
-  evaluation: { endpoint: "GET /v1/evaluations/{evaluationId}", operationId: "getEvaluation", status: "existing", sourceOfTruth: `${pg} + ${ch}` },
-  evaluations: { endpoint: "GET /v1/evaluations", operationId: "getEvaluations", status: "existing", sourceOfTruth: ch },
+  // Verified evidence-aware/1 result is PG-authoritative, even while CH is pending.
+  evaluation: { endpoint: "GET /v1/evaluations/{evaluationId}", operationId: "getEvaluation", status: "existing", sourceOfTruth: `${pg} (observedEvaluation) + ${ch} (projection)` },
+  evaluations: { endpoint: "GET /v1/evaluations", operationId: "getEvaluations", status: "existing", sourceOfTruth: pg },
   evaluationReadiness: { endpoint: "GET /v1/evaluations/{evaluationId}/readiness", operationId: "getEvaluationsByEvaluationIdReadiness", status: "existing", sourceOfTruth: ch },
   evaluationMetrics: { endpoint: "GET /v1/evaluations/{evaluationId}/metrics", operationId: "getEvaluationsByEvaluationIdMetrics", status: "existing", sourceOfTruth: ch },
   evaluationProvenance: { endpoint: "GET /v1/evaluations/{evaluationId}/telemetry-provenance", operationId: "getEvaluationsByEvaluationIdTelemetryProvenance", status: "existing", sourceOfTruth: `${pg} + ${artifact}` },
